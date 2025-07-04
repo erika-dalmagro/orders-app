@@ -1,34 +1,53 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from "react"
+import axios from "axios"
+
+type Product = {
+  id: number
+  name: string
+  price: number
+}
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [products, setProducts] = useState<Product[]>([])
+  const [name, setName] = useState("")
+  const [price, setPrice] = useState("")
+
+  useEffect(() => {
+    axios.get("http://localhost:8080/products")
+      .then(res => setProducts(res.data))
+  }, [])
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await axios.post("http://localhost:8080/products", {
+      name,
+      price: parseFloat(price)
+    })
+
+    setName("")
+    setPrice("")
+
+    const res = await axios.get("http://localhost:8080/products")
+    
+    setProducts(res.data)
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <div className="p-6 max-w-xl mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Product List</h1>
+
+      <form onSubmit={handleSubmit} className="mb-4">
+        <input className="border p-2 mr-2" placeholder="Name" value={name} onChange={e => setName(e.target.value)} />
+        <input className="border p-2 mr-2" placeholder="Price" type="number" value={price} onChange={e => setPrice(e.target.value)} />
+        <button className="bg-blue-500 text-white px-4 py-2 rounded" type="submit">Add</button>
+      </form>
+
+      <ul>
+        {products.map(p => (
+          <li key={p.id}>{p.name} - ${p.price.toFixed(2)}</li>
+        ))}
+      </ul>
+    </div>
   )
 }
 
