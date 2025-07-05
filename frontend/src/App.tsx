@@ -1,54 +1,45 @@
-import { useEffect, useState } from "react"
-import axios from "axios"
+import { useState } from "react";
+import ProductManager from "./components/ProductManager";
+import CreateOrderForm from "./components/CreateOrderForm";
+import OrderList from "./components/OrderList";
 
-type Product = {
-  id: number
-  name: string
-  price: number
-}
+export default function App() {
+  const [activeTab, setActiveTab] = useState<"products" | "orders">("orders");
+  const [refreshOrders, setRefreshOrders] = useState(false);
 
-function App() {
-  const [products, setProducts] = useState<Product[]>([])
-  const [name, setName] = useState("")
-  const [price, setPrice] = useState("")
-
-  useEffect(() => {
-    axios.get("http://localhost:8080/products")
-      .then(res => setProducts(res.data))
-  }, [])
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    await axios.post("http://localhost:8080/products", {
-      name,
-      price: parseFloat(price)
-    })
-
-    setName("")
-    setPrice("")
-
-    const res = await axios.get("http://localhost:8080/products")
-    
-    setProducts(res.data)
-  }
+  const reloadOrders = () => setRefreshOrders(!refreshOrders);
 
   return (
-    <div className="p-6 max-w-xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Product List</h1>
+    <div className="max-w-4xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6">Restaurant System</h1>
 
-      <form onSubmit={handleSubmit} className="mb-4">
-        <input className="border p-2 mr-2" placeholder="Name" value={name} onChange={e => setName(e.target.value)} />
-        <input className="border p-2 mr-2" placeholder="Price" type="number" value={price} onChange={e => setPrice(e.target.value)} />
-        <button className="bg-blue-500 text-white px-4 py-2 rounded" type="submit">Add</button>
-      </form>
+      <div className="flex gap-4 mb-6">
+        <button
+          onClick={() => setActiveTab("orders")}
+          className={`px-4 py-2 rounded ${
+            activeTab === "orders" ? "bg-blue-600 text-white" : "bg-gray-200"
+          }`}
+        >
+          Orders
+        </button>
+        <button
+          onClick={() => setActiveTab("products")}
+          className={`px-4 py-2 rounded ${
+            activeTab === "products" ? "bg-blue-600 text-white" : "bg-gray-200"
+          }`}
+        >
+          Products
+        </button>
+      </div>
 
-      <ul>
-        {products.map(p => (
-          <li key={p.id}>{p.name} - ${p.price.toFixed(2)}</li>
-        ))}
-      </ul>
+      {activeTab === "products" ? (
+        <ProductManager />
+      ) : (
+        <>
+          <CreateOrderForm onOrderCreated={reloadOrders} />
+          <OrderList key={refreshOrders.toString()} />
+        </>
+      )}
     </div>
-  )
+  );
 }
-
-export default App

@@ -66,3 +66,28 @@ func CreateOrder(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, order)
 }
+
+func GetOrders(c *gin.Context) {
+	var orders []models.Order
+	database.DB.Preload("Items.Product").Find(&orders)
+	c.JSON(http.StatusOK, orders)
+}
+
+func CloseOrder(c *gin.Context) {
+	id := c.Param("id")
+	var order models.Order
+
+	if err := database.DB.First(&order, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Order not found"})
+		return
+	}
+
+	if order.Status == "closed" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Order already closed"})
+		return
+	}
+
+	order.Status = "closed"
+	database.DB.Save(&order)
+	c.JSON(http.StatusOK, gin.H{"message": "Order closed successfully"})
+}
