@@ -17,7 +17,7 @@ export default function App() {
         <button
           onClick={() => setActiveTab("orders")}
           className={`px-4 py-2 rounded ${
-            activeTab === "orders" ? "bg-blue-600 text-white" : "bg-gray-200"
+            activeTab === "orders" ? "bg-blue-600 text-white" : "bg-gray-200 text-blue-900"
           }`}
         >
           Orders
@@ -25,7 +25,7 @@ export default function App() {
         <button
           onClick={() => setActiveTab("products")}
           className={`px-4 py-2 rounded ${
-            activeTab === "products" ? "bg-blue-600 text-white" : "bg-gray-200"
+            activeTab === "products" ? "bg-blue-600 text-white" : "bg-gray-200 text-blue-900"
           }`}
         >
           Products

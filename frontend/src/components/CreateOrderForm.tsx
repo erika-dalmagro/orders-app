@@ -112,7 +112,7 @@ export default function CreateOrderForm({
           <button
             type="button"
             onClick={addItem}
-            className="bg-blue-100 px-3 py-1 rounded"
+            className="bg-blue-400 px-3 py-1 rounded"
           >
             + Add Product
           </button>
