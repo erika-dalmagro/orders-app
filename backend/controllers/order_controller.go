@@ -91,3 +91,40 @@ func CloseOrder(c *gin.Context) {
 	database.DB.Save(&order)
 	c.JSON(http.StatusOK, gin.H{"message": "Order closed successfully"})
 }
+
+func UpdateOrder(c *gin.Context) {
+	id := c.Param("id")
+	var order models.Order
+	var req OrderRequest
+
+	if err := database.DB.First(&order, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Order not found"})
+		return
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	order.TableNumber = req.TableNumber
+
+	database.DB.Save(&order)
+
+	c.JSON(http.StatusOK, order)
+}
+
+func DeleteOrder(c *gin.Context) {
+	id := c.Param("id")
+	var order models.Order
+
+	if err := database.DB.First(&order, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Order not found"})
+		return
+	}
+
+	database.DB.Where("order_id = ?", order.ID).Delete(&models.OrderItem{})
+	database.DB.Delete(&order)
+
+	c.JSON(http.StatusOK, gin.H{"message": "Order deleted successfully"})
+}

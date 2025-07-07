@@ -7,6 +7,7 @@ export default function ProductManager() {
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   const loadProducts = () => {
     axios
@@ -20,16 +21,41 @@ export default function ProductManager() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await axios.post("http://localhost:8080/products", {
-      name,
-      price: parseFloat(price),
-      stock: parseInt(stock),
-    });
+    if (editingProduct) {
+      // Logic for updating product
+      await axios.put(`http://localhost:8080/products/${editingProduct.id}`, {
+        name,
+        price: parseFloat(price),
+        stock: parseInt(stock),
+      });
+      setEditingProduct(null);
+    } else {
+      // Logic for creating product
+      await axios.post("http://localhost:8080/products", {
+        name,
+        price: parseFloat(price),
+        stock: parseInt(stock),
+      });
+    }
 
     setName("");
     setPrice("");
     setStock("");
     loadProducts();
+  };
+
+  const handleEdit = (product: Product) => {
+    setEditingProduct(product);
+    setName(product.name);
+    setPrice(product.price.toString());
+    setStock(product.stock.toString());
+  };
+
+  const handleDelete = async (id: number) => {
+    if (window.confirm("Are you sure you want to delete this product?")) {
+      await axios.delete(`http://localhost:8080/products/${id}`);
+      loadProducts();
+    }
   };
 
   return (
@@ -60,14 +86,42 @@ export default function ProductManager() {
           className="bg-blue-600 text-white px-4 py-2 rounded"
           type="submit"
         >
-          Add
+          {editingProduct ? "Update" : "Add"}
         </button>
+        {editingProduct && (
+          <button
+            className="bg-gray-400 text-white px-4 py-2 rounded"
+            type="button"
+            onClick={() => {
+              setEditingProduct(null);
+              setName("");
+              setPrice("");
+              setStock("");
+            }}
+          >
+            Cancel
+          </button>
+        )}
       </form>
 
       <ul className="space-y-1">
         {products.map((p) => (
-          <li key={p.id}>
+          <li key={p.id} className="flex justify-between items-center">
             <strong>{p.name}</strong> — ${p.price.toFixed(2)} — Stock: {p.stock}
+            <div>
+              <button
+                onClick={() => handleEdit(p)}
+                className="bg-yellow-500 text-white px-2 py-1 rounded mr-2"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => handleDelete(p.id)}
+                className="bg-red-500 text-white px-2 py-1 rounded"
+              >
+                Delete
+              </button>
+            </div>
           </li>
         ))}
       </ul>
