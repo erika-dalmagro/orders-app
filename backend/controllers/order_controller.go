@@ -11,13 +11,13 @@ import (
 )
 
 type OrderRequest struct {
-	TableNumber uint             `json:"table_number"`
-	Items       []OrderItemInput `json:"items"`
+	TableNumber uint             `json:"table_number" binding:"required,gt=0"`
+	Items       []OrderItemInput `json:"items" binding:"required,min=1,dive"`
 }
 
 type OrderItemInput struct {
-	ProductID uint `json:"product_id"`
-	Quantity  int  `json:"quantity"`
+	ProductID uint `json:"product_id" binding:"required,gt=0"`
+	Quantity  int  `json:"quantity" binding:"required,gt=0"`
 }
 
 func CreateOrder(c *gin.Context) {
@@ -123,8 +123,37 @@ func DeleteOrder(c *gin.Context) {
 		return
 	}
 
-	database.DB.Where("order_id = ?", order.ID).Delete(&models.OrderItem{})
-	database.DB.Delete(&order)
+	var orderItems []models.OrderItem
+	database.DB.Where("order_id = ?", order.ID).Find(&orderItems)
 
-	c.JSON(http.StatusOK, gin.H{"message": "Order deleted successfully"})
+	err := database.DB.Transaction(func(tx *gorm.DB) error {
+
+		// Return stock for each product
+		for _, item := range orderItems {
+			if err := tx.Model(&models.Product{}).
+				Where("id = ?", item.ProductID).
+				Update("stock", gorm.Expr("stock + ?", item.Quantity)).Error; err != nil {
+				return err
+			}
+		}
+
+		// Delete order items
+		if err := tx.Where("order_id = ?", order.ID).Delete(&models.OrderItem{}).Error; err != nil {
+			return err
+		}
+
+		// Delete order
+		if err := tx.Delete(&order).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting order and restoring stock: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Order deleted successfully and stock restored"})
 }
