@@ -21,27 +21,32 @@ export default function ProductManager() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingProduct) {
-      // Logic for updating product
-      await axios.put(`http://localhost:8080/products/${editingProduct.id}`, {
-        name,
-        price: parseFloat(price),
-        stock: parseInt(stock),
-      });
-      setEditingProduct(null);
-    } else {
-      // Logic for creating product
-      await axios.post("http://localhost:8080/products", {
-        name,
-        price: parseFloat(price),
-        stock: parseInt(stock),
-      });
-    }
+    try {
+      if (editingProduct) {
+        await axios.put(`http://localhost:8080/products/${editingProduct.id}`, {
+          name,
+          price: parseFloat(price),
+          stock: parseInt(stock),
+        });
+        setEditingProduct(null);
+        alert("Product updated successfully!");
+      } else {
+        await axios.post("http://localhost:8080/products", {
+          name,
+          price: parseFloat(price),
+          stock: parseInt(stock),
+        });
+        alert("Product created successfully!");
+      }
 
-    setName("");
-    setPrice("");
-    setStock("");
-    loadProducts();
+      setName("");
+      setPrice("");
+      setStock("");
+      loadProducts();
+    } catch (error) {
+      alert("An error occurred. Check the console.");
+      console.error(error);
+    }
   };
 
   const handleEdit = (product: Product) => {
@@ -53,8 +58,14 @@ export default function ProductManager() {
 
   const handleDelete = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
-      await axios.delete(`http://localhost:8080/products/${id}`);
-      loadProducts();
+      try {
+        await axios.delete(`http://localhost:8080/products/${id}`);
+        alert("Product deleted successfully!");
+        loadProducts();
+      } catch (error) {
+        alert("Error deleting product.");
+        console.error(error);
+      }
     }
   };
 

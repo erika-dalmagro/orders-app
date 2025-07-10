@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/erika-dalmagro/orders-backend/database"
@@ -107,9 +108,69 @@ func UpdateOrder(c *gin.Context) {
 		return
 	}
 
-	order.TableNumber = req.TableNumber
+	err := database.DB.Transaction(func(tx *gorm.DB) error {
+		// Finds the old order items to restore stock
+		var oldItems []models.OrderItem
+		if err := tx.Where("order_id = ?", order.ID).Find(&oldItems).Error; err != nil {
+			return err
+		}
 
-	database.DB.Save(&order)
+		// Restores stock for the removed products
+		for _, item := range oldItems {
+			if err := tx.Model(&models.Product{}).Where("id = ?", item.ProductID).
+				Update("stock", gorm.Expr("stock + ?", item.Quantity)).Error; err != nil {
+				return err
+			}
+		}
+
+		// Deletes the old order items
+		if err := tx.Where("order_id = ?", order.ID).Delete(&models.OrderItem{}).Error; err != nil {
+			return err
+		}
+
+		// Checks stock for the new items
+		for _, item := range req.Items {
+			var product models.Product
+			if err := tx.First(&product, item.ProductID).Error; err != nil {
+				return fmt.Errorf("product with id %d not found", item.ProductID)
+			}
+			if product.Stock < item.Quantity {
+				return fmt.Errorf("insufficient stock for product %s", product.Name)
+			}
+		}
+
+		// Updates the table number and saves the order
+		order.TableNumber = req.TableNumber
+		if err := tx.Save(&order).Error; err != nil {
+			return err
+		}
+
+		// Creates the new order items and updates stock
+		for _, item := range req.Items {
+			orderItem := models.OrderItem{
+				OrderID:   order.ID,
+				ProductID: item.ProductID,
+				Quantity:  item.Quantity,
+			}
+			if err := tx.Create(&orderItem).Error; err != nil {
+				return err
+			}
+
+			if err := tx.Model(&models.Product{}).Where("id = ?", item.ProductID).
+				Update("stock", gorm.Expr("stock - ?", item.Quantity)).Error; err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update order: " + err.Error()})
+		return
+	}
+
+	database.DB.Preload("Items.Product").First(&order, id)
 
 	c.JSON(http.StatusOK, order)
 }

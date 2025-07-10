@@ -52,6 +52,8 @@ export default function CreateOrderForm({
         table_number: tableNumber,
         items: selectedItems,
       });
+
+      alert("Order created successfully!");
       setSelectedItems([]);
       setTableNumber(1);
       onOrderCreated();
