@@ -123,7 +123,7 @@ export default function EditOrderModal({
               <button
                 type="button"
                 onClick={() => handleRemoveItem(index)}
-                className="text-red-500 hover:text-red-700"
+                className="bg-red-700 text-white px-3 py-1 rounded"
               >
                 Remove
               </button>

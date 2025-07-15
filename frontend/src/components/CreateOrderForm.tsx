@@ -63,10 +63,10 @@ export default function CreateOrderForm({
   };
 
   return (
-    <div className="border p-4 rounded mb-6">
+    <div className="border p-6 rounded mb-6 shadow">
       <h2 className="text-xl font-bold mb-2">Create New Order</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
+        <div className="flex gap-4">
           <label className="mr-2 font-medium">Table Number:</label>
           <input
             type="number"
@@ -75,6 +75,15 @@ export default function CreateOrderForm({
             className="border px-2 py-1 w-24"
             required
           />
+           <div>
+            <button
+              type="button"
+              onClick={addItem}
+              className="bg-blue-400 px-3 py-1 rounded"
+            >
+              + Add Product
+            </button>
+          </div>
         </div>
 
         {selectedItems.map((item, index) => (
@@ -104,23 +113,14 @@ export default function CreateOrderForm({
             <button
               type="button"
               onClick={() => removeItem(index)}
-              className="text-red-500"
+              className="bg-red-700 text-white px-3 py-1 rounded"
             >
               Remove
             </button>
           </div>
         ))}
 
-        <div>
-          <button
-            type="button"
-            onClick={addItem}
-            className="bg-blue-400 px-3 py-1 rounded"
-          >
-            + Add Product
-          </button>
-        </div>
-
+       
         {error && <div className="text-red-500">{error}</div>}
 
         <button

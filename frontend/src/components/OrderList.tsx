@@ -54,7 +54,7 @@ export default function OrderList({ onEditOrder }: OrderListProps) {
     <div>
       <h2 className="text-xl font-bold mb-2">Orders</h2>
       {orders.map((order) => (
-        <div key={order.id} className="border p-4 mb-3 rounded shadow">
+        <div key={order.id} className="border p-6 mb-3 rounded shadow">
           <div className="flex justify-between items-center">
             <h3 className="font-semibold">
               Table #{order.table_number} —{" "}

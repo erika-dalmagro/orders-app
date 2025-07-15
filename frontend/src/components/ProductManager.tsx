@@ -70,7 +70,7 @@ export default function ProductManager() {
   };
 
   return (
-    <div>
+    <div className="border p-6 rounded mb-6 shadow">
       <h2 className="text-xl font-bold mb-4">Product Manager</h2>
       <form onSubmit={handleSubmit} className="mb-6 flex gap-2">
         <input
@@ -119,16 +119,16 @@ export default function ProductManager() {
         {products.map((p) => (
           <li key={p.id} className="flex justify-between items-center">
             <strong>{p.name}</strong> — ${p.price.toFixed(2)} — Stock: {p.stock}
-            <div>
+            <div className="flex gap-1">
               <button
                 onClick={() => handleEdit(p)}
-                className="bg-yellow-500 text-white px-2 py-1 rounded mr-2"
+                className="bg-yellow-500 text-white px-3 py-1 rounded mr-2"
               >
                 Edit
               </button>
               <button
                 onClick={() => handleDelete(p.id)}
-                className="bg-red-500 text-white px-2 py-1 rounded"
+                className="bg-red-500 text-white px-3 py-1 rounded"
               >
                 Delete
               </button>
