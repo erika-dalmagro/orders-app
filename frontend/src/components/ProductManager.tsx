@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import type { Product } from "../types";
+import EditProductModal from "./EditProductModal"; // Importe a nova modal
 
 export default function ProductManager() {
   const [products, setProducts] = useState<Product[]>([]);
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  // Estado para controlar qual produto está sendo editado na modal
+  const [editingProductInModal, setEditingProductInModal] = useState<Product | null>(null);
 
   const loadProducts = () => {
     axios
@@ -22,22 +24,12 @@ export default function ProductManager() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      if (editingProduct) {
-        await axios.put(`http://localhost:8080/products/${editingProduct.id}`, {
-          name,
-          price: parseFloat(price),
-          stock: parseInt(stock),
-        });
-        setEditingProduct(null);
-        alert("Product updated successfully!");
-      } else {
-        await axios.post("http://localhost:8080/products", {
-          name,
-          price: parseFloat(price),
-          stock: parseInt(stock),
-        });
-        alert("Product created successfully!");
-      }
+      await axios.post("http://localhost:8080/products", {
+        name,
+        price: parseFloat(price),
+        stock: parseInt(stock),
+      });
+      alert("Product created successfully!");
 
       setName("");
       setPrice("");
@@ -50,10 +42,16 @@ export default function ProductManager() {
   };
 
   const handleEdit = (product: Product) => {
-    setEditingProduct(product);
-    setName(product.name);
-    setPrice(product.price.toString());
-    setStock(product.stock.toString());
+    setEditingProductInModal(product);
+  };
+
+  const handleCloseModal = () => {
+    setEditingProductInModal(null);
+  };
+
+  const handleProductUpdated = () => {
+    loadProducts();
+    handleCloseModal();
   };
 
   const handleDelete = async (id: number) => {
@@ -78,6 +76,7 @@ export default function ProductManager() {
           placeholder="Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          required
         />
         <input
           className="border p-2"
@@ -85,6 +84,8 @@ export default function ProductManager() {
           type="number"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
+          required // Tornar obrigatório para adicionar
+          min={0} // Preço não pode ser negativo
         />
         <input
           className="border p-2"
@@ -92,27 +93,15 @@ export default function ProductManager() {
           type="number"
           value={stock}
           onChange={(e) => setStock(e.target.value)}
+          required // Tornar obrigatório para adicionar
+          min={0} // Estoque não pode ser negativo
         />
         <button
           className="bg-blue-600 text-white px-4 py-2 rounded"
           type="submit"
         >
-          {editingProduct ? "Update" : "Add"}
+          Add Product
         </button>
-        {editingProduct && (
-          <button
-            className="bg-gray-400 text-white px-4 py-2 rounded"
-            type="button"
-            onClick={() => {
-              setEditingProduct(null);
-              setName("");
-              setPrice("");
-              setStock("");
-            }}
-          >
-            Cancel
-          </button>
-        )}
       </form>
 
       <ul className="space-y-1">
@@ -121,7 +110,7 @@ export default function ProductManager() {
             <strong>{p.name}</strong> — ${p.price.toFixed(2)} — Stock: {p.stock}
             <div className="flex gap-1">
               <button
-                onClick={() => handleEdit(p)}
+                onClick={() => handleEdit(p)} // Chama handleEdit para abrir a modal
                 className="bg-yellow-500 text-white px-3 py-1 rounded mr-2"
               >
                 Edit
@@ -136,6 +125,14 @@ export default function ProductManager() {
           </li>
         ))}
       </ul>
+
+      {editingProductInModal && (
+        <EditProductModal
+          product={editingProductInModal}
+          onClose={handleCloseModal}
+          onProductUpdated={handleProductUpdated}
+        />
+      )}
     </div>
   );
 }
