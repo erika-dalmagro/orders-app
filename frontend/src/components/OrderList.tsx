@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import type { Order } from "../types";
+import toast from "react-hot-toast";
 
 interface OrderListProps {
   onEditOrder: (order: Order) => void;
@@ -22,10 +23,10 @@ export default function OrderList({ onEditOrder }: OrderListProps) {
   const closeOrder = async (id: number) => {
     try {
       await axios.put(`http://localhost:8080/orders/${id}/close`);
-      alert("Order closed successfully!");
+      toast.success("Order closed successfully!");
       loadOrders();
     } catch (error) {
-      alert("Error closing order.");
+      toast.error("Error closing order.");
     }
   };
 
@@ -41,11 +42,11 @@ export default function OrderList({ onEditOrder }: OrderListProps) {
     ) {
       try {
         await axios.delete(`http://localhost:8080/orders/${id}`);
-        alert("Order deleted successfully!");
+        toast.success("Order deleted successfully!");
         loadOrders();
       } catch (error) {
         console.error("Error deleting order:", error);
-        alert("Error deleting order. Check console for details.");
+        toast.error("Error deleting order. Check console for details.");
       }
     }
   };

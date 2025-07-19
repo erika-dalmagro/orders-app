@@ -3,6 +3,7 @@ import ProductManager from "./components/ProductManager";
 import CreateOrderForm from "./components/CreateOrderForm";
 import OrderList from "./components/OrderList";
 import EditOrderModal from "./components/EditOrderModal";
+import { Toaster } from 'react-hot-toast';
 import type { Order } from "./types";
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
@@ -123,6 +124,7 @@ export default function App() {
           </div>
         </main>
       </div>
+      <Toaster />
     </div>
   );
 }

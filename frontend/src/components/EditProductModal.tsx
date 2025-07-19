@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import type { Product } from "../types";
+import toast from "react-hot-toast";
 
 interface EditProductModalProps {
   product: Product | null;
@@ -37,11 +38,12 @@ export default function EditProductModal({product, onClose, onProductUpdated}: E
         price: parseFloat(price),
         stock: parseInt(stock),
       });
-      alert("Product updated successfully!");
+      toast.success("Product updated successfully!");
       onProductUpdated();
       onClose();
     } catch (err: any) {
       setError(err.response?.data?.error || "Error updating product.");
+      toast.error(err.response?.data?.error || "Error updating product.");
       console.error(err);
     }
   };
@@ -89,8 +91,6 @@ export default function EditProductModal({product, onClose, onProductUpdated}: E
               min={0}
             />
           </div>
-
-          {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
 
           <div className="flex justify-end gap-3 mt-6">
             <button

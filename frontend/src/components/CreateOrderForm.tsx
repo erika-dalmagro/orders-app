@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import type { Product, OrderItem } from "../types";
+import toast from "react-hot-toast";
 
 export default function CreateOrderForm({
   onOrderCreated,
@@ -21,7 +22,7 @@ export default function CreateOrderForm({
 
   const addItem = () => {
     if (products.length === 0) {
-      alert("Products not loaded yet.");
+      toast.error("Products not loaded yet.");
       return;
     }
 
@@ -53,12 +54,13 @@ export default function CreateOrderForm({
         items: selectedItems,
       });
 
-      alert("Order created successfully!");
+      toast.success("Order created successfully!");
       setSelectedItems([]);
       setTableNumber(1);
       onOrderCreated();
     } catch (err: any) {
       setError(err.response?.data?.error || "Error creating order");
+      toast.error(err.response?.data?.error || "Error creating order");
     }
   };
 
@@ -119,9 +121,6 @@ export default function CreateOrderForm({
             </button>
           </div>
         ))}
-
-       
-        {error && <div className="text-red-500">{error}</div>}
 
         <button
           type="submit"

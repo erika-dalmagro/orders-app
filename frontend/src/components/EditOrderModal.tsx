@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import type { Order, Product, OrderItem } from "../types";
+import toast from "react-hot-toast";
 
 interface EditOrderModalProps {
   order: Order | null;
@@ -47,7 +48,7 @@ export default function EditOrderModal({
     if (products.length > 0) {
       setItems([...items, { product_id: products[0].id, quantity: 1 }]);
     } else {
-      alert("Products not loaded.");
+      toast.error("Products not loaded.");
     }
   };
 
@@ -69,11 +70,12 @@ export default function EditOrderModal({
           quantity: item.quantity,
         })),
       });
-      alert("Order updated successfully!");
+      toast.success("Order updated successfully!");
       onOrderUpdated();
       onClose();
     } catch (err: any) {
       setError(err.response?.data?.error || "Error updating order");
+      toast.error(err.response?.data?.error || "Error updating order");
     }
   };
 
@@ -137,9 +139,7 @@ export default function EditOrderModal({
           >
             + Add Product
           </button>
-
-          {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
-
+          
           <div className="flex justify-end gap-4 mt-6">
             <button
               type="button"
