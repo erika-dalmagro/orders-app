@@ -12,9 +12,16 @@ export type OrderItem = {
   product?: Product;
 };
 
+export type Table = {
+  id: number;
+  name: string;
+  capacity: number;
+};
+
 export type Order = {
   id: number;
-  table_number: number;
+  table_id: number;
+  table?: Table;
   status: string;
   items: OrderItem[];
 };

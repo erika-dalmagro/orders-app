@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import axios from "axios";
-import type { Product, OrderItem } from "../types";
+import type { Product, OrderItem, Table } from "../types";
 import toast from "react-hot-toast";
 
 export default function CreateOrderForm({
@@ -10,15 +10,33 @@ export default function CreateOrderForm({
   onOrderCreated: () => void;
 }) {
   const [products, setProducts] = useState<Product[]>([]);
+  const [tables, setTables] = useState<Table[]>([]);
   const [selectedItems, setSelectedItems] = useState<OrderItem[]>([]);
-  const [tableNumber, setTableNumber] = useState(1);
+  const [selectedTableId, setSelectedTableId] = useState<number | null>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
     axios
       .get("http://localhost:8080/products")
-      .then((res) => setProducts(res.data));
+      .then((res) => setProducts(res.data))
+      .catch((err) => toast.error("Failed to load products."));
+
+    loadAvailableTables();
   }, []);
+
+  const loadAvailableTables = () => {
+    axios
+      .get("http://localhost:8080/tables/available")
+      .then((res) => {
+        setTables(res.data);
+        if (res.data.length > 0) {
+          setSelectedTableId(res.data[0].id);
+        } else {
+          setSelectedTableId(null);
+        }
+      })
+      .catch((err) => toast.error("Failed to load available tables."));
+  };
 
   const addItem = () => {
     if (products.length === 0) {
@@ -48,15 +66,25 @@ export default function CreateOrderForm({
     e.preventDefault();
     setError("");
 
+    if (!selectedTableId) {
+      toast.error("Please select a table.");
+      return;
+    }
+
+    if (selectedItems.length === 0) {
+      toast.error("Please add at least one item to the order.");
+      return;
+    }
+
     try {
       await axios.post("http://localhost:8080/orders", {
-        table_number: tableNumber,
+        table_id: selectedTableId,
         items: selectedItems,
       });
 
       toast.success("Order created successfully!");
       setSelectedItems([]);
-      setTableNumber(1);
+      loadAvailableTables();
       onOrderCreated();
     } catch (err: any) {
       setError(err.response?.data?.error || "Error creating order");
@@ -68,20 +96,33 @@ export default function CreateOrderForm({
     <div className="border p-6 rounded mb-6 shadow">
       <h2 className="text-xl font-bold mb-2">Create New Order</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex gap-4">
-          <label className="mr-2 font-medium">Table Number:</label>
-          <input
-            type="number"
-            value={tableNumber}
-            onChange={(e) => setTableNumber(Number(e.target.value))}
-            className="border px-2 py-1 w-24"
+        <div className="flex gap-4 items-center">
+          <label htmlFor="tableSelect" className="mr-2 font-medium">
+            Table:
+          </label>
+          <select
+            id="tableSelect"
+            value={selectedTableId || ""}
+            onChange={(e) => setSelectedTableId(Number(e.target.value))}
+            className="border px-2 py-1"
             required
-          />
-           <div>
+            disabled={tables.length === 0}
+          >
+            {tables.length === 0 && (
+              <option value="">No tables available</option>
+            )}
+            {tables.map((table) => (
+              <option key={table.id} value={table.id}>
+                {table.name} (Capacity: {table.capacity})
+              </option>
+            ))}
+          </select>
+          <div>
             <button
               type="button"
               onClick={addItem}
               className="bg-blue-400 px-3 py-1 rounded"
+              disabled={products.length === 0}
             >
               + Add Product
             </button>
@@ -122,9 +163,12 @@ export default function CreateOrderForm({
           </div>
         ))}
 
+        {error && <div className="text-red-500">{error}</div>}
+
         <button
           type="submit"
           className="bg-green-600 text-white px-4 py-2 rounded"
+          disabled={!selectedTableId || selectedItems.length === 0} // Desabilita se não houver mesa ou itens
         >
           Create Order
         </button>

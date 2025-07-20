@@ -5,7 +5,8 @@ import "gorm.io/gorm"
 type Order struct {
 	gorm.Model
 	ID          uint        `json:"id" gorm:"primaryKey"`
-	TableNumber uint        `json:"table_number"`
+	TableID     uint        `json:"table_id" gorm:"index"`
+	Table       Table       `json:"table" gorm:"foreignKey:TableID"`
 	Status      string      `json:"status" gorm:"index"`
 	Items       []OrderItem `json:"items"`
 }

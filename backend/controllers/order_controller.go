@@ -12,8 +12,8 @@ import (
 )
 
 type OrderRequest struct {
-	TableNumber uint             `json:"table_number" binding:"required,gt=0"`
-	Items       []OrderItemInput `json:"items" binding:"required,min=1,dive"`
+	TableID uint             `json:"table_id" binding:"required,gt=0"`
+	Items   []OrderItemInput `json:"items" binding:"required,min=1,dive"`
 }
 
 type OrderItemInput struct {
@@ -25,6 +25,23 @@ func CreateOrder(c *gin.Context) {
 	var req OrderRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// 1. Check if table exists
+	var table models.Table
+	if err := database.DB.First(&table, req.TableID).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Table not found"})
+		return
+	}
+
+	// 2. Check if table has an open order
+	var existingOpenOrder models.Order
+	if err := database.DB.Where("table_id = ? AND status = ?", req.TableID, "open").First(&existingOpenOrder).Error; err == nil {
+		c.JSON(http.StatusConflict, gin.H{"error": fmt.Sprintf("Table %s already has an open order (Order ID: %d)", table.Name, existingOpenOrder.ID)})
+		return
+	} else if err != gorm.ErrRecordNotFound {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check table status"})
 		return
 	}
 
@@ -45,9 +62,10 @@ func CreateOrder(c *gin.Context) {
 
 	// Create order
 	order := models.Order{
-		TableNumber: req.TableNumber,
-		Status:      "open",
+		TableID: req.TableID,
+		Status:  "open",
 	}
+
 	database.DB.Create(&order)
 
 	// Create items and update stock
@@ -65,20 +83,35 @@ func CreateOrder(c *gin.Context) {
 			Update("stock", gorm.Expr("stock - ?", item.Quantity))
 	}
 
+	database.DB.Preload("Table").Preload("Items.Product").First(&order, order.ID)
 	c.JSON(http.StatusCreated, order)
 }
 
 func GetOrders(c *gin.Context) {
 	var orders []models.Order
-	database.DB.Preload("Items.Product").Find(&orders)
+	database.DB.Preload("Table").Preload("Items.Product").Find(&orders)
 	c.JSON(http.StatusOK, orders)
+}
+
+func GetOrder(c *gin.Context) {
+	id := c.Param("id")
+	var order models.Order
+	if err := database.DB.Preload("Table").Preload("Items.Product").First(&order, id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Order not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch order"})
+		return
+	}
+	c.JSON(http.StatusOK, order)
 }
 
 func CloseOrder(c *gin.Context) {
 	id := c.Param("id")
 	var order models.Order
 
-	if err := database.DB.First(&order, id).Error; err != nil {
+	if err := database.DB.Preload("Table").First(&order, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Order not found"})
 		return
 	}
@@ -90,15 +123,14 @@ func CloseOrder(c *gin.Context) {
 
 	order.Status = "closed"
 	database.DB.Save(&order)
-	c.JSON(http.StatusOK, gin.H{"message": "Order closed successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("Order for table %s closed successfully", order.Table.Name)})
 }
 
 func UpdateOrder(c *gin.Context) {
 	id := c.Param("id")
 	var order models.Order
 	var req OrderRequest
-
-	if err := database.DB.First(&order, id).Error; err != nil {
+	if err := database.DB.Preload("Table").First(&order, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Order not found"})
 		return
 	}
@@ -107,6 +139,24 @@ func UpdateOrder(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	var newTable models.Table
+	if err := database.DB.First(&newTable, req.TableID).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "New table not found"})
+		return
+	}
+
+	if order.TableID != req.TableID {
+		var existingOpenOrder models.Order
+		if err := database.DB.Where("table_id = ? AND status = ?", req.TableID, "open").First(&existingOpenOrder).Error; err == nil {
+			c.JSON(http.StatusConflict, gin.H{"error": fmt.Sprintf("New table %s already has an open order (Order ID: %d)", newTable.Name, existingOpenOrder.ID)})
+			return
+		} else if err != gorm.ErrRecordNotFound {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check new table status"})
+			return
+		}
+	}
+
 
 	err := database.DB.Transaction(func(tx *gorm.DB) error {
 		// Finds the old order items to restore stock
@@ -140,7 +190,7 @@ func UpdateOrder(c *gin.Context) {
 		}
 
 		// Updates the table number and saves the order
-		order.TableNumber = req.TableNumber
+		order.TableID = req.TableID
 		if err := tx.Save(&order).Error; err != nil {
 			return err
 		}
@@ -170,7 +220,7 @@ func UpdateOrder(c *gin.Context) {
 		return
 	}
 
-	database.DB.Preload("Items.Product").First(&order, id)
+	database.DB.Preload("Table").Preload("Items.Product").First(&order, id)
 
 	c.JSON(http.StatusOK, order)
 }

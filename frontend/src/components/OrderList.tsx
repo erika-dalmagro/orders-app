@@ -13,7 +13,8 @@ export default function OrderList({ onEditOrder }: OrderListProps) {
   const loadOrders = () => {
     axios
       .get("http://localhost:8080/orders")
-      .then((res) => setOrders(res.data));
+      .then((res) => setOrders(res.data))
+      .catch(() => toast.error("Failed to load orders."));
   };
 
   useEffect(() => {
@@ -25,8 +26,8 @@ export default function OrderList({ onEditOrder }: OrderListProps) {
       await axios.put(`http://localhost:8080/orders/${id}/close`);
       toast.success("Order closed successfully!");
       loadOrders();
-    } catch (error) {
-      toast.error("Error closing order.");
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || "Error closing order.");
     }
   };
 
@@ -44,9 +45,9 @@ export default function OrderList({ onEditOrder }: OrderListProps) {
         await axios.delete(`http://localhost:8080/orders/${id}`);
         toast.success("Order deleted successfully!");
         loadOrders();
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error deleting order:", error);
-        toast.error("Error deleting order. Check console for details.");
+        toast.error(error.response?.data?.error || "Error deleting order.");
       }
     }
   };
@@ -58,7 +59,7 @@ export default function OrderList({ onEditOrder }: OrderListProps) {
         <div key={order.id} className="border p-6 mb-3 rounded shadow">
           <div className="flex justify-between items-center">
             <h3 className="font-semibold">
-              Table #{order.table_number} —{" "}
+              Table {order.table?.name || `#${order.table_id}`} —{" "}
               <span
                 className={
                   order.status === "open" ? "text-green-600" : "text-gray-600"
