@@ -10,11 +10,28 @@ import (
 	"gorm.io/gorm"
 )
 
+type TableRequest struct {
+	Name      string `json:"name" binding:"required"`
+	Capacity  int    `json:"capacity" binding:"required,gt=0"`
+	SingleTab *bool  `json:"single_tab"`
+}
+
 func CreateTable(c *gin.Context) {
-	var table models.Table
-	if err := c.ShouldBindJSON(&table); err != nil {
+	var req TableRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
+	}
+
+	table := models.Table{
+		Name:     req.Name,
+		Capacity: req.Capacity,
+	}
+
+	if req.SingleTab != nil {
+		table.SingleTab = *req.SingleTab
+	} else {
+		table.SingleTab = true
 	}
 
 	if err := database.DB.Create(&table).Error; err != nil {
@@ -61,18 +78,17 @@ func UpdateTable(c *gin.Context) {
 		return
 	}
 
-	var reqTable struct {
-		Name     string `json:"name" binding:"required"`
-		Capacity int    `json:"capacity" binding:"required,gt=0"`
-	}
-
-	if err := c.ShouldBindJSON(&reqTable); err != nil {
+	var req TableRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	table.Name = reqTable.Name
-	table.Capacity = reqTable.Capacity
+	table.Name = req.Name
+	table.Capacity = req.Capacity
+	if req.SingleTab != nil {
+		table.SingleTab = *req.SingleTab
+	}
 
 	if err := database.DB.Save(&table).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update table"})
@@ -116,17 +132,23 @@ func DeleteTable(c *gin.Context) {
 
 func GetAvailableTables(c *gin.Context) {
 	var tables []models.Table
-	var occupiedTableIDs []uint
-
-	database.DB.Model(&models.Order{}).
-		Where("status = ?", "open").
-		Pluck("table_id", &occupiedTableIDs)
-
-	if len(occupiedTableIDs) > 0 {
-		database.DB.Where("id NOT IN (?)", occupiedTableIDs).Find(&tables)
-	} else {
-		database.DB.Find(&tables)
+	if err := database.DB.Find(&tables).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch tables"})
+		return
 	}
 
-	c.JSON(http.StatusOK, tables)
+	var availableTables []models.Table
+	for _, table := range tables {
+		if table.SingleTab {
+			var openOrder models.Order
+			err := database.DB.Where("table_id = ? AND status = ?", table.ID, "open").First(&openOrder).Error
+			if err == gorm.ErrRecordNotFound {
+				availableTables = append(availableTables, table)
+			}
+		} else {
+			availableTables = append(availableTables, table)
+		}
+	}
+
+	c.JSON(http.StatusOK, availableTables)
 }

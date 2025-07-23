@@ -16,6 +16,7 @@ export type Table = {
   id: number;
   name: string;
   capacity: number;
+  single_tab: boolean;
 };
 
 export type Order = {

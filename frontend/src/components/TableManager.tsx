@@ -8,6 +8,7 @@ export default function TableManager() {
   const [tables, setTables] = useState<Table[]>([]);
   const [name, setName] = useState("");
   const [capacity, setCapacity] = useState("");
+  const [singleTab, setSingleTab] = useState(true);
   const [editingTableInModal, setEditingTableInModal] = useState<Table | null>(
     null
   );
@@ -29,11 +30,13 @@ export default function TableManager() {
       await axios.post("http://localhost:8080/tables", {
         name,
         capacity: parseInt(capacity),
+        single_tab: singleTab,
       });
       toast.success("Table created successfully!");
 
       setName("");
       setCapacity("");
+      setSingleTab(true);
       loadTables();
     } catch (error) {
       toast.error("An error occurred creating table. Check the console.");
@@ -73,7 +76,7 @@ export default function TableManager() {
   return (
     <div className="border p-6 rounded mb-6 shadow">
       <h2 className="text-xl font-bold mb-4">Table Manager</h2>
-      <form onSubmit={handleSubmit} className="mb-6 flex gap-2">
+      <form onSubmit={handleSubmit} className="mb-6 flex gap-2 items-center">
         <input
           className="border p-2"
           placeholder="Table Name (e.g., Table 1, Bar)"
@@ -90,6 +93,16 @@ export default function TableManager() {
           required
           min={1}
         />
+        <div className="flex items-center gap-2">
+          <input
+            id="singleTab"
+            type="checkbox"
+            checked={singleTab}
+            onChange={(e) => setSingleTab(e.target.checked)}
+            className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+          />
+          <label htmlFor="singleTab" className="text-sm font-medium text-gray-700">Single Tab</label>
+        </div>
         <button
           className="bg-blue-600 text-white px-4 py-2 rounded"
           type="submit"
@@ -101,7 +114,7 @@ export default function TableManager() {
       <ul className="space-y-1">
         {tables.map((t) => (
           <li key={t.id} className="flex justify-between items-center">
-            <strong>{t.name}</strong> — Capacity: {t.capacity}
+            <strong>{t.name}</strong> — Capacity: {t.capacity} — Tab: {t.single_tab ? "Single" : "Multiple"}
             <div className="flex gap-1">
               <button
                 onClick={() => handleEdit(t)}

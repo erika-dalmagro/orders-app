@@ -16,12 +16,14 @@ export default function EditTableModal({
 }: EditTableModalProps) {
   const [name, setName] = useState("");
   const [capacity, setCapacity] = useState("");
+  const [singleTab, setSingleTab] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     if (table) {
       setName(table.name);
       setCapacity(table.capacity.toString());
+      setSingleTab(table.single_tab);
       setError("");
     }
   }, [table]);
@@ -38,6 +40,7 @@ export default function EditTableModal({
       await axios.put(`http://localhost:8080/tables/${table.id}`, {
         name,
         capacity: parseInt(capacity),
+        single_tab: singleTab,
       });
 
       toast.success("Table updated successfully!");
@@ -88,6 +91,16 @@ export default function EditTableModal({
               required
               min={1}
             />
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              id="editSingleTab"
+              type="checkbox"
+              checked={singleTab}
+              onChange={(e) => setSingleTab(e.target.checked)}
+              className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <label htmlFor="editSingleTab" className="text-sm font-medium text-gray-700">Single Tab</label>
           </div>
 
           {error && <div className="text-red-500 text-sm mt-2">{error}</div>}

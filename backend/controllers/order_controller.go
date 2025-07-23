@@ -35,14 +35,16 @@ func CreateOrder(c *gin.Context) {
 		return
 	}
 
-	// 2. Check if table has an open order
-	var existingOpenOrder models.Order
-	if err := database.DB.Where("table_id = ? AND status = ?", req.TableID, "open").First(&existingOpenOrder).Error; err == nil {
-		c.JSON(http.StatusConflict, gin.H{"error": fmt.Sprintf("Table %s already has an open order (Order ID: %d)", table.Name, existingOpenOrder.ID)})
-		return
-	} else if err != gorm.ErrRecordNotFound {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check table status"})
-		return
+	// 2. Check if table has an open order ONLY IF SingleTab is true
+	if table.SingleTab {
+		var existingOpenOrder models.Order
+		if err := database.DB.Where("table_id = ? AND status = ?", req.TableID, "open").First(&existingOpenOrder).Error; err == nil {
+			c.JSON(http.StatusConflict, gin.H{"error": fmt.Sprintf("Table %s already has an open order (Order ID: %d)", table.Name, existingOpenOrder.ID)})
+			return
+		} else if err != gorm.ErrRecordNotFound {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check table status"})
+			return
+		}
 	}
 
 	// Check stock for each item
@@ -146,7 +148,7 @@ func UpdateOrder(c *gin.Context) {
 		return
 	}
 
-	if order.TableID != req.TableID {
+	if newTable.ID != order.TableID && newTable.SingleTab {
 		var existingOpenOrder models.Order
 		if err := database.DB.Where("table_id = ? AND status = ?", req.TableID, "open").First(&existingOpenOrder).Error; err == nil {
 			c.JSON(http.StatusConflict, gin.H{"error": fmt.Sprintf("New table %s already has an open order (Order ID: %d)", newTable.Name, existingOpenOrder.ID)})
@@ -156,7 +158,6 @@ func UpdateOrder(c *gin.Context) {
 			return
 		}
 	}
-
 
 	err := database.DB.Transaction(func(tx *gorm.DB) error {
 		// Finds the old order items to restore stock
