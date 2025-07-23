@@ -101,7 +101,7 @@ export default function TableManager() {
             onChange={(e) => setSingleTab(e.target.checked)}
             className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
           />
-          <label htmlFor="singleTab" className="text-sm font-medium text-gray-700">Single Tab</label>
+          <label htmlFor="singleTab" className="text-sm font-medium text-gray-700">Comanda Única</label>
         </div>
         <button
           className="bg-blue-600 text-white px-4 py-2 rounded"
@@ -111,27 +111,43 @@ export default function TableManager() {
         </button>
       </form>
 
-      <ul className="space-y-1">
-        {tables.map((t) => (
-          <li key={t.id} className="flex justify-between items-center">
-            <strong>{t.name}</strong> — Capacity: {t.capacity} — Tab: {t.single_tab ? "Single" : "Multiple"}
-            <div className="flex gap-1">
-              <button
-                onClick={() => handleEdit(t)}
-                className="bg-yellow-500 text-white px-3 py-1 rounded mr-2"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => handleDelete(t.id)}
-                className="bg-red-500 text-white px-3 py-1 rounded"
-              >
-                Delete
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white border border-gray-300">
+          <thead>
+            <tr>
+              <th className="py-2 px-4 border-b text-left text-gray-700">Name</th>
+              <th className="py-2 px-4 border-b text-left text-gray-700">Capacity</th>
+              <th className="py-2 px-4 border-b text-left text-gray-700">Tab</th>
+              <th className="py-2 px-4 border-b text-left text-gray-700">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tables.map((t) => (
+              <tr key={t.id} className="border-b">
+                <td className="py-2 px-4 text-gray-900">{t.name}</td>
+                <td className="py-2 px-4 text-gray-900">{t.capacity}</td>
+                <td className="py-2 px-4 text-gray-900">{t.single_tab ? "Single" : "Multiple"}</td>
+                <td className="py-2 px-4">
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => handleEdit(t)}
+                      className="bg-yellow-500 text-white px-3 py-1 rounded"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(t.id)}
+                      className="bg-red-500 text-white px-3 py-1 rounded"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {editingTableInModal && (
         <EditTableModal

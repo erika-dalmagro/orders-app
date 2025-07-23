@@ -104,14 +104,27 @@ export default function ProductManager() {
         </button>
       </form>
 
-      <ul className="space-y-1">
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white border border-gray-300">
+          <thead>
+            <tr>
+              <th className="py-2 px-4 border-b text-left text-gray-700">Name</th>
+              <th className="py-2 px-4 border-b text-left text-gray-700">Price</th>
+              <th className="py-2 px-4 border-b text-left text-gray-700">Stock</th>
+              <th className="py-2 px-4 border-b text-left text-gray-700">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
         {products.map((p) => (
-          <li key={p.id} className="flex justify-between items-center">
-            <strong>{p.name}</strong> — ${p.price.toFixed(2)} — Stock: {p.stock}
+              <tr key={p.id} className="border-b">
+                <td className="py-2 px-4 text-gray-900">{p.name}</td>
+                <td className="py-2 px-4 text-gray-900">${p.price.toFixed(2)}</td>
+                <td className="py-2 px-4 text-gray-900">{p.stock}</td>
+                <td className="py-2 px-4">
             <div className="flex gap-1">
               <button
                 onClick={() => handleEdit(p)}
-                className="bg-yellow-500 text-white px-3 py-1 rounded mr-2"
+                      className="bg-yellow-500 text-white px-3 py-1 rounded"
               >
                 Edit
               </button>
@@ -122,9 +135,12 @@ export default function ProductManager() {
                 Delete
               </button>
             </div>
-          </li>
+                </td>
+              </tr>
         ))}
-      </ul>
+          </tbody>
+        </table>
+      </div>
 
       {editingProductInModal && (
         <EditProductModal

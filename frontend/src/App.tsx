@@ -48,7 +48,7 @@ export default function App() {
   };
 
   return (
-    <div className="h-dvh text-gray-900 bg-gray-100">
+    <div className="min-h-dvh text-gray-900 bg-gray-100">
       <div className="min-h-full">
         <Disclosure as="nav" className="bg-gray-800">
           <div className="mx-auto max-w-7xl">
