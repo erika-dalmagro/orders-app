@@ -18,6 +18,7 @@ export default function EditOrderModal({
   const [items, setItems] = useState<OrderItem[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [availableTables, setAvailableTables] = useState<Table[]>([]);
+  const [orderDate, setOrderDate] = useState<string>("");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -30,6 +31,7 @@ export default function EditOrderModal({
       setSelectedTableId(order.table_id);
       setItems(order.items);
       loadTablesForEdit(order.table_id);
+      setOrderDate(new Date(order.date).toISOString().split("T")[0]);
     }
   }, [order]);
 
@@ -113,6 +115,7 @@ export default function EditOrderModal({
           product_id: item.product_id,
           quantity: item.quantity,
         })),
+        date: orderDate,
       });
       toast.success("Order updated successfully!");
       onOrderUpdated();
@@ -162,6 +165,23 @@ export default function EditOrderModal({
                 </option>
               ))}
             </select>
+          </div>
+
+          <div>
+            <label
+              htmlFor="orderDate"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Date:
+            </label>
+            <input
+              type="date"
+              id="orderDate"
+              value={orderDate}
+              onChange={(e) => setOrderDate(e.target.value)}
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+              required
+            />
           </div>
 
           <h3 className="text-xl font-semibold">Itens</h3>

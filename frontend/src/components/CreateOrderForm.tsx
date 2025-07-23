@@ -13,6 +13,9 @@ export default function CreateOrderForm({
   const [tables, setTables] = useState<Table[]>([]);
   const [selectedItems, setSelectedItems] = useState<OrderItem[]>([]);
   const [selectedTableId, setSelectedTableId] = useState<number | null>(null);
+  const [orderDate, setOrderDate] = useState<string>(
+    new Date().toISOString().split("T")[0] 
+  );
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -80,6 +83,7 @@ export default function CreateOrderForm({
       await axios.post("http://localhost:8080/orders", {
         table_id: selectedTableId,
         items: selectedItems,
+        date: orderDate,
       });
 
       toast.success("Order created successfully!");
@@ -117,6 +121,19 @@ export default function CreateOrderForm({
               </option>
             ))}
           </select>
+
+          <label htmlFor="orderDate" className="mr-2 font-medium">
+            Date:
+          </label>
+          <input
+            type="date"
+            id="orderDate"
+            value={orderDate}
+            onChange={(e) => setOrderDate(e.target.value)}
+            className="border px-2 py-1"
+            required
+          />
+
           <div>
             <button
               type="button"
@@ -168,7 +185,7 @@ export default function CreateOrderForm({
         <button
           type="submit"
           className="bg-green-600 text-white px-4 py-2 rounded"
-          disabled={!selectedTableId || selectedItems.length === 0} // Desabilita se não houver mesa ou itens
+          disabled={!selectedTableId || selectedItems.length === 0}
         >
           Create Order
         </button>

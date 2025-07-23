@@ -15,6 +15,7 @@ import (
 type OrderRequest struct {
 	TableID uint             `json:"table_id" binding:"required,gt=0"`
 	Items   []OrderItemInput `json:"items" binding:"required,min=1,dive"`
+	Date    string           `json:"date" binding:"required"`
 }
 
 type OrderItemInput struct {
@@ -26,6 +27,12 @@ func CreateOrder(c *gin.Context) {
 	var req OrderRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	parsedDate, err := time.Parse("2006-01-02", req.Date) // YYYY-MM-DD
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format for order. Use YYYY-MM-DD"})
 		return
 	}
 
@@ -67,7 +74,7 @@ func CreateOrder(c *gin.Context) {
 	order := models.Order{
 		TableID: req.TableID,
 		Status:  "open",
-		Date:    time.Now(),
+		Date:    parsedDate,
 	}
 
 	database.DB.Create(&order)
@@ -170,6 +177,13 @@ func UpdateOrder(c *gin.Context) {
 		return
 	}
 
+	parsedDate, err := time.Parse("2006-01-02", req.Date)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format for order update. Use YYYY-MM-DD"})
+		return
+	}
+	order.Date = parsedDate
+
 	var newTable models.Table
 	if err := database.DB.First(&newTable, req.TableID).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "New table not found"})
@@ -187,7 +201,7 @@ func UpdateOrder(c *gin.Context) {
 		}
 	}
 
-	err := database.DB.Transaction(func(tx *gorm.DB) error {
+	transactionErr := database.DB.Transaction(func(tx *gorm.DB) error {
 		// Finds the old order items to restore stock
 		var oldItems []models.OrderItem
 		if err := tx.Where("order_id = ?", order.ID).Find(&oldItems).Error; err != nil {
@@ -244,8 +258,8 @@ func UpdateOrder(c *gin.Context) {
 		return nil
 	})
 
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update order: " + err.Error()})
+	if transactionErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update order: " + transactionErr.Error()})
 		return
 	}
 
