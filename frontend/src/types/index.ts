@@ -25,4 +25,5 @@ export type Order = {
   table?: Table;
   status: string;
   items: OrderItem[];
+  date: string;
 };

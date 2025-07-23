@@ -12,11 +12,13 @@ import {
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Toaster } from "react-hot-toast";
 import TableManager from "./components/TableManager";
+import CalendarView from "./components/CalendarView";
 
 const navigation = [
   { name: "Orders", href: "orders" },
   { name: "Products", href: "products" },
   { name: "Tables", href: "tables" },
+  { name: "Calendar", href: "calendar" },
 ] as const;
 
 function classNames(...classes: string[]) {
@@ -24,9 +26,9 @@ function classNames(...classes: string[]) {
 }
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<"products" | "orders" | "tables">(
-    "orders"
-  );
+  const [activeTab, setActiveTab] = useState<
+    "products" | "orders" | "tables" | "calendar"
+  >("orders");
   const [refreshOrders, setRefreshOrders] = useState(false);
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
 
@@ -124,6 +126,8 @@ export default function App() {
                 <ProductManager />
               ) : activeTab === "tables" ? (
                 <TableManager />
+              ) : activeTab === "calendar" ? (
+                <CalendarView />
               ) : (
                 <>
                   <CreateOrderForm onOrderCreated={reloadOrders} />

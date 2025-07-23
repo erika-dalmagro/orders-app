@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/erika-dalmagro/orders-backend/database"
 	"github.com/erika-dalmagro/orders-backend/models"
@@ -66,6 +67,7 @@ func CreateOrder(c *gin.Context) {
 	order := models.Order{
 		TableID: req.TableID,
 		Status:  "open",
+		Date:    time.Now(),
 	}
 
 	database.DB.Create(&order)
@@ -92,6 +94,32 @@ func CreateOrder(c *gin.Context) {
 func GetOrders(c *gin.Context) {
 	var orders []models.Order
 	database.DB.Preload("Table").Preload("Items.Product").Find(&orders)
+	c.JSON(http.StatusOK, orders)
+}
+
+func GetOrdersByDate(c *gin.Context) {
+	dateStr := c.Query("date") // YYYY-MM-DD
+	if dateStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Date parameter is required"})
+		return
+	}
+
+	date, err := time.Parse("2006-01-02", dateStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid date format. Use YYYY-MM-DD"})
+		return
+	}
+
+	startOfDay := date.Truncate(24 * time.Hour)
+	endOfDay := startOfDay.Add(24 * time.Hour).Add(-time.Second)
+
+	var orders []models.Order
+	if err := database.DB.Preload("Table").Preload("Items.Product").
+		Where("date BETWEEN ? AND ?", startOfDay, endOfDay).
+		Find(&orders).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch orders for the specified date"})
+		return
+	}
 	c.JSON(http.StatusOK, orders)
 }
 

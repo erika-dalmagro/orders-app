@@ -14,11 +14,12 @@ func RegisterRoutes(r *gin.Engine) {
 
 	// Orders
 	r.POST("/orders", controllers.CreateOrder)
-	r.GET("/orders", controllers.GetOrders)	
-	r.PUT("/orders/:id/close", controllers.CloseOrder)	
+	r.GET("/orders", controllers.GetOrders)
+	r.PUT("/orders/:id/close", controllers.CloseOrder)
 	r.PUT("/orders/:id", controllers.UpdateOrder)
 	r.DELETE("/orders/:id", controllers.DeleteOrder)
 	r.GET("/orders/:id", controllers.GetOrder)
+	r.GET("/orders/by-date", controllers.GetOrdersByDate)
 
 	// Tables
 	r.POST("/tables", controllers.CreateTable)
