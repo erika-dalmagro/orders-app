@@ -45,6 +45,10 @@ export default function EditOrderModal({
             const allTables: Table[] = allTablesRes.data;
             const currentAvailableTables: Table[] = availableTablesRes.data;
 
+            if (allTables?.length == 1 && allTables[0].id == currentTableId) {
+              return;
+            }
+
             const combinedTables = Array.from(
               new Set([
                 ...currentAvailableTables.map((t) => JSON.stringify(t)),
@@ -154,7 +158,7 @@ export default function EditOrderModal({
                 <option value="">No tables available</option>
               )}
               {order.table &&
-                !availableTables.some((t) => t.id === order.table.id) && (
+                !availableTables.some((t) => t.id === order.table?.id) && (
                   <option key={order.table.id} value={order.table.id}>
                     {order.table.name} (Current Order's Table)
                   </option>

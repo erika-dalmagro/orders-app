@@ -1,6 +1,6 @@
 # Orders App
 
-A full-stack web application for managing restaurant orders (comandas), built with:
+A full-stack web application for managing restaurant orders (tabs), built with:
 
 - **Backend**: Go (Golang)
 - **Frontend**: React + TypeScript + Vite
@@ -13,18 +13,18 @@ A full-stack web application for managing restaurant orders (comandas), built wi
 - Assign products to each order
 - Track and update order status (open, in progress, closed)
 - Manage available products
-- Track which seats (tables or positions) are occupied or available
+- Manage and track which seats (tables or positions) are occupied or available
 - Automatically free up seats when an order is closed
 
 ## Tech Stack
 
-| Layer       | Stack                      |
-|-------------|----------------------------|
-| Frontend    | React + TypeScript + Vite  |
-| Styling     | Tailwind CSS               |
-| Backend     | Go (net/http + Gorilla Mux)|
-| API Comm    | REST + Axios               |
-| Database    | PostgreSQL / SQLite (TBD)  |
+| Layer    | Stack                       |
+| -------- | --------------------------- |
+| Frontend | React + TypeScript + Vite   |
+| Styling  | Tailwind CSS                |
+| Backend  | Go (net/http + Gorilla Mux) |
+| API Comm | REST + Axios                |
+| Database | PostgreSQL / SQLite (TBD)   |
 
 ## Getting Started
 

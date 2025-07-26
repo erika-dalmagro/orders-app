@@ -9,7 +9,11 @@ interface EditProductModalProps {
   onProductUpdated: () => void;
 }
 
-export default function EditProductModal({product, onClose, onProductUpdated}: EditProductModalProps) {
+export default function EditProductModal({
+  product,
+  onClose,
+  onProductUpdated,
+}: EditProductModalProps) {
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
@@ -51,10 +55,17 @@ export default function EditProductModal({product, onClose, onProductUpdated}: E
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white text-gray-900 p-6 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-4">Edit Product: {product.name}</h2>
+        <h2 className="text-2xl font-bold mb-4">
+          Edit Product: {product.name}
+        </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="productName" className="block text-sm font-medium text-gray-700">Name:</label>
+            <label
+              htmlFor="productName"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Name:
+            </label>
             <input
               id="productName"
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
@@ -65,7 +76,12 @@ export default function EditProductModal({product, onClose, onProductUpdated}: E
             />
           </div>
           <div>
-            <label htmlFor="productPrice" className="block text-sm font-medium text-gray-700">Price:</label>
+            <label
+              htmlFor="productPrice"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Price:
+            </label>
             <input
               id="productPrice"
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
@@ -79,7 +95,12 @@ export default function EditProductModal({product, onClose, onProductUpdated}: E
             />
           </div>
           <div>
-            <label htmlFor="productStock" className="block text-sm font-medium text-gray-700">Stock:</label>
+            <label
+              htmlFor="productStock"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Stock:
+            </label>
             <input
               id="productStock"
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"

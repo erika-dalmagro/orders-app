@@ -101,7 +101,12 @@ export default function TableManager() {
             onChange={(e) => setSingleTab(e.target.checked)}
             className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
           />
-          <label htmlFor="singleTab" className="text-sm font-medium text-gray-700">Comanda Única</label>
+          <label
+            htmlFor="singleTab"
+            className="text-sm font-medium text-gray-700 mr-4"
+          >
+            Single Tab
+          </label>
         </div>
         <button
           className="bg-blue-600 text-white px-4 py-2 rounded"
@@ -115,10 +120,18 @@ export default function TableManager() {
         <table className="min-w-full bg-white border border-gray-300">
           <thead>
             <tr>
-              <th className="py-2 px-4 border-b text-left text-gray-700">Name</th>
-              <th className="py-2 px-4 border-b text-left text-gray-700">Capacity</th>
-              <th className="py-2 px-4 border-b text-left text-gray-700">Tab</th>
-              <th className="py-2 px-4 border-b text-left text-gray-700">Actions</th>
+              <th className="py-2 px-4 border-b text-left text-gray-700">
+                Name
+              </th>
+              <th className="py-2 px-4 border-b text-left text-gray-700">
+                Capacity
+              </th>
+              <th className="py-2 px-4 border-b text-left text-gray-700">
+                Tab
+              </th>
+              <th className="py-2 px-4 border-b text-left text-gray-700">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -126,7 +139,9 @@ export default function TableManager() {
               <tr key={t.id} className="border-b">
                 <td className="py-2 px-4 text-gray-900">{t.name}</td>
                 <td className="py-2 px-4 text-gray-900">{t.capacity}</td>
-                <td className="py-2 px-4 text-gray-900">{t.single_tab ? "Single" : "Multiple"}</td>
+                <td className="py-2 px-4 text-gray-900">
+                  {t.single_tab ? "Single" : "Multiple"}
+                </td>
                 <td className="py-2 px-4">
                   <div className="flex gap-1">
                     <button

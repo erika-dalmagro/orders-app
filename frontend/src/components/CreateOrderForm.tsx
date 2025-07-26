@@ -14,7 +14,7 @@ export default function CreateOrderForm({
   const [selectedItems, setSelectedItems] = useState<OrderItem[]>([]);
   const [selectedTableId, setSelectedTableId] = useState<number | null>(null);
   const [orderDate, setOrderDate] = useState<string>(
-    new Date().toISOString().split("T")[0] 
+    new Date().toISOString().split("T")[0]
   );
   const [error, setError] = useState("");
 
@@ -32,7 +32,7 @@ export default function CreateOrderForm({
       .get("http://localhost:8080/tables/available")
       .then((res) => {
         setTables(res.data);
-        if (res.data.length > 0) {
+        if (res.data?.length > 0) {
           setSelectedTableId(res.data[0].id);
         } else {
           setSelectedTableId(null);
@@ -42,7 +42,7 @@ export default function CreateOrderForm({
   };
 
   const addItem = () => {
-    if (products.length === 0) {
+    if (products?.length === 0) {
       toast.error("Products not loaded yet.");
       return;
     }
@@ -74,7 +74,7 @@ export default function CreateOrderForm({
       return;
     }
 
-    if (selectedItems.length === 0) {
+    if (selectedItems?.length === 0) {
       toast.error("Please add at least one item to the order.");
       return;
     }
@@ -110,12 +110,12 @@ export default function CreateOrderForm({
             onChange={(e) => setSelectedTableId(Number(e.target.value))}
             className="border px-2 py-1"
             required
-            disabled={tables.length === 0}
+            disabled={tables?.length === 0}
           >
-            {tables.length === 0 && (
+            {tables?.length === 0 && (
               <option value="">No tables available</option>
             )}
-            {tables.map((table) => (
+            {tables?.map((table) => (
               <option key={table.id} value={table.id}>
                 {table.name} (Capacity: {table.capacity})
               </option>
@@ -139,14 +139,14 @@ export default function CreateOrderForm({
               type="button"
               onClick={addItem}
               className="bg-blue-400 px-3 py-1 rounded"
-              disabled={products.length === 0}
+              disabled={products?.length === 0}
             >
               + Add Product
             </button>
           </div>
         </div>
 
-        {selectedItems.map((item, index) => (
+        {selectedItems?.map((item, index) => (
           <div key={index} className="flex gap-2 items-center">
             <select
               value={item.product_id}
@@ -155,7 +155,7 @@ export default function CreateOrderForm({
               }
               className="border px-2 py-1"
             >
-              {products.map((p) => (
+              {products?.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name} (Stock: {p.stock})
                 </option>
@@ -185,7 +185,7 @@ export default function CreateOrderForm({
         <button
           type="submit"
           className="bg-green-600 text-white px-4 py-2 rounded"
-          disabled={!selectedTableId || selectedItems.length === 0}
+          disabled={!selectedTableId || selectedItems?.length === 0}
         >
           Create Order
         </button>
