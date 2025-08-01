@@ -28,4 +28,34 @@ A full-stack web application for managing restaurant orders (tabs), built with:
 
 ## Getting Started
 
-Coming soon...
+1.  **Navigate to the backend directory:**
+    ```sh
+    cd backend
+    ```
+
+2.  **Install dependencies:**
+    ```sh
+    go mod tidy
+    ```
+
+4.  **Run the backend server:**
+    ```sh
+    go run main.go
+    ```
+
+### Frontend Setup
+
+1.  **Navigate to the frontend directory:**
+    ```sh
+    cd frontend
+    ```
+
+2.  **Install dependencies:**
+    ```sh
+    npm install
+    ```
+
+3.  **Run server:**
+    ```sh
+    npm run dev
+    ```
