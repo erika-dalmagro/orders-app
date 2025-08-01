@@ -59,3 +59,6 @@ A full-stack web application for managing restaurant orders (tabs), built with:
     ```sh
     npm run dev
     ```
+---
+
+Good coding!
