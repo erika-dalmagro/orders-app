@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import {
   View,
   Text,
@@ -9,15 +9,11 @@ import {
   SafeAreaView,
   Alert,
   Switch,
+  TouchableOpacity,
 } from "react-native";
 import axios from "axios";
-
-type Table = {
-  id: number;
-  name: string;
-  capacity: number;
-  single_tab: boolean;
-};
+import {Table} from "../types";
+import EditTableModal from "./EditTableModal";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -26,11 +22,13 @@ export default function TableManager() {
   const [name, setName] = useState("");
   const [capacity, setCapacity] = useState("");
   const [singleTab, setSingleTab] = useState(true);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedTable, setSelectedTable] = useState<Table | null>(null);
 
   const loadTables = () => {
     axios
       .get(`${API_URL}/tables`)
-      .then((res) => setTables(res.data))
+      .then(res => setTables(res.data || []))
       .catch(() => Alert.alert("Error", "Failed to load tables."));
   };
 
@@ -40,8 +38,8 @@ export default function TableManager() {
 
   const handleSubmit = async () => {
     if (!name || !capacity) {
-        Alert.alert("Validation Error", "Name and Capacity are required.");
-        return;
+      Alert.alert("Validation Error", "Name and Capacity are required.");
+      return;
     }
     try {
       await axios.post(`${API_URL}/tables`, {
@@ -58,6 +56,39 @@ export default function TableManager() {
       Alert.alert("Error", "An error occurred creating the table.");
       console.error(error);
     }
+  };
+
+  const handleEdit = (table: Table) => {
+    setSelectedTable(table);
+    setIsModalVisible(true);
+  };
+
+  const handleDelete = (id: number) => {
+    Alert.alert("Delete Table", "Are you sure you want to delete this table?", [
+      {text: "Cancel", style: "cancel"},
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await axios.delete(`${API_URL}/tables/${id}`);
+            Alert.alert("Success", "Table deleted successfully!");
+            loadTables();
+          } catch (error: any) {
+            const message =
+              error.response?.data?.error || "Error deleting table.";
+            Alert.alert("Error", message);
+            console.error(error);
+          }
+        },
+      },
+    ]);
+  };
+
+  const handleTableUpdated = () => {
+    setIsModalVisible(false);
+    setSelectedTable(null);
+    loadTables();
   };
 
   return (
@@ -82,7 +113,7 @@ export default function TableManager() {
           <View style={styles.switchContainer}>
             <Text style={styles.switchLabel}>Single Tab</Text>
             <Switch
-              trackColor={{ false: "#767577", true: "#81b0ff" }}
+              trackColor={{false: "#767577", true: "#81b0ff"}}
               thumbColor={singleTab ? "#f5dd4b" : "#f4f3f4"}
               onValueChange={setSingleTab}
               value={singleTab}
@@ -93,17 +124,40 @@ export default function TableManager() {
 
         <View style={styles.list}>
           <Text style={styles.title}>Tables</Text>
-          {tables.map((t) => (
+          {tables.map(t => (
             <View key={t.id} style={styles.tableItem}>
-              <Text style={styles.tableName}>{t.name}</Text>
-              <Text style={styles.tableDetail}>Capacity: {t.capacity}</Text>
-              <Text style={styles.tableDetail}>
-                Tab: {t.single_tab ? "Single" : "Multiple"}
-              </Text>
+              <View>
+                <Text style={styles.tableName}>{t.name}</Text>
+                <Text style={styles.tableDetail}>Capacity: {t.capacity}</Text>
+                <Text style={styles.tableDetail}>
+                  Tab: {t.single_tab ? "Single" : "Multiple"}
+                </Text>
+              </View>
+              <View style={styles.actionsContainer}>
+                <TouchableOpacity
+                  style={[styles.actionButton, styles.editButton]}
+                  onPress={() => handleEdit(t)}
+                >
+                  <Text style={styles.actionButtonText}>Edit</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.actionButton, styles.deleteButton]}
+                  onPress={() => handleDelete(t.id)}
+                >
+                  <Text style={styles.actionButtonText}>Delete</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           ))}
         </View>
       </ScrollView>
+
+      <EditTableModal
+        visible={isModalVisible}
+        table={selectedTable}
+        onClose={() => setIsModalVisible(false)}
+        onTableUpdated={handleTableUpdated}
+      />
     </SafeAreaView>
   );
 }
@@ -111,7 +165,7 @@ export default function TableManager() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: "#f8f9fa",
   },
   container: {
     padding: 20,
@@ -121,7 +175,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 20,
     textAlign: "center",
-    color: '#333',
+    color: "#333",
   },
   form: {
     marginBottom: 30,
@@ -129,7 +183,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 8,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
@@ -145,9 +199,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   switchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 15,
   },
   switchLabel: {
@@ -160,17 +214,37 @@ const styles = StyleSheet.create({
     padding: 15,
     marginBottom: 10,
     backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#eee",
     borderRadius: 5,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   tableName: {
     fontSize: 18,
     fontWeight: "bold",
-    color: '#28a745'
+    color: "#28a745",
   },
   tableDetail: {
     fontSize: 14,
-    color: '#6c757d',
+    color: "#6c757d",
+  },
+  actionsContainer: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  actionButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 5,
+  },
+  actionButtonText: {
+    color: "white",
+    fontWeight: "bold",
+  },
+  editButton: {
+    backgroundColor: "#ffc107",
+  },
+  deleteButton: {
+    backgroundColor: "#dc3545",
   },
 });

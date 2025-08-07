@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import {
   View,
   Text,
@@ -8,15 +8,19 @@ import {
   ActivityIndicator,
 } from "react-native";
 import axios from "axios";
-import { Order } from "../types";
+import {Order} from "../types";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 interface OrderListProps {
   shouldRefresh: boolean;
+  onEditOrder: (order: Order) => void;
 }
 
-export default function OrderList({ shouldRefresh }: OrderListProps) {
+export default function OrderList({
+  shouldRefresh,
+  onEditOrder,
+}: OrderListProps) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -24,7 +28,7 @@ export default function OrderList({ shouldRefresh }: OrderListProps) {
     setLoading(true);
     axios
       .get(`${API_URL}/orders`)
-      .then((res) => setOrders(res.data))
+      .then(res => setOrders(res.data))
       .catch(() => Alert.alert("Error", "Failed to load orders."))
       .finally(() => setLoading(false));
   };
@@ -49,7 +53,7 @@ export default function OrderList({ shouldRefresh }: OrderListProps) {
       "Delete Order",
       "Are you sure you want to delete this order? This will also delete its items.",
       [
-        { text: "Cancel", style: "cancel" },
+        {text: "Cancel", style: "cancel"},
         {
           text: "Delete",
           style: "destructive",
@@ -59,12 +63,13 @@ export default function OrderList({ shouldRefresh }: OrderListProps) {
               Alert.alert("Success", "Order deleted successfully!");
               loadOrders();
             } catch (error: any) {
-              const message = error.response?.data?.error || "Error deleting order.";
+              const message =
+                error.response?.data?.error || "Error deleting order.";
               Alert.alert("Error", message);
             }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -75,17 +80,23 @@ export default function OrderList({ shouldRefresh }: OrderListProps) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Orders</Text>
-      {orders.map((order) => (
+      {orders.map(order => (
         <View key={order.id} style={styles.orderCard}>
           <View style={styles.cardHeader}>
             <Text style={styles.tableName}>
               Table {order.table?.name || `#${order.table_id}`}
             </Text>
-            <Text style={order.status === 'open' ? styles.statusOpen : styles.statusClosed}>
+            <Text
+              style={
+                order.status === "open"
+                  ? styles.statusOpen
+                  : styles.statusClosed
+              }
+            >
               {order.status.toUpperCase()}
             </Text>
           </View>
-          
+
           <View style={styles.itemsList}>
             {order.items.map((item, i) => (
               <Text key={i} style={styles.itemText}>
@@ -95,6 +106,14 @@ export default function OrderList({ shouldRefresh }: OrderListProps) {
           </View>
 
           <View style={styles.actionsContainer}>
+            {order.status === "open" && (
+              <TouchableOpacity
+                style={[styles.button, styles.editButton]}
+                onPress={() => onEditOrder(order)}
+              >
+                <Text style={styles.buttonText}>Edit</Text>
+              </TouchableOpacity>
+            )}
             {order.status === "open" && (
               <TouchableOpacity
                 style={[styles.button, styles.closeButton]}
@@ -117,70 +136,76 @@ export default function OrderList({ shouldRefresh }: OrderListProps) {
 }
 
 const styles = StyleSheet.create({
-    title: {
-        fontSize: 24,
-        fontWeight: "bold",
-        marginBottom: 20,
-        textAlign: "center",
-        color: '#333',
-    },
-    orderCard: {
-        backgroundColor: 'white',
-        borderRadius: 8,
-        padding: 15,
-        marginBottom: 15,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.2,
-        shadowRadius: 2,
-        elevation: 2,
-    },
-    cardHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        borderBottomWidth: 1,
-        borderBottomColor: '#eee',
-        paddingBottom: 10,
-        marginBottom: 10,
-    },
-    tableName: {
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
-    statusOpen: {
-        color: 'green',
-        fontWeight: 'bold',
-    },
-    statusClosed: {
-        color: 'gray',
-        fontWeight: 'bold',
-    },
-    itemsList: {
-        marginBottom: 15,
-    },
-    itemText: {
-        fontSize: 16,
-        color: '#333'
-    },
-    actionsContainer: {
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-        gap: 10,
-    },
-    button: {
-        paddingVertical: 8,
-        paddingHorizontal: 15,
-        borderRadius: 5,
-    },
-    buttonText: {
-        color: 'white',
-        fontWeight: 'bold',
-    },
-    closeButton: {
-        backgroundColor: '#ffc107',
-    },
-    deleteButton: {
-        backgroundColor: '#dc3545',
-    },
+  container: {
+    marginTop: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
+    color: "#333",
+  },
+  orderCard: {
+    backgroundColor: "white",
+    borderRadius: 8,
+    padding: 15,
+    marginBottom: 15,
+    shadowColor: "#000",
+    shadowOffset: {width: 0, height: 1},
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+    paddingBottom: 10,
+    marginBottom: 10,
+  },
+  tableName: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  statusOpen: {
+    color: "green",
+    fontWeight: "bold",
+  },
+  statusClosed: {
+    color: "gray",
+    fontWeight: "bold",
+  },
+  itemsList: {
+    marginBottom: 15,
+  },
+  itemText: {
+    fontSize: 16,
+    color: "#333",
+  },
+  actionsContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 10,
+  },
+  button: {
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: "white",
+    fontWeight: "bold",
+  },
+  editButton: {
+    backgroundColor: "#ffc107",
+  },
+  closeButton: {
+    backgroundColor: "#17a2b8",
+  },
+  deleteButton: {
+    backgroundColor: "#dc3545",
+  },
 });
