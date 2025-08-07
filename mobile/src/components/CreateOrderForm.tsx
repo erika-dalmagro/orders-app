@@ -127,7 +127,7 @@ export default function CreateOrderForm({ onOrderCreated }: CreateOrderFormProps
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Create New Order</Text>
+      <Text style={styles.title}>Order Manager</Text>
 
       <View style={styles.formSection}>
         <Text style={styles.label}>Table:</Text>
@@ -191,9 +191,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         padding: 20,
-    },
-    container: {
-      padding: 15,
     },
     title: {
       fontSize: 24,

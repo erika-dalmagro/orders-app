@@ -92,6 +92,7 @@ export default function TableManager() {
         </View>
 
         <View style={styles.list}>
+          <Text style={styles.title}>Tables</Text>
           {tables.map((t) => (
             <View key={t.id} style={styles.tableItem}>
               <Text style={styles.tableName}>{t.name}</Text>

@@ -117,13 +117,12 @@ export default function OrderList({ shouldRefresh }: OrderListProps) {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        marginTop: 20,
-    },
     title: {
-        fontSize: 22,
-        fontWeight: 'bold',
-        marginBottom: 10,
+        fontSize: 24,
+        fontWeight: "bold",
+        marginBottom: 20,
+        textAlign: "center",
+        color: '#333',
     },
     orderCard: {
         backgroundColor: 'white',

@@ -13,10 +13,7 @@ export default function OrderScreen() {
     return (
         <SafeAreaView style={styles.safeArea}>
             <ScrollView style={styles.container}>
-                {/* Wrap the form in a component that can pass the refresh handler */}
-                <View>
-                    <CreateOrderForm onOrderCreated={handleOrderCreated} />
-                </View>
+                <CreateOrderForm onOrderCreated={handleOrderCreated} />
                 <OrderList shouldRefresh={refreshFlag} />
             </ScrollView>
         </SafeAreaView>
@@ -26,9 +23,9 @@ export default function OrderScreen() {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: '#f0f2f5',
+        backgroundColor: '#f8f9fa',
     },
     container: {
-        flex: 1,
+        padding: 20,
     }
 });

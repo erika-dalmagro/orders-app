@@ -89,6 +89,7 @@ export default function ProductManager() {
         </View>
 
         <View style={styles.list}>
+          <Text style={styles.title}>Products</Text>
           {products.map((p) => (
             <View key={p.id} style={styles.productItem}>
               <Text style={styles.productName}>{p.name}</Text>
