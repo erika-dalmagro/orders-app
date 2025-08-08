@@ -59,6 +59,28 @@ A full-stack web application for managing restaurant orders (tabs), built with:
     ```sh
     npm run dev
     ```
+    
+### Mobile Setup
+
+1.  **Navigate to the mobile directory:**
+    ```sh
+    cd mobile
+    ```
+
+2.  **Install dependencies:**
+    ```sh
+    npm install
+    ```
+
+3.  **Configure Environment Variables:**
+    * Create a `.env` file by copying the example file .env.example
+
+
+4.  **Start the development server:**
+    ```sh
+    npx expo start
+    ```
+
 ---
 
 Good coding!
