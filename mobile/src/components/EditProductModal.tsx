@@ -1,15 +1,8 @@
-import React, {useEffect, useState} from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  Alert,
-  Modal,
-  Button,
-} from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, TextInput, StyleSheet, Alert, Modal, Button } from "react-native";
 import axios from "axios";
-import {Product} from "../types";
+import { Product } from "../types";
+import Toast from "react-native-toast-message";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -47,13 +40,15 @@ export default function EditProductModal({
         price: parseFloat(price),
         stock: parseInt(stock),
       });
-
-      Alert.alert("Success", "Product updated successfully!");
+      Toast.show({
+        type: "success",
+        text1: "Success",
+        text2: "Product updated successfully!",
+      });
       onProductUpdated();
     } catch (err: any) {
       const message = err.response?.data?.error || "Error updating product.";
-      Alert.alert("Error", message);
-      console.error(err);
+      Toast.show({ type: "error", text1: "Error", text2: message });
     }
   };
 
@@ -63,12 +58,7 @@ export default function EditProductModal({
         <View style={styles.modalView}>
           <Text style={styles.modalTitle}>Edit Product: {product?.name}</Text>
 
-          <TextInput
-            style={styles.input}
-            placeholder="Product Name"
-            value={name}
-            onChangeText={setName}
-          />
+          <TextInput style={styles.input} placeholder="Product Name" value={name} onChangeText={setName} />
           <TextInput
             style={styles.input}
             placeholder="Price"

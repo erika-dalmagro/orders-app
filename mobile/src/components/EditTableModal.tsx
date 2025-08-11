@@ -1,16 +1,8 @@
-import React, {useEffect, useState} from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  Alert,
-  Modal,
-  Button,
-  Switch,
-} from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, TextInput, StyleSheet, Alert, Modal, Button, Switch } from "react-native";
 import axios from "axios";
-import {Table} from "../types";
+import { Table } from "../types";
+import Toast from "react-native-toast-message";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -21,12 +13,7 @@ interface EditTableModalProps {
   onTableUpdated: () => void;
 }
 
-export default function EditTableModal({
-  table,
-  visible,
-  onClose,
-  onTableUpdated,
-}: EditTableModalProps) {
+export default function EditTableModal({ table, visible, onClose, onTableUpdated }: EditTableModalProps) {
   const [name, setName] = useState("");
   const [capacity, setCapacity] = useState("");
   const [singleTab, setSingleTab] = useState(true);
@@ -48,12 +35,15 @@ export default function EditTableModal({
         capacity: parseInt(capacity),
         single_tab: singleTab,
       });
-      Alert.alert("Success", "Table updated successfully!");
+      Toast.show({
+        type: "success",
+        text1: "Success",
+        text2: "Table updated successfully!",
+      });
       onTableUpdated();
     } catch (err: any) {
       const message = err.response?.data?.error || "Error updating table.";
-      Alert.alert("Error", message);
-      console.error(err);
+      Toast.show({ type: "error", text1: "Error", text2: message });
     }
   };
 
@@ -63,12 +53,7 @@ export default function EditTableModal({
         <View style={styles.modalView}>
           <Text style={styles.modalTitle}>Edit Table: {table?.name}</Text>
 
-          <TextInput
-            style={styles.input}
-            placeholder="Table Name"
-            value={name}
-            onChangeText={setName}
-          />
+          <TextInput style={styles.input} placeholder="Table Name" value={name} onChangeText={setName} />
           <TextInput
             style={styles.input}
             placeholder="Capacity"

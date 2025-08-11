@@ -1,15 +1,9 @@
-import React, {useEffect, useState} from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Alert,
-  ScrollView,
-  ActivityIndicator,
-} from "react-native";
-import {Calendar, DateData} from "react-native-calendars";
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
+import { Calendar, DateData } from "react-native-calendars";
 import axios from "axios";
-import {Order} from "../types";
+import Toast from "react-native-toast-message";
+import { Order } from "../types";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -30,7 +24,11 @@ export default function CalendarView() {
     } catch (err) {
       console.error("Failed to fetch orders for date:", err);
       setOrders([]);
-      Alert.alert("Error", `Failed to load orders for ${date}`);
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: `Failed to load orders for ${date}`,
+      });
     } finally {
       setLoading(false);
     }
@@ -52,7 +50,7 @@ export default function CalendarView() {
         current={selectedDate}
         onDayPress={onDayPress}
         markedDates={{
-          [selectedDate]: {selected: true, selectedColor: "#007bff"},
+          [selectedDate]: { selected: true, selectedColor: "#007bff" },
         }}
         theme={{
           todayTextColor: "#007bff",
@@ -68,19 +66,11 @@ export default function CalendarView() {
         ) : orders.length === 0 ? (
           <Text style={styles.noOrdersText}>No orders for this date.</Text>
         ) : (
-          orders.map(order => (
+          orders.map((order) => (
             <View key={order.id} style={styles.orderCard}>
               <View style={styles.cardHeader}>
-                <Text style={styles.tableName}>
-                  Table {order.table?.name || `#${order.table_id}`}
-                </Text>
-                <Text
-                  style={
-                    order.status === "open"
-                      ? styles.statusOpen
-                      : styles.statusClosed
-                  }
-                >
+                <Text style={styles.tableName}>Table {order.table?.name || `#${order.table_id}`}</Text>
+                <Text style={order.status === "open" ? styles.statusOpen : styles.statusClosed}>
                   {order.status.toUpperCase()}
                 </Text>
               </View>
@@ -145,8 +135,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
   },
-  statusOpen: {color: "green", fontWeight: "bold"},
-  statusClosed: {color: "gray", fontWeight: "bold"},
-  itemsList: {marginTop: 10},
-  itemText: {fontSize: 16},
+  statusOpen: { color: "green", fontWeight: "bold" },
+  statusClosed: { color: "gray", fontWeight: "bold" },
+  itemsList: { marginTop: 10 },
+  itemText: { fontSize: 16 },
 });

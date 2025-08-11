@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -11,7 +11,8 @@ import {
   TouchableOpacity,
 } from "react-native";
 import axios from "axios";
-import {Product} from "../types";
+import Toast from "react-native-toast-message";
+import { Product } from "../types";
 import EditProductModal from "./EditProductModal";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
@@ -27,8 +28,14 @@ export default function ProductManager() {
   const loadProducts = () => {
     axios
       .get(`${API_URL}/products`)
-      .then(res => setProducts(res.data))
-      .catch(() => Alert.alert("Error", "Failed to load products."));
+      .then((res) => setProducts(res.data))
+      .catch(() => {
+        Toast.show({
+          type: "error",
+          text1: "Error",
+          text2: "Failed to load products.",
+        });
+      });
   };
 
   useEffect(() => {
@@ -37,7 +44,11 @@ export default function ProductManager() {
 
   const handleSubmit = async () => {
     if (!name || !price || !stock) {
-      Alert.alert("Validation Error", "All fields are required.");
+      Toast.show({
+        type: "error",
+        text1: "Validation Error",
+        text2: "All fields are required.",
+      });
       return;
     }
     try {
@@ -46,13 +57,21 @@ export default function ProductManager() {
         price: parseFloat(price),
         stock: parseInt(stock),
       });
-      Alert.alert("Success", "Product created successfully!");
+      Toast.show({
+        type: "success",
+        text1: "Success",
+        text2: "Product created successfully!",
+      });
       setName("");
       setPrice("");
       setStock("");
       loadProducts();
     } catch (error) {
-      Alert.alert("Error", "An error occurred while creating the product.");
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Could not create product.",
+      });
       console.error(error);
     }
   };
@@ -63,27 +82,31 @@ export default function ProductManager() {
   };
 
   const handleDelete = (id: number) => {
-    Alert.alert(
-      "Delete Product",
-      "Are you sure you want to delete this product?",
-      [
-        {text: "Cancel", style: "cancel"},
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await axios.delete(`${API_URL}/products/${id}`);
-              Alert.alert("Success", "Product deleted successfully!");
-              loadProducts();
-            } catch (error) {
-              Alert.alert("Error", "Error deleting product.");
-              console.error(error);
-            }
-          },
+    Alert.alert("Delete Product", "Are you sure you want to delete this product?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await axios.delete(`${API_URL}/products/${id}`);
+            Toast.show({
+              type: "success",
+              text1: "Success",
+              text2: "Product deleted successfully!",
+            });
+            loadProducts();
+          } catch (error) {
+            Toast.show({
+              type: "error",
+              text1: "Error",
+              text2: "Error deleting product.",
+            });
+            console.error(error);
+          }
         },
-      ],
-    );
+      },
+    ]);
   };
 
   const handleProductUpdated = () => {
@@ -98,12 +121,7 @@ export default function ProductManager() {
         <Text style={styles.title}>Product Manager</Text>
 
         <View style={styles.form}>
-          <TextInput
-            style={styles.input}
-            placeholder="Product Name"
-            value={name}
-            onChangeText={setName}
-          />
+          <TextInput style={styles.input} placeholder="Product Name" value={name} onChangeText={setName} />
           <TextInput
             style={styles.input}
             placeholder="Price"
@@ -123,7 +141,7 @@ export default function ProductManager() {
 
         <View style={styles.list}>
           <Text style={styles.title}>Products</Text>
-          {products.map(p => (
+          {products.map((p) => (
             <View key={p.id} style={styles.productItem}>
               <View>
                 <Text style={styles.productName}>{p.name}</Text>
@@ -180,7 +198,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 8,
     shadowColor: "#000",
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,

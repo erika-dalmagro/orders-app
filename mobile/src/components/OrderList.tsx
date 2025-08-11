@@ -1,14 +1,8 @@
-import React, {useEffect, useState} from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Alert,
-  TouchableOpacity,
-  ActivityIndicator,
-} from "react-native";
+import React, { useEffect, useState } from "react";
+import Toast from "react-native-toast-message";
+import { View, Text, StyleSheet, Alert, TouchableOpacity, ActivityIndicator } from "react-native";
 import axios from "axios";
-import {Order} from "../types";
+import { Order } from "../types";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -17,10 +11,7 @@ interface OrderListProps {
   onEditOrder: (order: Order) => void;
 }
 
-export default function OrderList({
-  shouldRefresh,
-  onEditOrder,
-}: OrderListProps) {
+export default function OrderList({ shouldRefresh, onEditOrder }: OrderListProps) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -28,7 +19,7 @@ export default function OrderList({
     setLoading(true);
     axios
       .get(`${API_URL}/orders`)
-      .then(res => setOrders(res.data))
+      .then((res) => setOrders(res.data))
       .catch(() => Alert.alert("Error", "Failed to load orders."))
       .finally(() => setLoading(false));
   };
@@ -40,11 +31,15 @@ export default function OrderList({
   const closeOrder = async (id: number) => {
     try {
       await axios.put(`${API_URL}/orders/${id}/close`);
-      Alert.alert("Success", "Order closed successfully!");
-      loadOrders(); // Refresh the list
+      Toast.show({
+        type: "success",
+        text1: "Success",
+        text2: "Order closed successfully!",
+      });
+      loadOrders();
     } catch (error: any) {
       const message = error.response?.data?.error || "Error closing order.";
-      Alert.alert("Error", message);
+      Toast.show({ type: "error", text1: "Error", text2: message });
     }
   };
 
@@ -53,19 +48,22 @@ export default function OrderList({
       "Delete Order",
       "Are you sure you want to delete this order? This will also delete its items.",
       [
-        {text: "Cancel", style: "cancel"},
+        { text: "Cancel", style: "cancel" },
         {
           text: "Delete",
           style: "destructive",
           onPress: async () => {
             try {
               await axios.delete(`${API_URL}/orders/${id}`);
-              Alert.alert("Success", "Order deleted successfully!");
+              Toast.show({
+                type: "success",
+                text1: "Success",
+                text2: "Order deleted successfully!",
+              });
               loadOrders();
             } catch (error: any) {
-              const message =
-                error.response?.data?.error || "Error deleting order.";
-              Alert.alert("Error", message);
+              const message = error.response?.data?.error || "Error deleting order.";
+              Toast.show({ type: "error", text1: "Error", text2: message });
             }
           },
         },
@@ -80,19 +78,11 @@ export default function OrderList({
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Orders</Text>
-      {orders.map(order => (
+      {orders.map((order) => (
         <View key={order.id} style={styles.orderCard}>
           <View style={styles.cardHeader}>
-            <Text style={styles.tableName}>
-              Table {order.table?.name || `#${order.table_id}`}
-            </Text>
-            <Text
-              style={
-                order.status === "open"
-                  ? styles.statusOpen
-                  : styles.statusClosed
-              }
-            >
+            <Text style={styles.tableName}>Table {order.table?.name || `#${order.table_id}`}</Text>
+            <Text style={order.status === "open" ? styles.statusOpen : styles.statusClosed}>
               {order.status.toUpperCase()}
             </Text>
           </View>
@@ -107,10 +97,7 @@ export default function OrderList({
 
           <View style={styles.actionsContainer}>
             {order.status === "open" && (
-              <TouchableOpacity
-                style={[styles.button, styles.editButton]}
-                onPress={() => onEditOrder(order)}
-              >
+              <TouchableOpacity style={[styles.button, styles.editButton]} onPress={() => onEditOrder(order)}>
                 <Text style={styles.buttonText}>Edit</Text>
               </TouchableOpacity>
             )}
@@ -152,7 +139,7 @@ const styles = StyleSheet.create({
     padding: 15,
     marginBottom: 15,
     shadowColor: "#000",
-    shadowOffset: {width: 0, height: 1},
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
     elevation: 2,

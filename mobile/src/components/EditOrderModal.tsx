@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -11,8 +11,9 @@ import {
   TouchableOpacity,
 } from "react-native";
 import axios from "axios";
-import {Picker} from "@react-native-picker/picker";
-import {Order, Product, Table, OrderItem} from "../types";
+import { Picker } from "@react-native-picker/picker";
+import { Order, Product, Table, OrderItem } from "../types";
+import Toast from "react-native-toast-message";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -23,12 +24,7 @@ interface EditOrderModalProps {
   onOrderUpdated: () => void;
 }
 
-export default function EditOrderModal({
-  order,
-  visible,
-  onClose,
-  onOrderUpdated,
-}: EditOrderModalProps) {
+export default function EditOrderModal({ order, visible, onClose, onOrderUpdated }: EditOrderModalProps) {
   const [selectedTableId, setSelectedTableId] = useState<number | string>("");
   const [items, setItems] = useState<Partial<OrderItem>[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -37,7 +33,7 @@ export default function EditOrderModal({
 
   useEffect(() => {
     if (order) {
-      axios.get(`${API_URL}/products`).then(res => setProducts(res.data || []));
+      axios.get(`${API_URL}/products`).then((res) => setProducts(res.data || []));
       loadTablesForEdit(order.table_id);
 
       setSelectedTableId(order.table_id);
@@ -47,20 +43,14 @@ export default function EditOrderModal({
   }, [order]);
 
   const loadTablesForEdit = (currentTableId: number) => {
-    Promise.all([
-      axios.get(`${API_URL}/tables`),
-      axios.get(`${API_URL}/tables/available`),
-    ])
+    Promise.all([axios.get(`${API_URL}/tables`), axios.get(`${API_URL}/tables/available`)])
       .then(([allTablesRes, availableTablesRes]) => {
         const allTables: Table[] = allTablesRes.data || [];
         const currentAvailable: Table[] = availableTablesRes.data || [];
-        const currentOrderTable = allTables.find(t => t.id === currentTableId);
+        const currentOrderTable = allTables.find((t) => t.id === currentTableId);
 
         const combinedTables = [...currentAvailable];
-        if (
-          currentOrderTable &&
-          !currentAvailable.some(t => t.id === currentTableId)
-        ) {
+        if (currentOrderTable && !currentAvailable.some((t) => t.id === currentTableId)) {
           combinedTables.push(currentOrderTable);
         }
         setAvailableTables(combinedTables);
@@ -70,20 +60,16 @@ export default function EditOrderModal({
 
   if (!order) return null;
 
-  const handleUpdateItem = (
-    index: number,
-    field: keyof OrderItem,
-    value: any,
-  ) => {
+  const handleUpdateItem = (index: number, field: keyof OrderItem, value: any) => {
     const updatedItems = [...items];
-    const itemToUpdate = {...updatedItems[index]};
+    const itemToUpdate = { ...updatedItems[index] };
     (itemToUpdate as any)[field] = value;
     updatedItems[index] = itemToUpdate;
     setItems(updatedItems);
   };
   const handleAddItem = () => {
     if (products.length > 0) {
-      setItems([...items, {product_id: products[0].id, quantity: 1}]);
+      setItems([...items, { product_id: products[0].id, quantity: 1 }]);
     }
   };
   const handleRemoveItem = (index: number) => {
@@ -96,17 +82,21 @@ export default function EditOrderModal({
     try {
       await axios.put(`${API_URL}/orders/${order.id}`, {
         table_id: selectedTableId,
-        items: items.map(item => ({
+        items: items.map((item) => ({
           product_id: item.product_id,
           quantity: item.quantity,
         })),
         date: orderDate,
       });
-      Alert.alert("Success", "Order updated successfully!");
+      Toast.show({
+        type: "success",
+        text1: "Success",
+        text2: "Order updated successfully!",
+      });
       onOrderUpdated();
     } catch (err: any) {
       const message = err.response?.data?.error || "Error updating order";
-      Alert.alert("Error", message);
+      Toast.show({ type: "error", text1: "Error", text2: message });
     }
   };
 
@@ -121,24 +111,16 @@ export default function EditOrderModal({
             <View style={styles.pickerContainer}>
               <Picker
                 selectedValue={selectedTableId}
-                onValueChange={itemValue => setSelectedTableId(itemValue)}
+                onValueChange={(itemValue) => setSelectedTableId(itemValue)}
               >
-                {availableTables.map(table => (
-                  <Picker.Item
-                    key={table.id}
-                    label={table.name}
-                    value={table.id}
-                  />
+                {availableTables.map((table) => (
+                  <Picker.Item key={table.id} label={table.name} value={table.id} />
                 ))}
               </Picker>
             </View>
 
             <Text style={styles.label}>Date:</Text>
-            <TextInput
-              style={styles.input}
-              value={orderDate}
-              editable={false}
-            />
+            <TextInput style={styles.input} value={orderDate} editable={false} />
 
             <View style={styles.itemsHeader}>
               <Text style={styles.label}>Items</Text>
@@ -150,11 +132,9 @@ export default function EditOrderModal({
                 <View style={styles.pickerContainer}>
                   <Picker
                     selectedValue={item.product_id}
-                    onValueChange={v =>
-                      handleUpdateItem(index, "product_id", v)
-                    }
+                    onValueChange={(v) => handleUpdateItem(index, "product_id", v)}
                   >
-                    {products.map(p => (
+                    {products.map((p) => (
                       <Picker.Item key={p.id} label={p.name} value={p.id} />
                     ))}
                   </Picker>
@@ -162,15 +142,10 @@ export default function EditOrderModal({
                 <TextInput
                   style={styles.quantityInput}
                   value={String(item.quantity)}
-                  onChangeText={t =>
-                    handleUpdateItem(index, "quantity", parseInt(t) || 1)
-                  }
+                  onChangeText={(t) => handleUpdateItem(index, "quantity", parseInt(t) || 1)}
                   keyboardType="number-pad"
                 />
-                <TouchableOpacity
-                  onPress={() => handleRemoveItem(index)}
-                  style={styles.removeButton}
-                >
+                <TouchableOpacity onPress={() => handleRemoveItem(index)} style={styles.removeButton}>
                   <Text style={styles.removeButtonText}>X</Text>
                 </TouchableOpacity>
               </View>
@@ -201,7 +176,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 20,
     shadowColor: "#000",
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
@@ -212,7 +187,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
   },
-  label: {fontSize: 16, fontWeight: "500", marginBottom: 5, marginTop: 10},
+  label: { fontSize: 16, fontWeight: "500", marginBottom: 5, marginTop: 10 },
   input: {
     height: 45,
     borderColor: "#ccc",
@@ -258,7 +233,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 20,
   },
-  removeButtonText: {color: "white", fontWeight: "bold"},
+  removeButtonText: { color: "white", fontWeight: "bold" },
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-around",

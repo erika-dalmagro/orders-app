@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -12,7 +12,8 @@ import {
   TouchableOpacity,
 } from "react-native";
 import axios from "axios";
-import {Table} from "../types";
+import Toast from "react-native-toast-message";
+import { Table } from "../types";
 import EditTableModal from "./EditTableModal";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
@@ -28,8 +29,14 @@ export default function TableManager() {
   const loadTables = () => {
     axios
       .get(`${API_URL}/tables`)
-      .then(res => setTables(res.data || []))
-      .catch(() => Alert.alert("Error", "Failed to load tables."));
+      .then((res) => setTables(res.data || []))
+      .catch(() =>
+        Toast.show({
+          type: "error",
+          text1: "Error",
+          text2: "Failed to load tables.",
+        }),
+      );
   };
 
   useEffect(() => {
@@ -38,7 +45,11 @@ export default function TableManager() {
 
   const handleSubmit = async () => {
     if (!name || !capacity) {
-      Alert.alert("Validation Error", "Name and Capacity are required.");
+      Toast.show({
+        type: "error",
+        text1: "Validation Error",
+        text2: "Name and Capacity are required.",
+      });
       return;
     }
     try {
@@ -47,13 +58,21 @@ export default function TableManager() {
         capacity: parseInt(capacity),
         single_tab: singleTab,
       });
-      Alert.alert("Success", "Table created successfully!");
+      Toast.show({
+        type: "success",
+        text1: "Success",
+        text2: "Table created successfully!",
+      });
       setName("");
       setCapacity("");
       setSingleTab(true);
       loadTables();
     } catch (error) {
-      Alert.alert("Error", "An error occurred creating the table.");
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "An error occurred creating the table.",
+      });
       console.error(error);
     }
   };
@@ -65,19 +84,22 @@ export default function TableManager() {
 
   const handleDelete = (id: number) => {
     Alert.alert("Delete Table", "Are you sure you want to delete this table?", [
-      {text: "Cancel", style: "cancel"},
+      { text: "Cancel", style: "cancel" },
       {
         text: "Delete",
         style: "destructive",
         onPress: async () => {
           try {
             await axios.delete(`${API_URL}/tables/${id}`);
-            Alert.alert("Success", "Table deleted successfully!");
+            Toast.show({
+              type: "success",
+              text1: "Success",
+              text2: "Table deleted successfully!",
+            });
             loadTables();
           } catch (error: any) {
-            const message =
-              error.response?.data?.error || "Error deleting table.";
-            Alert.alert("Error", message);
+            const message = error.response?.data?.error || "Error deleting table.";
+            Toast.show({ type: "error", text1: "Error", text2: message });
             console.error(error);
           }
         },
@@ -113,7 +135,7 @@ export default function TableManager() {
           <View style={styles.switchContainer}>
             <Text style={styles.switchLabel}>Single Tab</Text>
             <Switch
-              trackColor={{false: "#767577", true: "#81b0ff"}}
+              trackColor={{ false: "#767577", true: "#81b0ff" }}
               thumbColor={singleTab ? "#f5dd4b" : "#f4f3f4"}
               onValueChange={setSingleTab}
               value={singleTab}
@@ -124,14 +146,12 @@ export default function TableManager() {
 
         <View style={styles.list}>
           <Text style={styles.title}>Tables</Text>
-          {tables.map(t => (
+          {tables.map((t) => (
             <View key={t.id} style={styles.tableItem}>
               <View>
                 <Text style={styles.tableName}>{t.name}</Text>
                 <Text style={styles.tableDetail}>Capacity: {t.capacity}</Text>
-                <Text style={styles.tableDetail}>
-                  Tab: {t.single_tab ? "Single" : "Multiple"}
-                </Text>
+                <Text style={styles.tableDetail}>Tab: {t.single_tab ? "Single" : "Multiple"}</Text>
               </View>
               <View style={styles.actionsContainer}>
                 <TouchableOpacity
@@ -183,7 +203,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 8,
     shadowColor: "#000",
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
