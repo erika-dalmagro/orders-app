@@ -1,18 +1,11 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  Button,
-  StyleSheet,
-  Alert,
-  TextInput,
-  TouchableOpacity,
-  ActivityIndicator,
-} from "react-native";
-import axios from "axios";
+import { View, Text, Button, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import { Product, Table, OrderItem } from "../types";
 import Toast from "react-native-toast-message";
+import axios from "axios";
+import { OrderItem } from "../types";
+import { useProducts } from "../context/ProductContext";
+import { useTables } from "../context/TableContext";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -21,53 +14,23 @@ interface CreateOrderFormProps {
 }
 
 export default function CreateOrderForm({ onOrderCreated }: CreateOrderFormProps) {
-  const [loading, setLoading] = useState(true);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [tables, setTables] = useState<Table[]>([]);
-  const [selectedItems, setSelectedItems] = useState<Partial<OrderItem>[]>([]);
+  const { products, loading: productsLoading } = useProducts();
+  const { availableTables, loading: tablesLoading, loadTables } = useTables();
 
+  const [selectedItems, setSelectedItems] = useState<Partial<OrderItem>[]>([]);
   const [selectedTableId, setSelectedTableId] = useState<number | string>("");
 
   useEffect(() => {
-    Promise.all([axios.get(`${API_URL}/products`), axios.get(`${API_URL}/tables/available`)])
-      .then(([productsRes, tablesRes]) => {
-        setProducts(productsRes.data || []);
-        const availableTables = tablesRes.data || [];
-        setTables(availableTables);
-
-        if (availableTables.length > 0) {
-          setSelectedTableId(availableTables[0].id);
-        } else {
-          setSelectedTableId("");
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        Alert.alert("Error", "Failed to load initial data. Make sure the server is running.");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, []);
-
-  const loadAvailableTables = () => {
-    axios
-      .get(`${API_URL}/tables/available`)
-      .then((res) => {
-        const availableTables = res.data || [];
-        setTables(availableTables);
-        if (availableTables.length > 0) {
-          setSelectedTableId(availableTables[0].id);
-        } else {
-          setSelectedTableId("");
-        }
-      })
-      .catch(() => Alert.alert("Error", "Failed to refresh available tables."));
-  };
+    if (availableTables.length > 0 && !tablesLoading) {
+      setSelectedTableId(availableTables[0].id);
+    } else {
+      setSelectedTableId("");
+    }
+  }, [availableTables, tablesLoading]);
 
   const addItem = () => {
     if (products?.length === 0) {
-      Alert.alert("Error", "Products not loaded yet.");
+      Toast.show({ type: "info", text1: "No products available to add." });
       return;
     }
     setSelectedItems([...selectedItems, { product_id: products[0].id, quantity: 1 }]);
@@ -89,19 +52,11 @@ export default function CreateOrderForm({ onOrderCreated }: CreateOrderFormProps
 
   const handleSubmit = async () => {
     if (!selectedTableId) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Please select a table.",
-      });
+      Toast.show({ type: "error", text1: "Error", text2: "Please select a table." });
       return;
     }
     if (selectedItems.length === 0) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Please add at least one item.",
-      });
+      Toast.show({ type: "error", text1: "Error", text2: "Please add at least one item." });
       return;
     }
 
@@ -114,13 +69,9 @@ export default function CreateOrderForm({ onOrderCreated }: CreateOrderFormProps
         date: orderDate,
       });
 
-      Toast.show({
-        type: "success",
-        text1: "Success",
-        text2: "Order created successfully!",
-      });
+      Toast.show({ type: "success", text1: "Success", text2: "Order created successfully!" });
       setSelectedItems([]);
-      loadAvailableTables();
+      loadTables();
       onOrderCreated();
     } catch (err: any) {
       const errorMessage = err.response?.data?.error || "Error creating order";
@@ -129,11 +80,11 @@ export default function CreateOrderForm({ onOrderCreated }: CreateOrderFormProps
     }
   };
 
-  if (loading) {
+  if (productsLoading || tablesLoading) {
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" />
-        <Text>Loading form...</Text>
+        <Text>Loading form data...</Text>
       </View>
     );
   }
@@ -148,10 +99,10 @@ export default function CreateOrderForm({ onOrderCreated }: CreateOrderFormProps
           <Picker
             selectedValue={selectedTableId}
             onValueChange={(itemValue) => setSelectedTableId(itemValue)}
-            enabled={tables.length > 0}
+            enabled={availableTables.length > 0}
           >
-            {tables.length === 0 && <Picker.Item label="No tables available" value="" />}
-            {tables.map((table) => (
+            {availableTables.length === 0 && <Picker.Item label="No tables available" value="" />}
+            {availableTables.map((table) => (
               <Picker.Item key={table.id} label={`${table.name} (Cap: ${table.capacity})`} value={table.id} />
             ))}
           </Picker>
@@ -199,6 +150,10 @@ export default function CreateOrderForm({ onOrderCreated }: CreateOrderFormProps
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f8f9fa",
+  },
   centered: {
     flex: 1,
     justifyContent: "center",

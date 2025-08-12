@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -10,46 +10,29 @@ import {
   Alert,
   Switch,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import axios from "axios";
 import Toast from "react-native-toast-message";
 import { Table } from "../types";
 import EditTableModal from "./EditTableModal";
+import { useTables } from "../context/TableContext";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export default function TableManager() {
-  const [tables, setTables] = useState<Table[]>([]);
+  const { allTables, loading, loadTables } = useTables();
+
   const [name, setName] = useState("");
   const [capacity, setCapacity] = useState("");
   const [singleTab, setSingleTab] = useState(true);
+
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
 
-  const loadTables = () => {
-    axios
-      .get(`${API_URL}/tables`)
-      .then((res) => setTables(res.data || []))
-      .catch(() =>
-        Toast.show({
-          type: "error",
-          text1: "Error",
-          text2: "Failed to load tables.",
-        }),
-      );
-  };
-
-  useEffect(() => {
-    loadTables();
-  }, []);
-
   const handleSubmit = async () => {
     if (!name || !capacity) {
-      Toast.show({
-        type: "error",
-        text1: "Validation Error",
-        text2: "Name and Capacity are required.",
-      });
+      Toast.show({ type: "error", text1: "Validation Error", text2: "Name and Capacity are required." });
       return;
     }
     try {
@@ -58,21 +41,13 @@ export default function TableManager() {
         capacity: parseInt(capacity),
         single_tab: singleTab,
       });
-      Toast.show({
-        type: "success",
-        text1: "Success",
-        text2: "Table created successfully!",
-      });
+      Toast.show({ type: "success", text1: "Success", text2: "Table created successfully!" });
       setName("");
       setCapacity("");
       setSingleTab(true);
       loadTables();
     } catch (error) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "An error occurred creating the table.",
-      });
+      Toast.show({ type: "error", text1: "Error", text2: "An error occurred creating the table." });
       console.error(error);
     }
   };
@@ -91,11 +66,7 @@ export default function TableManager() {
         onPress: async () => {
           try {
             await axios.delete(`${API_URL}/tables/${id}`);
-            Toast.show({
-              type: "success",
-              text1: "Success",
-              text2: "Table deleted successfully!",
-            });
+            Toast.show({ type: "success", text1: "Success", text2: "Table deleted successfully!" });
             loadTables();
           } catch (error: any) {
             const message = error.response?.data?.error || "Error deleting table.";
@@ -112,6 +83,15 @@ export default function TableManager() {
     setSelectedTable(null);
     loadTables();
   };
+
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" />
+        <Text>Loading tables...</Text>
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -146,7 +126,7 @@ export default function TableManager() {
 
         <View style={styles.list}>
           <Text style={styles.title}>Tables</Text>
-          {tables.map((t) => (
+          {allTables.map((t) => (
             <View key={t.id} style={styles.tableItem}>
               <View>
                 <Text style={styles.tableName}>{t.name}</Text>
@@ -188,6 +168,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#f8f9fa",
   },
   container: {
+    padding: 20,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
   },
   title: {

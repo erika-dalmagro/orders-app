@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -9,46 +9,29 @@ import {
   SafeAreaView,
   Alert,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import axios from "axios";
 import Toast from "react-native-toast-message";
 import { Product } from "../types";
 import EditProductModal from "./EditProductModal";
+import { useProducts } from "../context/ProductContext";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export default function ProductManager() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const { products, loading, loadProducts } = useProducts();
+
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
+
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  const loadProducts = () => {
-    axios
-      .get(`${API_URL}/products`)
-      .then((res) => setProducts(res.data))
-      .catch(() => {
-        Toast.show({
-          type: "error",
-          text1: "Error",
-          text2: "Failed to load products.",
-        });
-      });
-  };
-
-  useEffect(() => {
-    loadProducts();
-  }, []);
-
   const handleSubmit = async () => {
     if (!name || !price || !stock) {
-      Toast.show({
-        type: "error",
-        text1: "Validation Error",
-        text2: "All fields are required.",
-      });
+      Toast.show({ type: "error", text1: "Validation Error", text2: "All fields are required." });
       return;
     }
     try {
@@ -67,11 +50,7 @@ export default function ProductManager() {
       setStock("");
       loadProducts();
     } catch (error) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Could not create product.",
-      });
+      Toast.show({ type: "error", text1: "Error", text2: "Could not create product." });
       console.error(error);
     }
   };
@@ -90,18 +69,10 @@ export default function ProductManager() {
         onPress: async () => {
           try {
             await axios.delete(`${API_URL}/products/${id}`);
-            Toast.show({
-              type: "success",
-              text1: "Success",
-              text2: "Product deleted successfully!",
-            });
+            Toast.show({ type: "success", text1: "Success", text2: "Product deleted successfully!" });
             loadProducts();
           } catch (error) {
-            Toast.show({
-              type: "error",
-              text1: "Error",
-              text2: "Error deleting product.",
-            });
+            Toast.show({ type: "error", text1: "Error", text2: "Error deleting product." });
             console.error(error);
           }
         },
@@ -114,6 +85,15 @@ export default function ProductManager() {
     setSelectedProduct(null);
     loadProducts();
   };
+
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" />
+        <Text>Loading products...</Text>
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -183,6 +163,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#f8f9fa",
   },
   container: {
+    padding: 20,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
   },
   title: {
