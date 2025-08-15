@@ -1,10 +1,36 @@
 import React, { useEffect, useState } from "react";
 import Toast from "react-native-toast-message";
-import { View, Text, StyleSheet, Alert, TouchableOpacity, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Modal } from "react-native";
 import axios from "axios";
 import { Order } from "../types";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
+
+const ConfirmDialog = ({ visible, title, message, onCancel, onConfirm }: any) => {
+  return (
+    <Modal
+      transparent={true}
+      animationType="fade"
+      visible={visible}
+      onRequestClose={onCancel}
+    >
+      <View style={styles.dialogOverlay}>
+        <View style={styles.dialogContainer}>
+          <Text style={styles.dialogTitle}>{title}</Text>
+          <Text style={styles.dialogMessage}>{message}</Text>
+          <View style={styles.dialogActions}>
+            <TouchableOpacity style={[styles.dialogButton, styles.dialogCancelButton]} onPress={onCancel}>
+              <Text style={styles.dialogCancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.dialogButton, styles.dialogDeleteButton]} onPress={onConfirm}>
+              <Text style={[styles.dialogDeleteButtonText, { color: 'red' }]}>Delete</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+};
 
 interface OrderListProps {
   shouldRefresh: boolean;
@@ -14,13 +40,16 @@ interface OrderListProps {
 export default function OrderList({ shouldRefresh, onEditOrder }: OrderListProps) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  const [isDialogVisible, setIsDialogVisible] = useState(false);
+  const [orderIdToDelete, setOrderIdToDelete] = useState<number | null>(null);
 
   const loadOrders = () => {
     setLoading(true);
     axios
       .get(`${API_URL}/orders`)
       .then((res) => setOrders(res.data))
-      .catch(() => Alert.alert("Error", "Failed to load orders."))
+      .catch(() => Toast.show({type: 'error', text1: 'Error', text2: 'Failed to load orders.'}))
       .finally(() => setLoading(false));
   };
 
@@ -44,31 +73,32 @@ export default function OrderList({ shouldRefresh, onEditOrder }: OrderListProps
   };
 
   const handleDeleteOrder = (id: number) => {
-    Alert.alert(
-      "Delete Order",
-      "Are you sure you want to delete this order? This will also delete its items.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await axios.delete(`${API_URL}/orders/${id}`);
-              Toast.show({
-                type: "success",
-                text1: "Success",
-                text2: "Order deleted successfully!",
-              });
-              loadOrders();
-            } catch (error: any) {
-              const message = error.response?.data?.error || "Error deleting order.";
-              Toast.show({ type: "error", text1: "Error", text2: message });
-            }
-          },
-        },
-      ],
-    );
+    setOrderIdToDelete(id);
+    setIsDialogVisible(true);
+  };
+
+  const handleCancelDelete = () => {
+    setIsDialogVisible(false);
+    setOrderIdToDelete(null);
+  };
+  
+  const handleConfirmDelete = async () => {
+    if (orderIdToDelete === null) return;
+    try {
+      await axios.delete(`${API_URL}/orders/${orderIdToDelete}`);
+      Toast.show({
+        type: "success",
+        text1: "Success",
+        text2: "Order deleted successfully!",
+      });
+      loadOrders();
+    } catch (error: any) {
+      const message = error.response?.data?.error || "Error deleting order.";
+      Toast.show({ type: "error", text1: "Error", text2: message });
+    } finally {
+        setIsDialogVisible(false);
+        setOrderIdToDelete(null);
+    }
   };
 
   if (loading) {
@@ -118,6 +148,13 @@ export default function OrderList({ shouldRefresh, onEditOrder }: OrderListProps
           </View>
         </View>
       ))}
+       <ConfirmDialog
+        visible={isDialogVisible}
+        title="Delete Order"
+        message="Are you sure you want to delete this order? This will also delete its items."
+        onCancel={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+      />
     </View>
   );
 }
@@ -194,5 +231,51 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     backgroundColor: "#dc3545",
+  },
+  dialogOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  dialogContainer: {
+    width: '80%',
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+  },
+  dialogTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  dialogMessage: {
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  dialogActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  dialogButton: {
+    marginLeft: 20,
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+  },
+  dialogCancelButtonText: {
+    fontSize: 16,
+    color: '#007bff',
+  },
+  dialogDeleteButtonText: {
+    fontSize: 16,
+    color: '#dc3545',
+  },
+  dialogCancelButton: {
+    borderColor: '#007bff',
+  },
+  dialogDeleteButton: {
+    borderColor: '#dc3545',
   },
 });

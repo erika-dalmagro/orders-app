@@ -7,10 +7,10 @@ import {
   StyleSheet,
   ScrollView,
   SafeAreaView,
-  Alert,
   Switch,
   TouchableOpacity,
   ActivityIndicator,
+  Modal,
 } from "react-native";
 import axios from "axios";
 import Toast from "react-native-toast-message";
@@ -19,6 +19,32 @@ import EditTableModal from "./EditTableModal";
 import { useTables } from "../context/TableContext";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
+
+const ConfirmDialog = ({ visible, title, message, onCancel, onConfirm }: any) => {
+  return (
+    <Modal
+      transparent={true}
+      animationType="fade"
+      visible={visible}
+      onRequestClose={onCancel}
+    >
+      <View style={styles.dialogOverlay}>
+        <View style={styles.dialogContainer}>
+          <Text style={styles.dialogTitle}>{title}</Text>
+          <Text style={styles.dialogMessage}>{message}</Text>
+          <View style={styles.dialogActions}>
+            <TouchableOpacity style={[styles.dialogButton, styles.dialogCancelButton]} onPress={onCancel}>
+              <Text style={styles.dialogCancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.dialogButton, styles.dialogDeleteButton]} onPress={onConfirm}>
+              <Text style={[styles.dialogDeleteButtonText, { color: 'red' }]}>Delete</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+};
 
 export default function TableManager() {
   const { allTables, loading, loadTables } = useTables();
@@ -29,6 +55,10 @@ export default function TableManager() {
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
+  
+  const [isDialogVisible, setIsDialogVisible] = useState(false);
+  const [tableIdToDelete, setTableIdToDelete] = useState<number | null>(null);
+
 
   const handleSubmit = async () => {
     if (!name || !capacity) {
@@ -58,24 +88,30 @@ export default function TableManager() {
   };
 
   const handleDelete = (id: number) => {
-    Alert.alert("Delete Table", "Are you sure you want to delete this table?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await axios.delete(`${API_URL}/tables/${id}`);
-            Toast.show({ type: "success", text1: "Success", text2: "Table deleted successfully!" });
-            loadTables();
-          } catch (error: any) {
-            const message = error.response?.data?.error || "Error deleting table.";
-            Toast.show({ type: "error", text1: "Error", text2: message });
-            console.error(error);
-          }
-        },
-      },
-    ]);
+    setTableIdToDelete(id);
+    setIsDialogVisible(true);
+  };
+
+  const handleCancelDelete = () => {
+    setIsDialogVisible(false);
+    setTableIdToDelete(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (tableIdToDelete === null) return;
+
+    try {
+      await axios.delete(`${API_URL}/tables/${tableIdToDelete}`);
+      Toast.show({ type: "success", text1: "Success", text2: "Table deleted successfully!" });
+      loadTables();
+    } catch (error: any) {
+      const message = error.response?.data?.error || "Error deleting table.";
+      Toast.show({ type: "error", text1: "Error", text2: message });
+      console.error(error);
+    } finally {
+      setIsDialogVisible(false);
+      setTableIdToDelete(null);
+    }
   };
 
   const handleTableUpdated = () => {
@@ -157,6 +193,14 @@ export default function TableManager() {
         table={selectedTable}
         onClose={() => setIsModalVisible(false)}
         onTableUpdated={handleTableUpdated}
+      />
+      
+      <ConfirmDialog
+        visible={isDialogVisible}
+        title="Delete Table"
+        message="Are you sure you want to delete this table?"
+        onCancel={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
       />
     </SafeAreaView>
   );
@@ -252,5 +296,51 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     backgroundColor: "#dc3545",
+  },
+  dialogOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  dialogContainer: {
+    width: '80%',
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+  },
+  dialogTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  dialogMessage: {
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  dialogActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  dialogButton: {
+    marginLeft: 20,
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+  },
+  dialogCancelButtonText: {
+    fontSize: 16,
+    color: '#007bff',
+  },
+  dialogDeleteButtonText: {
+    fontSize: 16,
+    color: '#dc3545',
+  },
+  dialogCancelButton: {
+    borderColor: '#007bff',
+  },
+  dialogDeleteButton: {
+    borderColor: '#dc3545',
   },
 });

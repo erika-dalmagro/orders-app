@@ -7,9 +7,9 @@ import {
   StyleSheet,
   ScrollView,
   SafeAreaView,
-  Alert,
   TouchableOpacity,
   ActivityIndicator,
+  Modal,
 } from "react-native";
 import axios from "axios";
 import Toast from "react-native-toast-message";
@@ -18,6 +18,33 @@ import EditProductModal from "./EditProductModal";
 import { useProducts } from "../context/ProductContext";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
+
+const ConfirmDialog = ({ visible, title, message, onCancel, onConfirm }: any) => {
+  return (
+    <Modal
+      transparent={true}
+      animationType="fade"
+      visible={visible}
+      onRequestClose={onCancel}
+    >
+      <View style={styles.dialogOverlay}>
+        <View style={styles.dialogContainer}>
+          <Text style={styles.dialogTitle}>{title}</Text>
+          <Text style={styles.dialogMessage}>{message}</Text>
+          <View style={styles.dialogActions}>
+            <TouchableOpacity style={[styles.dialogButton, styles.dialogCancelButton]} onPress={onCancel}>
+              <Text style={styles.dialogCancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.dialogButton, styles.dialogDeleteButton]} onPress={onConfirm}>
+              <Text style={[styles.dialogDeleteButtonText, { color: 'red' }]}>Delete</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
 
 export default function ProductManager() {
   const { products, loading, loadProducts } = useProducts();
@@ -28,6 +55,9 @@ export default function ProductManager() {
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+  const [isDialogVisible, setIsDialogVisible] = useState(false);
+  const [productIdToDelete, setProductIdToDelete] = useState<number | null>(null);
 
   const handleSubmit = async () => {
     if (!name || !price || !stock) {
@@ -61,24 +91,36 @@ export default function ProductManager() {
   };
 
   const handleDelete = (id: number) => {
-    Alert.alert("Delete Product", "Are you sure you want to delete this product?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await axios.delete(`${API_URL}/products/${id}`);
-            Toast.show({ type: "success", text1: "Success", text2: "Product deleted successfully!" });
-            loadProducts();
-          } catch (error) {
-            Toast.show({ type: "error", text1: "Error", text2: "Error deleting product." });
-            console.error(error);
-          }
-        },
-      },
-    ]);
+    setProductIdToDelete(id);
+    setIsDialogVisible(true);
   };
+
+  const handleCancelDelete = () => {
+    setIsDialogVisible(false);
+    setProductIdToDelete(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (productIdToDelete === null) return;
+
+    try {
+      await axios.delete(`${API_URL}/products/${productIdToDelete}`);
+      Toast.show({
+        type: "success",
+        text1: "Success",
+        text2: "Product deleted successfully!",
+      });
+      loadProducts();
+    } catch (error: any) {
+      const message = error.response?.data?.error || "Error deleting product.";
+      Toast.show({ type: "error", text1: "Error", text2: message });
+      console.error(error);
+    } finally {
+      setIsDialogVisible(false);
+      setProductIdToDelete(null);
+    }
+  };
+
 
   const handleProductUpdated = () => {
     setIsModalVisible(false);
@@ -152,6 +194,14 @@ export default function ProductManager() {
         product={selectedProduct}
         onClose={() => setIsModalVisible(false)}
         onProductUpdated={handleProductUpdated}
+      />
+      
+      <ConfirmDialog
+        visible={isDialogVisible}
+        title="Delete Product"
+        message="Are you sure you want to delete this product?"
+        onCancel={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
       />
     </SafeAreaView>
   );
@@ -234,5 +284,51 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     backgroundColor: "#dc3545",
+  },
+  dialogOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  dialogContainer: {
+    width: '80%',
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+  },
+  dialogTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  dialogMessage: {
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  dialogActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+   dialogButton: {
+    marginLeft: 20,
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+  },
+  dialogCancelButtonText: {
+    fontSize: 16,
+    color: '#007bff',
+  },
+  dialogDeleteButtonText: {
+    fontSize: 16,
+    color: '#dc3545',
+  },
+  dialogCancelButton: {
+    borderColor: '#007bff',
+  },
+  dialogDeleteButton: {
+    borderColor: '#dc3545',
   },
 });
