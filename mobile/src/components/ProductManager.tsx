@@ -9,41 +9,15 @@ import {
   SafeAreaView,
   TouchableOpacity,
   ActivityIndicator,
-  Modal,
 } from "react-native";
 import axios from "axios";
 import Toast from "react-native-toast-message";
 import { Product } from "../types";
 import EditProductModal from "./EditProductModal";
 import { useProducts } from "../context/ProductContext";
+import ConfirmDialog from "./ConfirmDialog";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
-
-const ConfirmDialog = ({ visible, title, message, onCancel, onConfirm }: any) => {
-  return (
-    <Modal
-      transparent={true}
-      animationType="fade"
-      visible={visible}
-      onRequestClose={onCancel}
-    >
-      <View style={styles.dialogOverlay}>
-        <View style={styles.dialogContainer}>
-          <Text style={styles.dialogTitle}>{title}</Text>
-          <Text style={styles.dialogMessage}>{message}</Text>
-          <View style={styles.dialogActions}>
-            <TouchableOpacity style={[styles.dialogButton, styles.dialogCancelButton]} onPress={onCancel}>
-              <Text style={styles.dialogCancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.dialogButton, styles.dialogDeleteButton]} onPress={onConfirm}>
-              <Text style={[styles.dialogDeleteButtonText, { color: 'red' }]}>Delete</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
-};
 
 
 export default function ProductManager() {
@@ -60,7 +34,7 @@ export default function ProductManager() {
   const [productIdToDelete, setProductIdToDelete] = useState<number | null>(null);
 
   const handleSubmit = async () => {
-    if (!name || !price || !stock) {
+  if (!name || !price || !stock) {
       Toast.show({ type: "error", text1: "Validation Error", text2: "All fields are required." });
       return;
     }
@@ -89,12 +63,12 @@ export default function ProductManager() {
     setSelectedProduct(product);
     setIsModalVisible(true);
   };
-
+  
   const handleDelete = (id: number) => {
     setProductIdToDelete(id);
     setIsDialogVisible(true);
   };
-
+  
   const handleCancelDelete = () => {
     setIsDialogVisible(false);
     setProductIdToDelete(null);
@@ -135,12 +109,12 @@ export default function ProductManager() {
         <Text>Loading products...</Text>
       </View>
     );
-  }
+  } 
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
-        <Text style={styles.title}>Product Manager</Text>
+         <Text style={styles.title}>Product Manager</Text>
 
         <View style={styles.form}>
           <TextInput style={styles.input} placeholder="Product Name" value={name} onChangeText={setName} />

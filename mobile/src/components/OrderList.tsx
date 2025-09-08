@@ -3,34 +3,9 @@ import Toast from "react-native-toast-message";
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Modal } from "react-native";
 import axios from "axios";
 import { Order } from "../types";
+import ConfirmDialog from "./ConfirmDialog";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
-
-const ConfirmDialog = ({ visible, title, message, onCancel, onConfirm }: any) => {
-  return (
-    <Modal
-      transparent={true}
-      animationType="fade"
-      visible={visible}
-      onRequestClose={onCancel}
-    >
-      <View style={styles.dialogOverlay}>
-        <View style={styles.dialogContainer}>
-          <Text style={styles.dialogTitle}>{title}</Text>
-          <Text style={styles.dialogMessage}>{message}</Text>
-          <View style={styles.dialogActions}>
-            <TouchableOpacity style={[styles.dialogButton, styles.dialogCancelButton]} onPress={onCancel}>
-              <Text style={styles.dialogCancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.dialogButton, styles.dialogDeleteButton]} onPress={onConfirm}>
-              <Text style={[styles.dialogDeleteButtonText, { color: 'red' }]}>Delete</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
-};
 
 interface OrderListProps {
   shouldRefresh: boolean;
@@ -40,7 +15,7 @@ interface OrderListProps {
 export default function OrderList({ shouldRefresh, onEditOrder }: OrderListProps) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   const [isDialogVisible, setIsDialogVisible] = useState(false);
   const [orderIdToDelete, setOrderIdToDelete] = useState<number | null>(null);
 
@@ -77,11 +52,6 @@ export default function OrderList({ shouldRefresh, onEditOrder }: OrderListProps
     setIsDialogVisible(true);
   };
 
-  const handleCancelDelete = () => {
-    setIsDialogVisible(false);
-    setOrderIdToDelete(null);
-  };
-  
   const handleConfirmDelete = async () => {
     if (orderIdToDelete === null) return;
     try {
@@ -96,8 +66,8 @@ export default function OrderList({ shouldRefresh, onEditOrder }: OrderListProps
       const message = error.response?.data?.error || "Error deleting order.";
       Toast.show({ type: "error", text1: "Error", text2: message });
     } finally {
-        setIsDialogVisible(false);
-        setOrderIdToDelete(null);
+      setIsDialogVisible(false);
+      setOrderIdToDelete(null);
     }
   };
 
@@ -114,7 +84,7 @@ export default function OrderList({ shouldRefresh, onEditOrder }: OrderListProps
             <Text style={styles.tableName}>Table {order.table?.name || `#${order.table_id}`}</Text>
             <Text style={order.status === "open" ? styles.statusOpen : styles.statusClosed}>
               {order.status.toUpperCase()}
-            </Text>
+              </Text>
           </View>
 
           <View style={styles.itemsList}>
@@ -148,11 +118,11 @@ export default function OrderList({ shouldRefresh, onEditOrder }: OrderListProps
           </View>
         </View>
       ))}
-       <ConfirmDialog
+      <ConfirmDialog
         visible={isDialogVisible}
         title="Delete Order"
         message="Are you sure you want to delete this order? This will also delete its items."
-        onCancel={handleCancelDelete}
+        onCancel={() => setIsDialogVisible(false)}
         onConfirm={handleConfirmDelete}
       />
     </View>
