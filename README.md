@@ -1,11 +1,12 @@
 # Orders App
 
-A full-stack web application for managing restaurant orders (tabs), built with:
+A web application for managing restaurant orders (tabs), built with:
 
-- **Backend**: Go (Golang)
 - **Frontend**: React + TypeScript + Vite
+- **Backend**: Go (Gorilla Mux)
 - **Styling**: Tailwind CSS
-- **API Communication**: Axios
+- **API Communication**: REST + Axios
+- **Database**: PostgreSQL
 
 ## Features
 
@@ -16,15 +17,6 @@ A full-stack web application for managing restaurant orders (tabs), built with:
 - Manage and track which seats (tables or positions) are occupied or available
 - Automatically free up seats when an order is closed
 
-## Tech Stack
-
-| Layer    | Stack                       |
-| -------- | --------------------------- |
-| Frontend | React + TypeScript + Vite   |
-| Styling  | Tailwind CSS                |
-| Backend  | Go (net/http + Gorilla Mux) |
-| API Comm | REST + Axios                |
-| Database | PostgreSQL / SQLite (TBD)   |
 
 ## Getting Started
 
