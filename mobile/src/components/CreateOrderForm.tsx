@@ -1,11 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Button, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator } from "react-native";
-import { Picker } from "@react-native-picker/picker";
+import { View, StyleSheet, ScrollView } from "react-native";
+import {
+  ActivityIndicator,
+  Button,
+  Card,
+  IconButton,
+  Menu,
+  Text,
+  TextInput,
+} from "react-native-paper";
 import Toast from "react-native-toast-message";
 import axios from "axios";
 import { OrderItem } from "../types";
 import { useProducts } from "../context/ProductContext";
 import { useTables } from "../context/TableContext";
+import { theme } from "../styles/theme";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -18,13 +27,15 @@ export default function CreateOrderForm({ onOrderCreated }: CreateOrderFormProps
   const { availableTables, loading: tablesLoading, loadTables } = useTables();
 
   const [selectedItems, setSelectedItems] = useState<Partial<OrderItem>[]>([]);
-  const [selectedTableId, setSelectedTableId] = useState<number | string>("");
+  const [selectedTableId, setSelectedTableId] = useState<number | null>(null);
+  const [tableMenuVisible, setTableMenuVisible] = useState(false);
+  const [itemMenuVisible, setItemMenuVisible] = useState<number | null>(null);
 
   useEffect(() => {
     if (availableTables.length > 0 && !tablesLoading) {
       setSelectedTableId(availableTables[0].id);
     } else {
-      setSelectedTableId("");
+      setSelectedTableId(null);
     }
   }, [availableTables, tablesLoading]);
 
@@ -89,70 +100,130 @@ export default function CreateOrderForm({ onOrderCreated }: CreateOrderFormProps
     );
   }
 
+  const selectedTableName = availableTables.find((t) => t.id === selectedTableId)?.name || "Select a table";
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Order Manager</Text>
+      <Text variant="headlineMedium" style={styles.title}>
+        Order Manager
+      </Text>
 
-      <View style={styles.formSection}>
-        <Text style={styles.label}>Table:</Text>
-        <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={selectedTableId}
-            onValueChange={(itemValue) => setSelectedTableId(itemValue)}
-            enabled={availableTables.length > 0}
-          >
-            {availableTables.length === 0 && <Picker.Item label="No tables available" value="" />}
-            {availableTables.map((table) => (
-              <Picker.Item key={table.id} label={`${table.name} (Cap: ${table.capacity})`} value={table.id} />
-            ))}
-          </Picker>
-        </View>
-      </View>
-
-      <View style={styles.formSection}>
-        <View style={styles.itemsHeader}>
-          <Text style={styles.label}>Items</Text>
-          <Button title="+ Add Product" onPress={addItem} disabled={products.length === 0} />
-        </View>
-
-        {selectedItems.map((item, index) => (
-          <View key={index} style={styles.itemRow}>
-            <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={item.product_id}
-                onValueChange={(value) => updateItem(index, "product_id", value)}
-              >
-                {products.map((p) => (
-                  <Picker.Item key={p.id} label={`${p.name} (Stock: ${p.stock})`} value={p.id} />
-                ))}
-              </Picker>
-            </View>
-            <TextInput
-              style={styles.quantityInput}
-              value={String(item.quantity || 1)}
-              onChangeText={(text) => updateItem(index, "quantity", parseInt(text) || 1)}
-              keyboardType="number-pad"
+    <Card style={styles.container}>
+      <Card.Content>
+        <Text variant="bodyLarge" style={styles.label}>
+          Table:
+        </Text>
+        <Menu
+          visible={tableMenuVisible}
+          onDismiss={() => setTableMenuVisible(false)}
+          anchor={
+            <Button
+              icon="chevron-down"
+              mode="outlined"
+              onPress={() => setTableMenuVisible(true)}
+              disabled={availableTables.length === 0}
+            >
+              {availableTables.length === 0 ? "No tables available" : selectedTableName}
+            </Button>
+          }
+        >
+          {availableTables.map((table) => (
+            <Menu.Item
+              key={table.id}
+              onPress={() => {
+                setSelectedTableId(table.id);
+                setTableMenuVisible(false);
+              }}
+              title={`${table.name} (Cap: ${table.capacity})`}
             />
-            <TouchableOpacity onPress={() => removeItem(index)} style={styles.removeButton}>
-              <Text style={styles.removeButtonText}>X</Text>
-            </TouchableOpacity>
-          </View>
-        ))}
-      </View>
+          ))}
+        </Menu>
 
-      <Button
-        title="Create Order"
-        onPress={handleSubmit}
-        disabled={!selectedTableId || selectedItems.length === 0}
-      />
+        <View style={styles.itemsHeader}>
+          <Text variant="bodyLarge" style={styles.label}>
+            Items
+          </Text>
+          <Button
+            mode="contained-tonal"
+            icon="plus"
+            onPress={addItem}
+            disabled={products.length === 0}
+          >
+            Add Product
+          </Button>
+        </View>
+
+        <ScrollView>
+          {selectedItems.map((item, index) => {
+            const selectedProductName = products.find((p) => p.id === item.product_id)?.name || "Select Product";
+            return (
+              <View key={index} style={styles.itemRow}>
+                {/* Product Selector */}
+                <Menu
+                  visible={itemMenuVisible === index}
+                  onDismiss={() => setItemMenuVisible(null)}
+                  anchor={
+                    <Button
+                      style={{ flex: 1 }}
+                      icon="chevron-down"
+                      mode="outlined"
+                      onPress={() => setItemMenuVisible(index)}
+                    >
+                      {selectedProductName}
+                    </Button>
+                  }
+                >
+                  {products.map((p) => (
+                    <Menu.Item
+                      key={p.id}
+                      onPress={() => {
+                        updateItem(index, "product_id", p.id);
+                        setItemMenuVisible(null);
+                      }}
+                      title={`${p.name} (Stock: ${p.stock})`}
+                    />
+                  ))}
+                </Menu>
+
+                <TextInput
+                  style={styles.quantityInput}
+                  value={String(item.quantity || 1)}
+                  onChangeText={(text) => updateItem(index, "quantity", parseInt(text) || 1)}
+                  keyboardType="number-pad"
+                  mode="outlined"
+                  dense
+                />
+                <IconButton
+                  icon="close"
+                  mode="contained"
+                  iconColor="white"
+                  containerColor="red"
+                  onPress={() => removeItem(index)}
+                />
+              </View>
+            );
+          })}
+        </ScrollView>
+      </Card.Content>
+      <Card.Actions>
+        <Button
+          mode="contained"
+          onPress={handleSubmit}
+          disabled={!selectedTableId || selectedItems.length === 0}
+          style={styles.createButton}
+        >
+          Create Order
+        </Button>
+      </Card.Actions>
+    </Card>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#f8f9fa",
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
   },
   centered: {
     flex: 1,
@@ -161,33 +232,19 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    fontSize: 24,
-    fontWeight: "bold",
     marginBottom: 20,
     textAlign: "center",
   },
-  formSection: {
-    marginBottom: 25,
-    backgroundColor: "#fff",
-    padding: 15,
-    borderRadius: 8,
-  },
   label: {
-    fontSize: 18,
-    fontWeight: "500",
     marginBottom: 10,
-  },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    flex: 1,
+    marginTop: 15,
   },
   itemsHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 10,
+    marginTop: 20,
   },
   itemRow: {
     flexDirection: "row",
@@ -196,26 +253,11 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   quantityInput: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 12,
-    width: 60,
+    width: 70,
     textAlign: "center",
   },
-  removeButton: {
-    backgroundColor: "#dc3545",
-    padding: 10,
-    borderRadius: 20,
-    width: 40,
-    height: 40,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  removeButtonText: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 16,
+  createButton: {
+    flex: 1,
+    margin: 8,
   },
 });

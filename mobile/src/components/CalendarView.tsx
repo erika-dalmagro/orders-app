@@ -4,6 +4,7 @@ import { Calendar, DateData } from "react-native-calendars";
 import axios from "axios";
 import Toast from "react-native-toast-message";
 import { Order } from "../types";
+import { theme } from "../styles/theme";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -92,7 +93,6 @@ export default function CalendarView() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
   },
   title: {
     fontSize: 24,

@@ -1,17 +1,16 @@
 import React, { useEffect, useState } from "react";
+import { View, StyleSheet, Alert, ScrollView } from "react-native";
 import {
-  View,
+  Button,
+  Card,
+  IconButton,
+  Modal,
+  Portal,
   Text,
   TextInput,
-  Button,
-  StyleSheet,
-  Alert,
-  Modal,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
+  Menu,
+} from "react-native-paper";
 import axios from "axios";
-import { Picker } from "@react-native-picker/picker";
 import { Order, Product, Table, OrderItem } from "../types";
 import Toast from "react-native-toast-message";
 
@@ -24,12 +23,20 @@ interface EditOrderModalProps {
   onOrderUpdated: () => void;
 }
 
-export default function EditOrderModal({ order, visible, onClose, onOrderUpdated }: EditOrderModalProps) {
+export default function EditOrderModal({
+  order,
+  visible,
+  onClose,
+  onOrderUpdated,
+}: EditOrderModalProps) {
   const [selectedTableId, setSelectedTableId] = useState<number | string>("");
   const [items, setItems] = useState<Partial<OrderItem>[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [availableTables, setAvailableTables] = useState<Table[]>([]);
   const [orderDate, setOrderDate] = useState<string>("");
+
+  const [tableMenuVisible, setTableMenuVisible] = useState(false);
+  const [itemMenuVisible, setItemMenuVisible] = useState<number | null>(null);
 
   useEffect(() => {
     if (order) {
@@ -67,11 +74,13 @@ export default function EditOrderModal({ order, visible, onClose, onOrderUpdated
     updatedItems[index] = itemToUpdate;
     setItems(updatedItems);
   };
+
   const handleAddItem = () => {
     if (products.length > 0) {
       setItems([...items, { product_id: products[0].id, quantity: 1 }]);
     }
   };
+
   const handleRemoveItem = (index: number) => {
     const updatedItems = [...items];
     updatedItems.splice(index, 1);
@@ -100,109 +109,120 @@ export default function EditOrderModal({ order, visible, onClose, onOrderUpdated
     }
   };
 
-  return (
-    <Modal visible={visible} animationType="slide" transparent={true}>
-      <View style={styles.centeredView}>
-        <View style={styles.modalView}>
-          <ScrollView>
-            <Text style={styles.modalTitle}>Edit Order</Text>
+  const selectedTableName = availableTables.find((t) => t.id === selectedTableId)?.name || "Select a table";
 
-            <Text style={styles.label}>Table:</Text>
-            <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={selectedTableId}
-                onValueChange={(itemValue) => setSelectedTableId(itemValue)}
+  return (
+    <Portal>
+      <Modal visible={visible} onDismiss={onClose} contentContainerStyle={styles.modalContainer}>
+        <Card>
+          <Card.Title title="Edit Order" />
+          <ScrollView style={{ maxHeight: '80%' }}>
+            <Card.Content>
+              <Menu
+                visible={tableMenuVisible}
+                onDismiss={() => setTableMenuVisible(false)}
+                anchor={
+                  <Button
+                    icon="chevron-down"
+                    mode="outlined"
+                    onPress={() => setTableMenuVisible(true)}
+                  >
+                    {selectedTableName}
+                  </Button>
+                }
               >
                 {availableTables.map((table) => (
-                  <Picker.Item key={table.id} label={table.name} value={table.id} />
+                  <Menu.Item
+                    key={table.id}
+                    onPress={() => {
+                      setSelectedTableId(table.id);
+                      setTableMenuVisible(false);
+                    }}
+                    title={table.name}
+                  />
                 ))}
-              </Picker>
-            </View>
+              </Menu>
 
-            <Text style={styles.label}>Date:</Text>
-            <TextInput style={styles.input} value={orderDate} editable={false} />
+              <TextInput label="Date" value={orderDate} editable={false} style={styles.input} />
 
-            <View style={styles.itemsHeader}>
-              <Text style={styles.label}>Items</Text>
-              <Button title="+ Add" onPress={handleAddItem} />
-            </View>
-
-            {items.map((item, index) => (
-              <View key={index} style={styles.itemRow}>
-                <View style={styles.pickerContainer}>
-                  <Picker
-                    selectedValue={item.product_id}
-                    onValueChange={(v) => handleUpdateItem(index, "product_id", v)}
-                  >
-                    {products.map((p) => (
-                      <Picker.Item key={p.id} label={p.name} value={p.id} />
-                    ))}
-                  </Picker>
-                </View>
-                <TextInput
-                  style={styles.quantityInput}
-                  value={String(item.quantity)}
-                  onChangeText={(t) => handleUpdateItem(index, "quantity", parseInt(t) || 1)}
-                  keyboardType="number-pad"
-                />
-                <TouchableOpacity onPress={() => handleRemoveItem(index)} style={styles.removeButton}>
-                  <Text style={styles.removeButtonText}>X</Text>
-                </TouchableOpacity>
+              <View style={styles.itemsHeader}>
+                <Text variant="bodyLarge" style={styles.label}>
+                  Items
+                </Text>
+                <Button icon="plus" onPress={handleAddItem}>
+                  Add
+                </Button>
               </View>
-            ))}
 
-            <View style={styles.buttonContainer}>
-              <Button title="Cancel" onPress={onClose} color="#6c757d" />
-              <Button title="Save Changes" onPress={handleSubmit} />
-            </View>
+              {items.map((item, index) => {
+                const selectedProductName = products.find(p => p.id === item.product_id)?.name ?? 'Select Product';
+                return (
+                  <View key={index} style={styles.itemRow}>
+                    <Menu
+                      visible={itemMenuVisible === index}
+                      onDismiss={() => setItemMenuVisible(null)}
+                      anchor={
+                        <Button style={{ flex: 1 }} mode="outlined" icon="chevron-down" onPress={() => setItemMenuVisible(index)}>
+                          {selectedProductName}
+                        </Button>
+                      }
+                    >
+                      {products.map((p) => (
+                        <Menu.Item
+                          key={p.id}
+                          onPress={() => {
+                            handleUpdateItem(index, "product_id", p.id);
+                            setItemMenuVisible(null);
+                          }}
+                          title={p.name}
+                        />
+                      ))}
+                    </Menu>
+
+                    <TextInput
+                      style={styles.quantityInput}
+                      value={String(item.quantity)}
+                      onChangeText={(t) => handleUpdateItem(index, "quantity", parseInt(t) || 1)}
+                      keyboardType="number-pad"
+                      mode="outlined"
+                      dense
+                    />
+                    <IconButton
+                      icon="close"
+                      mode="contained"
+                      iconColor="white"
+                      containerColor="red"
+                      onPress={() => handleRemoveItem(index)}
+                    />
+                  </View>
+                );
+              })}
+            </Card.Content>
           </ScrollView>
-        </View>
-      </View>
-    </Modal>
+          <Card.Actions>
+            <Button onPress={onClose}>Cancel</Button>
+            <Button onPress={handleSubmit}>Save Changes</Button>
+          </Card.Actions>
+        </Card>
+      </Modal>
+    </Portal>
   );
 }
 
 const styles = StyleSheet.create({
-  centeredView: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
-  },
-  modalView: {
-    width: "95%",
-    maxHeight: "80%",
-    backgroundColor: "white",
-    borderRadius: 10,
+  modalContainer: {
     padding: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    margin: 20,
   },
-  modalTitle: {
-    marginBottom: 20,
-    textAlign: "center",
-    fontSize: 20,
-    fontWeight: "bold",
+  label: {
+    fontSize: 16,
+    fontWeight: "500",
+    marginBottom: 5,
+    marginTop: 10,
   },
-  label: { fontSize: 16, fontWeight: "500", marginBottom: 5, marginTop: 10 },
   input: {
-    height: 45,
-    borderColor: "#ccc",
-    borderWidth: 1,
+    marginTop: 15,
     marginBottom: 12,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-    backgroundColor: "#e9ecef",
-    color: "#495057",
-  },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    flex: 1,
   },
   itemsHeader: {
     flexDirection: "row",
@@ -214,29 +234,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 10,
+    marginTop: 10,
     gap: 10,
   },
   quantityInput: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 12,
-    width: 60,
+    width: 70,
     textAlign: "center",
-  },
-  removeButton: {
-    backgroundColor: "#dc3545",
-    width: 40,
-    height: 40,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 20,
-  },
-  removeButtonText: { color: "white", fontWeight: "bold" },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginTop: 30,
   },
 });

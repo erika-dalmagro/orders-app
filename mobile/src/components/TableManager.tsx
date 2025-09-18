@@ -184,7 +184,6 @@ export default function TableManager() {
 const styles = StyleSheet.create({
     safeArea: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
   },
   container: {
     padding: 20,
