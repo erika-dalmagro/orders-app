@@ -13,6 +13,7 @@ import {
 import axios from "axios";
 import { Order, Product, Table, OrderItem } from "../types";
 import Toast from "react-native-toast-message";
+import { theme } from "../styles/theme";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -114,8 +115,10 @@ export default function EditOrderModal({
   return (
     <Portal>
       <Modal visible={visible} onDismiss={onClose} contentContainerStyle={styles.modalContainer}>
-        <Card>
-          <Card.Title title="Edit Order" />
+        <Card style={styles.container}>
+          <Text variant="headlineMedium" style={styles.title}>
+            Edit Order
+          </Text>
           <ScrollView style={{ maxHeight: '80%' }}>
             <Card.Content>
               <Menu
@@ -211,8 +214,17 @@ export default function EditOrderModal({
 
 const styles = StyleSheet.create({
   modalContainer: {
-    padding: 20,
-    margin: 20,
+    margin: theme.spacing.xl,
+    borderRadius: theme.borderRadius.md,
+  },
+  container: {
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
+  },
+  title: {
+    marginTop: 10,
+    marginBottom: 20,
+    textAlign: "center",
   },
   label: {
     fontSize: 16,
@@ -239,6 +251,7 @@ const styles = StyleSheet.create({
   },
   quantityInput: {
     width: 70,
+    height: 40,
     textAlign: "center",
   },
 });
