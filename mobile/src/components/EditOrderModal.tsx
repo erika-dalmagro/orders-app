@@ -117,7 +117,7 @@ export default function EditOrderModal({
       <Modal visible={visible} onDismiss={onClose} contentContainerStyle={styles.modalContainer}>
         <Card style={styles.container}>
           <Text variant="headlineMedium" style={styles.title}>
-            Edit Order
+            Edit Order:
           </Text>
           <ScrollView style={{ maxHeight: '80%' }}>
             <Card.Content>

@@ -1,9 +1,10 @@
-import React, {useState} from "react";
-import {SafeAreaView, ScrollView, StyleSheet, View} from "react-native";
+import React, { useState } from "react";
+import { SafeAreaView, ScrollView, StyleSheet, View } from "react-native";
 import CreateOrderForm from "../components/CreateOrderForm";
 import OrderList from "../components/OrderList";
 import EditOrderModal from "../components/EditOrderModal";
-import {Order} from "../types";
+import { Order } from "../types";
+import { theme } from "../styles/theme";
 
 export default function OrderScreen() {
   const [refreshFlag, setRefreshFlag] = useState(false);
@@ -57,6 +58,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   container: {
-    padding: 20,
+    padding: theme.spacing.md,
   },
 });

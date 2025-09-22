@@ -1,8 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TextInput, StyleSheet, Alert, Modal, Button } from "react-native";
+import { View, StyleSheet } from "react-native";
+import {
+  Button,
+  Card,
+  Modal,
+  Portal,
+  Text,
+  TextInput,
+} from "react-native-paper";
 import axios from "axios";
 import { Product } from "../types";
 import Toast from "react-native-toast-message";
+import { theme } from "../styles/theme";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -53,77 +62,64 @@ export default function EditProductModal({
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent={true}>
-      <View style={styles.centeredView}>
-        <View style={styles.modalView}>
-          <Text style={styles.modalTitle}>Edit Product: {product?.name}</Text>
-
-          <TextInput style={styles.input} placeholder="Product Name" value={name} onChangeText={setName} />
-          <TextInput
-            style={styles.input}
-            placeholder="Price"
-            value={price}
-            onChangeText={setPrice}
-            keyboardType="numeric"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Stock"
-            value={stock}
-            onChangeText={setStock}
-            keyboardType="numeric"
-          />
-
-          <View style={styles.buttonContainer}>
-            <Button title="Cancel" onPress={onClose} color="#6c757d" />
-            <Button title="Save Changes" onPress={handleSubmit} />
-          </View>
-        </View>
-      </View>
-    </Modal>
+    <Portal>
+      <Modal
+        visible={visible}
+        onDismiss={onClose}
+        contentContainerStyle={styles.modalContainer}
+      >
+        <Card style={styles.container}>
+          <Text variant="headlineMedium" style={styles.title}>
+            Edit Product: {product?.name}
+          </Text>
+          <Card.Content>
+            <TextInput
+              label="Product Name"
+              value={name}
+              onChangeText={setName}
+              style={styles.input}
+            />
+            <TextInput
+              label="Price"
+              value={price}
+              onChangeText={setPrice}
+              keyboardType="numeric"
+              style={styles.input}
+            />
+            <TextInput
+              label="Stock"
+              value={stock}
+              onChangeText={setStock}
+              keyboardType="numeric"
+              style={styles.input}
+            />
+          </Card.Content>
+          <Card.Actions>
+            <Button onPress={onClose}>Cancel</Button>
+            <Button onPress={handleSubmit}>Save Changes</Button>
+          </Card.Actions>
+        </Card>
+      </Modal>
+    </Portal>
   );
 }
 
 const styles = StyleSheet.create({
-  centeredView: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
+  modalContainer: {
+    margin: theme.spacing.xl,
+    borderRadius: theme.borderRadius.md,
   },
-  modalView: {
-    width: "90%",
-    backgroundColor: "white",
-    borderRadius: 10,
-    padding: 20,
-    alignItems: "stretch",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+  container: {
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
   },
-  modalTitle: {
-    marginBottom: 15,
+  title: {
+    marginTop: 10,
+    marginBottom: 20,
     textAlign: "center",
-    fontSize: 20,
-    fontWeight: "bold",
   },
   input: {
-    height: 45,
-    borderColor: "#ccc",
-    borderWidth: 1,
+    marginTop: 15,
     marginBottom: 12,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-    fontSize: 16,
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginTop: 20,
   },
 });

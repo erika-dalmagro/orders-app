@@ -91,7 +91,7 @@ export default function OrderList({ shouldRefresh, onEditOrder }: OrderListProps
       {orders.map((order) => (
         <Card key={order.id} style={styles.container}>
           <Card.Title
-            title={`Table ${order.table?.name || `#${order.table_id}`}`}
+            title={`Table: ${order.table?.name || `#${order.table_id}`}`}
             subtitle={order.status.toUpperCase()}
             subtitleStyle={
               order.status === "open"
