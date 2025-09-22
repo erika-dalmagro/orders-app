@@ -1,8 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TextInput, StyleSheet, Alert, Modal, Button, Switch } from "react-native";
+import { View, StyleSheet, Switch } from "react-native";
+import {
+  Button,
+  Card,
+  Modal,
+  Portal,
+  Text,
+  TextInput,
+} from "react-native-paper";
 import axios from "axios";
 import { Table } from "../types";
 import Toast from "react-native-toast-message";
+import { theme } from "../styles/theme";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -48,83 +57,68 @@ export default function EditTableModal({ table, visible, onClose, onTableUpdated
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent={true}>
-      <View style={styles.centeredView}>
-        <View style={styles.modalView}>
-          <Text style={styles.modalTitle}>Edit Table: {table?.name}</Text>
-
-          <TextInput style={styles.input} placeholder="Table Name" value={name} onChangeText={setName} />
-          <TextInput
-            style={styles.input}
-            placeholder="Capacity"
-            value={capacity}
-            onChangeText={setCapacity}
-            keyboardType="numeric"
-          />
-          <View style={styles.switchContainer}>
-            <Text style={styles.switchLabel}>Single Tab</Text>
-            <Switch onValueChange={setSingleTab} value={singleTab} />
-          </View>
-
-          <View style={styles.buttonContainer}>
-            <Button title="Cancel" onPress={onClose} color="#6c757d" />
-            <Button title="Save Changes" onPress={handleSubmit} />
-          </View>
-        </View>
-      </View>
-    </Modal>
+    <Portal>
+      <Modal
+        visible={visible}
+        onDismiss={onClose}
+        contentContainerStyle={styles.modalContainer}
+      >
+        <Card style={styles.container}>
+          <Text variant="headlineMedium" style={styles.title}>
+            Edit Table: {table?.name}
+          </Text>
+          <Card.Content>
+            <TextInput
+              label="Table Name"
+              value={name}
+              onChangeText={setName}
+              style={styles.input}
+            />
+            <TextInput
+              label="Capacity"
+              value={capacity}
+              onChangeText={setCapacity}
+              keyboardType="numeric"
+              style={styles.input}
+            />
+            <View style={styles.switchContainer}>
+              <Text>Single Tab</Text>
+              <Switch onValueChange={setSingleTab} value={singleTab} />
+            </View>
+          </Card.Content>
+          <Card.Actions>
+            <Button onPress={onClose}>Cancel</Button>
+            <Button onPress={handleSubmit}>Save Changes</Button>
+          </Card.Actions>
+        </Card>
+      </Modal>
+    </Portal>
   );
 }
 
 const styles = StyleSheet.create({
-  centeredView: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
+  modalContainer: {
+    margin: theme.spacing.xl,
+    borderRadius: theme.borderRadius.md,
   },
-  modalView: {
-    width: "90%",
-    backgroundColor: "white",
-    borderRadius: 10,
-    padding: 20,
-    alignItems: "stretch",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+  container: {
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
   },
-  modalTitle: {
-    marginBottom: 15,
+  title: {
+    marginTop: 10,
+    marginBottom: 20,
     textAlign: "center",
-    fontSize: 20,
-    fontWeight: "bold",
   },
   input: {
-    height: 45,
-    borderColor: "#ccc",
-    borderWidth: 1,
     marginBottom: 12,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-    fontSize: 16,
   },
   switchContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    marginTop: 15,
     marginBottom: 15,
-  },
-  switchLabel: {
-    fontSize: 16,
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginTop: 20,
+    paddingHorizontal: 12
   },
 });

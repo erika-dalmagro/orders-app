@@ -1,25 +1,27 @@
 import React, { useState } from "react";
 import {
   View,
-  Text,
-  TextInput,
-  Button,
   StyleSheet,
   ScrollView,
   SafeAreaView,
-  Switch,
-  TouchableOpacity,
   ActivityIndicator,
+  Switch,
 } from "react-native";
+import {
+  Button,
+  Card,
+  Text,
+  TextInput,
+} from "react-native-paper";
 import axios from "axios";
 import Toast from "react-native-toast-message";
 import { Table } from "../types";
 import EditTableModal from "./EditTableModal";
 import { useTables } from "../context/TableContext";
 import ConfirmDialog from "./ConfirmDialog";
+import { theme } from "../styles/theme";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
-
 
 export default function TableManager() {
   const { allTables, loading, loadTables } = useTables();
@@ -30,10 +32,9 @@ export default function TableManager() {
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
-  
+
   const [isDialogVisible, setIsDialogVisible] = useState(false);
   const [tableIdToDelete, setTableIdToDelete] = useState<number | null>(null);
-
 
   const handleSubmit = async () => {
     if (!name || !capacity) {
@@ -61,12 +62,12 @@ export default function TableManager() {
     setSelectedTable(table);
     setIsModalVisible(true);
   };
-  
+
   const handleDelete = (id: number) => {
     setTableIdToDelete(id);
     setIsDialogVisible(true);
   };
-  
+
   const handleCancelDelete = () => {
     setIsDialogVisible(false);
     setTableIdToDelete(null);
@@ -107,58 +108,57 @@ export default function TableManager() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
-        <Text style={styles.title}>Table Manager</Text>
-
-        <View style={styles.form}>
-          <TextInput
-            style={styles.input}
-            placeholder="Table Name (e.g., Table 1, Bar)"
-            value={name}
-            onChangeText={setName}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Capacity"
-            value={capacity}
-            onChangeText={setCapacity}
-            keyboardType="numeric"
-          />
-          <View style={styles.switchContainer}>
-            <Text style={styles.switchLabel}>Single Tab</Text>
-            <Switch
-              trackColor={{ false: "#767577", true: "#81b0ff" }}
-              thumbColor={singleTab ? "#f5dd4b" : "#f4f3f4"}
-              onValueChange={setSingleTab}
-              value={singleTab}
-            />
-          </View>
-          <Button title="Add Table" onPress={handleSubmit} />
+        <View style={styles.container}>
+          <Text variant="headlineMedium" style={styles.title}>
+            Table Manager
+          </Text>
+          <Card style={styles.container}>
+            <Card.Content>
+              <TextInput
+                label="Table Name (e.g., Table 1, Bar)"
+                value={name}
+                onChangeText={setName}
+                style={styles.input}
+              />
+              <TextInput
+                label="Capacity"
+                value={capacity}
+                onChangeText={setCapacity}
+                keyboardType="numeric"
+                style={styles.input}
+              />
+              <View style={styles.switchContainer}>
+                <Text>Single Tab</Text>
+                <Switch onValueChange={setSingleTab} value={singleTab} />
+              </View>
+            </Card.Content>
+            <Card.Actions>
+              <Button mode="contained" onPress={handleSubmit}>
+                Add Table
+              </Button>
+            </Card.Actions>
+          </Card>
         </View>
 
-        <View style={styles.list}>
-          <Text style={styles.title}>Tables</Text>
+        <View style={styles.container}>
+          <Text variant="headlineMedium" style={styles.title}>
+            Tables
+          </Text>
           {allTables.map((t) => (
-            <View key={t.id} style={styles.tableItem}>
-              <View>
-                <Text style={styles.tableName}>{t.name}</Text>
-                <Text style={styles.tableDetail}>Capacity: {t.capacity}</Text>
-                <Text style={styles.tableDetail}>Tab: {t.single_tab ? "Single" : "Multiple"}</Text>
-              </View>
-              <View style={styles.actionsContainer}>
-                <TouchableOpacity
-                  style={[styles.actionButton, styles.editButton]}
-                  onPress={() => handleEdit(t)}
-                >
-                  <Text style={styles.actionButtonText}>Edit</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.actionButton, styles.deleteButton]}
-                  onPress={() => handleDelete(t.id)}
-                >
-                  <Text style={styles.actionButtonText}>Delete</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
+            <Card key={t.id} style={styles.container}>
+              <Card.Title title={`Table: ${t.name}`} subtitle={`Capacity: ${t.capacity}`}/>
+               <Card.Content>
+                 <Text>Tab Mode: {t.single_tab ? "Single" : "Multiple"}</Text>
+               </Card.Content>
+              <Card.Actions>
+                <Button style={styles.editButton} onPress={() => handleEdit(t)}>
+                   <Text style={styles.buttonText}>Edit</Text>
+                </Button>
+                <Button style={styles.deleteButton} onPress={() => handleDelete(t.id)}>
+                  <Text style={styles.buttonText}>Delete</Text>
+                </Button>
+              </Card.Actions>
+            </Card>
           ))}
         </View>
       </ScrollView>
@@ -169,7 +169,7 @@ export default function TableManager() {
         onClose={() => setIsModalVisible(false)}
         onTableUpdated={handleTableUpdated}
       />
-      
+
       <ConfirmDialog
         visible={isDialogVisible}
         title="Delete Table"
@@ -182,11 +182,12 @@ export default function TableManager() {
 }
 
 const styles = StyleSheet.create({
-    safeArea: {
+  safeArea: {
     flex: 1,
   },
   container: {
-    padding: 20,
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
   },
   centered: {
     flex: 1,
@@ -195,126 +196,27 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    fontSize: 24,
-    fontWeight: "bold",
     marginBottom: 20,
     textAlign: "center",
-    color: "#333",
-  },
-  form: {
-    marginBottom: 30,
-    backgroundColor: "white",
-    padding: 15,
-    borderRadius: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
   input: {
-    height: 45,
-    borderColor: "#ccc",
-    borderWidth: 1,
     marginBottom: 12,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-    backgroundColor: "white",
-    fontSize: 16,
   },
-  switchContainer: {
+   switchContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    marginTop: 15,
     marginBottom: 15,
+    paddingHorizontal: 12
   },
-  switchLabel: {
-    fontSize: 16,
-  },
-  list: {
-    marginTop: 20,
-  },
-  tableItem: {
-    padding: 15,
-    marginBottom: 10,
-    backgroundColor: "#fff",
-    borderRadius: 5,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  tableName: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#28a745",
-  },
-  tableDetail: {
-    fontSize: 14,
-    color: "#6c757d",
-  },
-  actionsContainer: {
-    flexDirection: "row",
-    gap: 10,
-  },
-  actionButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 5,
-  },
-  actionButtonText: {
+  buttonText: {
     color: "white",
-    fontWeight: "bold",
   },
   editButton: {
     backgroundColor: "#ffc107",
   },
   deleteButton: {
     backgroundColor: "#dc3545",
-  },
-  dialogOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  dialogContainer: {
-    width: '80%',
-    padding: 20,
-    backgroundColor: 'white',
-    borderRadius: 10,
-  },
-  dialogTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  dialogMessage: {
-    fontSize: 16,
-    marginBottom: 20,
-  },
-  dialogActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-  },
-  dialogButton: {
-    marginLeft: 20,
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-  },
-  dialogCancelButtonText: {
-    fontSize: 16,
-    color: '#007bff',
-  },
-  dialogDeleteButtonText: {
-    fontSize: 16,
-    color: '#dc3545',
-  },
-  dialogCancelButton: {
-    borderColor: '#007bff',
-  },
-  dialogDeleteButton: {
-    borderColor: '#dc3545',
   },
 });
