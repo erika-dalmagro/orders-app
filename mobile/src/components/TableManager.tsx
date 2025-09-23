@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
   input: {
     marginBottom: 12,
   },
-   switchContainer: {
+  switchContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",

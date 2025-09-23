@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
+import { View, StyleSheet, ScrollView } from "react-native";
+import { ActivityIndicator, Card, Text, MD2Colors } from "react-native-paper";
 import { Calendar, DateData } from "react-native-calendars";
 import axios from "axios";
 import Toast from "react-native-toast-message";
@@ -45,44 +46,56 @@ export default function CalendarView() {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>Orders Calendar</Text>
+      <Text variant="headlineMedium" style={styles.title}>
+        Orders Calendar
+      </Text>
 
-      <Calendar
-        current={selectedDate}
-        onDayPress={onDayPress}
-        markedDates={{
-          [selectedDate]: { selected: true, selectedColor: "#007bff" },
-        }}
-        theme={{
-          todayTextColor: "#007bff",
-          arrowColor: "#007bff",
-        }}
-        style={styles.calendar}
-      />
+      <Card style={styles.card}>
+        <Calendar
+          style={styles.calendar}
+          current={selectedDate}
+          onDayPress={onDayPress}
+          markedDates={{
+            [selectedDate]: {
+              selected: true,
+              selectedColor: theme.colors.primary,
+            },
+          }}
+          theme={{
+            todayTextColor: theme.colors.primary,
+            arrowColor: theme.colors.primary,
+          }}
+        />
+      </Card>
 
-      <View style={styles.ordersContainer}>
-        <Text style={styles.ordersTitle}>Orders for {selectedDate}:</Text>
+      <View style={styles.container}>
+        <Text variant="titleLarge" style={styles.title}>
+          Orders for {selectedDate}:
+        </Text>
         {loading ? (
           <ActivityIndicator size="large" />
         ) : orders.length === 0 ? (
           <Text style={styles.noOrdersText}>No orders for this date.</Text>
         ) : (
           orders.map((order) => (
-            <View key={order.id} style={styles.orderCard}>
-              <View style={styles.cardHeader}>
-                <Text style={styles.tableName}>Table {order.table?.name || `#${order.table_id}`}</Text>
-                <Text style={order.status === "open" ? styles.statusOpen : styles.statusClosed}>
-                  {order.status.toUpperCase()}
-                </Text>
-              </View>
-              <View style={styles.itemsList}>
+            <Card key={order.id} style={styles.container}>
+              <Card.Title
+                title={`Table: ${order.table?.name || `#${order.table_id}`}`}
+                subtitle={order.status.toUpperCase()}
+                subtitleStyle={
+                  order.status === "open"
+                    ? styles.statusOpen
+                    : styles.statusClosed
+                }
+              />
+              <Card.Content>
                 {order.items.map((item, i) => (
                   <Text key={i} style={styles.itemText}>
                     - {item.product?.name} x {item.quantity}
                   </Text>
                 ))}
-              </View>
-            </View>
+              </Card.Content>
+            </Card>
           ))
         )}
       </View>
@@ -92,51 +105,36 @@ export default function CalendarView() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
   },
   title: {
-    fontSize: 24,
-    fontWeight: "bold",
+    marginTop: 10,
+    marginBottom: 20,
     textAlign: "center",
-    paddingVertical: 20,
-    color: "#333",
+  },
+  card: {
+    marginHorizontal: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
+    overflow: "hidden", 
   },
   calendar: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    marginHorizontal: 10,
-  },
-  ordersContainer: {
-    padding: 20,
-  },
-  ordersTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 15,
+    paddingHorizontal: theme.spacing.md,
+    paddingBottom: theme.spacing.md,
   },
   noOrdersText: {
-    fontSize: 16,
-    color: "gray",
     textAlign: "center",
+    color: MD2Colors.grey500,
   },
-  orderCard: {
-    backgroundColor: "white",
-    borderRadius: 8,
-    padding: 15,
-    marginBottom: 15,
-    elevation: 2,
-  },
-  cardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  tableName: {
-    fontSize: 18,
+  statusOpen: {
+    color: MD2Colors.green800,
     fontWeight: "bold",
   },
-  statusOpen: { color: "green", fontWeight: "bold" },
-  statusClosed: { color: "gray", fontWeight: "bold" },
-  itemsList: { marginTop: 10 },
-  itemText: { fontSize: 16 },
+  statusClosed: {
+    color: MD2Colors.grey600,
+    fontWeight: "bold",
+  },
+  itemText: {
+    marginBottom: theme.spacing.xs,
+  },
 });
