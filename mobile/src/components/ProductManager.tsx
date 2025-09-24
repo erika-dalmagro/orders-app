@@ -157,7 +157,7 @@ export default function ProductManager() {
             Products
           </Text>
           {products.map((p) => (
-            <Card key={p.id} style={styles.container}>
+            <Card key={p.id} style={[styles.cardContainer, styles.container]}>
               <Card.Title title={`Product: ${p.name}`} subtitle={`Stock: ${p.stock}`}/>
               <Card.Content>
                 <Text>Price: $ {p.price.toFixed(2)}</Text>
@@ -201,6 +201,9 @@ const styles = StyleSheet.create({
     padding: theme.spacing.md,
     borderRadius: theme.borderRadius.md,
   },
+  cardContainer: {
+    marginVertical:theme.spacing.sm,
+  },
   centered: {
     flex: 1,
     justifyContent: "center",
@@ -218,6 +221,7 @@ const styles = StyleSheet.create({
     color: "white",
   },
   editButton: {
+    borderWidth: 0,
     backgroundColor: "#ffc107",
   },
   deleteButton: {

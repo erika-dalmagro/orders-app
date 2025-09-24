@@ -153,7 +153,6 @@ const styles = StyleSheet.create({
     color: "white",
   },
   editButton: {
-    color: "black",
     borderWidth: 0,
     backgroundColor: "#ffc107",
   },

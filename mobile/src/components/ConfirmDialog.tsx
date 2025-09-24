@@ -28,11 +28,11 @@ const ConfirmDialog = ({
           <Text variant="bodyMedium">{message}</Text>
         </Dialog.Content>
         <Dialog.Actions style={styles.dialogActions}>
-          <Button style={styles.dialogCancelButton} onPress={onCancel}>
+          <Button style={[styles.buttons, styles.dialogCancelButton]} onPress={onCancel}>
             <Text style={styles.dialogCancelButtonText}>Cancel</Text>
           </Button>
 
-          <Button style={styles.dialogConfirmButton} onPress={onConfirm}>
+          <Button style={[styles.buttons, styles.dialogConfirmButton]} onPress={onConfirm}>
             <Text style={styles.dialogConfirmButtonText}>{confirmText}</Text>
           </Button>
         </Dialog.Actions>
@@ -50,6 +50,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "flex-end",
     paddingBottom: theme.spacing.md,
+  },
+  buttons: {
+    paddingHorizontal: theme.spacing.md,
+    borderRadius: '60px',
+    marginVertical: 0,
   },
   dialogCancelButton: {
     backgroundColor: theme.colors.light,

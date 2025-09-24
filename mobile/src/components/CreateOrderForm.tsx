@@ -134,7 +134,7 @@ export default function CreateOrderForm({ onOrderCreated }: CreateOrderFormProps
                 setSelectedTableId(table.id);
                 setTableMenuVisible(false);
               }}
-              title={`${table.name} (Cap: ${table.capacity})`}
+              title={`${table.name} (Capacity: ${table.capacity})`}
             />
           ))}
         </Menu>

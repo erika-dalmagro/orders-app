@@ -152,8 +152,12 @@ export default function EditOrderModal({
                 <Text variant="bodyLarge" style={styles.label}>
                   Items
                 </Text>
-                <Button icon="plus" onPress={handleAddItem}>
-                  Add
+                <Button
+                  mode="contained-tonal"
+                  icon="plus"
+                  onPress={handleAddItem}
+                >
+                  Add Product
                 </Button>
               </View>
 

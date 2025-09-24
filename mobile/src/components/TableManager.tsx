@@ -134,7 +134,7 @@ export default function TableManager() {
             </Card.Content>
             <Card.Actions>
               <Button mode="contained" onPress={handleSubmit}>
-                Add Table
+                Create Table
               </Button>
             </Card.Actions>
           </Card>
@@ -145,7 +145,7 @@ export default function TableManager() {
             Tables
           </Text>
           {allTables.map((t) => (
-            <Card key={t.id} style={styles.container}>
+            <Card key={t.id} style={[styles.cardContainer, styles.container]}>
               <Card.Title title={`Table: ${t.name}`} subtitle={`Capacity: ${t.capacity}`}/>
                <Card.Content>
                  <Text>Tab Mode: {t.single_tab ? "Single" : "Multiple"}</Text>
@@ -189,6 +189,9 @@ const styles = StyleSheet.create({
     padding: theme.spacing.md,
     borderRadius: theme.borderRadius.md,
   },
+  cardContainer: {
+    marginVertical:theme.spacing.sm,
+  },
   centered: {
     flex: 1,
     justifyContent: "center",
@@ -214,6 +217,7 @@ const styles = StyleSheet.create({
     color: "white",
   },
   editButton: {
+    borderWidth: 0,
     backgroundColor: "#ffc107",
   },
   deleteButton: {
