@@ -1,18 +1,6 @@
 import React, { useState } from "react";
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  SafeAreaView,
-  ActivityIndicator,
-  Switch,
-} from "react-native";
-import {
-  Button,
-  Card,
-  Text,
-  TextInput,
-} from "react-native-paper";
+import { View, StyleSheet, ScrollView, SafeAreaView, ActivityIndicator, Switch } from "react-native";
+import { Button, Card, Text, TextInput } from "react-native-paper";
 import axios from "axios";
 import Toast from "react-native-toast-message";
 import { Table } from "../../types";
@@ -146,13 +134,13 @@ export default function TableManager() {
           </Text>
           {allTables.map((t) => (
             <Card key={t.id} style={[styles.cardContainer, styles.container]}>
-              <Card.Title title={`Table: ${t.name}`} subtitle={`Capacity: ${t.capacity}`}/>
-               <Card.Content>
-                 <Text>Tab Mode: {t.single_tab ? "Single" : "Multiple"}</Text>
-               </Card.Content>
+              <Card.Title title={`Table: ${t.name}`} subtitle={`Capacity: ${t.capacity}`} />
+              <Card.Content>
+                <Text>Tab Mode: {t.single_tab ? "Single" : "Multiple"}</Text>
+              </Card.Content>
               <Card.Actions>
                 <Button style={styles.editButton} onPress={() => handleEdit(t)}>
-                   <Text style={styles.buttonText}>Edit</Text>
+                  <Text style={styles.buttonText}>Edit</Text>
                 </Button>
                 <Button style={styles.deleteButton} onPress={() => handleDelete(t.id)}>
                   <Text style={styles.buttonText}>Delete</Text>
@@ -190,7 +178,7 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.md,
   },
   cardContainer: {
-    marginVertical:theme.spacing.sm,
+    marginVertical: theme.spacing.sm,
   },
   centered: {
     flex: 1,
@@ -211,7 +199,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginTop: 15,
     marginBottom: 15,
-    paddingHorizontal: 12
+    paddingHorizontal: 12,
   },
   buttonText: {
     color: "white",

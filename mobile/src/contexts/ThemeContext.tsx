@@ -1,5 +1,5 @@
-import React, { createContext, useState, useMemo, ReactNode, useContext } from 'react';
-import { MD3DarkTheme, MD3LightTheme, useTheme } from 'react-native-paper';
+import React, { createContext, useState, useMemo, ReactNode, useContext } from "react";
+import { MD3DarkTheme, MD3LightTheme, useTheme } from "react-native-paper";
 
 interface ThemeContextType {
   isDarkTheme: boolean;
@@ -28,7 +28,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
       toggleTheme,
       theme,
     }),
-    [isDarkTheme, theme]
+    [isDarkTheme, theme],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

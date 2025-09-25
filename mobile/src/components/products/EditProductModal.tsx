@@ -1,13 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, StyleSheet } from "react-native";
-import {
-  Button,
-  Card,
-  Modal,
-  Portal,
-  Text,
-  TextInput,
-} from "react-native-paper";
+import { Button, Card, Modal, Portal, Text, TextInput } from "react-native-paper";
 import axios from "axios";
 import { Product } from "../../types";
 import Toast from "react-native-toast-message";
@@ -63,22 +56,13 @@ export default function EditProductModal({
 
   return (
     <Portal>
-      <Modal
-        visible={visible}
-        onDismiss={onClose}
-        contentContainerStyle={styles.modalContainer}
-      >
+      <Modal visible={visible} onDismiss={onClose} contentContainerStyle={styles.modalContainer}>
         <Card style={styles.container}>
           <Text variant="headlineMedium" style={styles.title}>
             Edit Product: {product?.name}
           </Text>
           <Card.Content>
-            <TextInput
-              label="Product Name"
-              value={name}
-              onChangeText={setName}
-              style={styles.input}
-            />
+            <TextInput label="Product Name" value={name} onChangeText={setName} style={styles.input} />
             <TextInput
               label="Price"
               value={price}

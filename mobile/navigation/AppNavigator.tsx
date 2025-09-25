@@ -16,9 +16,7 @@ export default function AppNavigator() {
   const { theme, toggleTheme, isDarkTheme } = useAppTheme();
 
   return (
-    <NavigationContainer
-      theme={theme}
-    >
+    <NavigationContainer theme={theme}>
       <Tab.Navigator
         screenOptions={({ route }) => ({
           headerStyle: { backgroundColor: theme.colors.surface },
@@ -41,9 +39,7 @@ export default function AppNavigator() {
             } else if (route.name === "Products") {
               iconName = focused ? "fast-food" : "fast-food-outline";
             } else if (route.name === "Tables") {
-              iconName = focused
-                ? "tablet-landscape"
-                : "tablet-landscape-outline";
+              iconName = focused ? "tablet-landscape" : "tablet-landscape-outline";
             } else if (route.name === "Calendar") {
               iconName = focused ? "calendar" : "calendar-outline";
             } else {

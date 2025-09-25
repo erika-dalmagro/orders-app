@@ -1,13 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, StyleSheet, Switch } from "react-native";
-import {
-  Button,
-  Card,
-  Modal,
-  Portal,
-  Text,
-  TextInput,
-} from "react-native-paper";
+import { Button, Card, Modal, Portal, Text, TextInput } from "react-native-paper";
 import axios from "axios";
 import { Table } from "../../types";
 import Toast from "react-native-toast-message";
@@ -58,22 +51,13 @@ export default function EditTableModal({ table, visible, onClose, onTableUpdated
 
   return (
     <Portal>
-      <Modal
-        visible={visible}
-        onDismiss={onClose}
-        contentContainerStyle={styles.modalContainer}
-      >
+      <Modal visible={visible} onDismiss={onClose} contentContainerStyle={styles.modalContainer}>
         <Card style={styles.container}>
           <Text variant="headlineMedium" style={styles.title}>
             Edit Table: {table?.name}
           </Text>
           <Card.Content>
-            <TextInput
-              label="Table Name"
-              value={name}
-              onChangeText={setName}
-              style={styles.input}
-            />
+            <TextInput label="Table Name" value={name} onChangeText={setName} style={styles.input} />
             <TextInput
               label="Capacity"
               value={capacity}
@@ -119,6 +103,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginTop: 15,
     marginBottom: 15,
-    paddingHorizontal: 12
+    paddingHorizontal: 12,
   },
 });

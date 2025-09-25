@@ -21,7 +21,7 @@ const ConfirmDialog = ({
   confirmText = "Delete",
 }: ConfirmDialogProps) => {
   return (
-    <Portal> 
+    <Portal>
       <Dialog style={styles.dialogContainer} visible={visible} onDismiss={onCancel}>
         <Dialog.Title>{title}</Dialog.Title>
         <Dialog.Content>
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
   },
   buttons: {
     paddingHorizontal: theme.spacing.md,
-    borderRadius: '60px',
+    borderRadius: "60px",
     marginVertical: 0,
   },
   dialogCancelButton: {

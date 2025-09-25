@@ -1,15 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, StyleSheet, Alert, ScrollView } from "react-native";
-import {
-  Button,
-  Card,
-  IconButton,
-  Modal,
-  Portal,
-  Text,
-  TextInput,
-  Menu,
-} from "react-native-paper";
+import { Button, Card, IconButton, Modal, Portal, Text, TextInput, Menu } from "react-native-paper";
 import axios from "axios";
 import { Order, Product, Table, OrderItem } from "../../types";
 import Toast from "react-native-toast-message";
@@ -24,12 +15,7 @@ interface EditOrderModalProps {
   onOrderUpdated: () => void;
 }
 
-export default function EditOrderModal({
-  order,
-  visible,
-  onClose,
-  onOrderUpdated,
-}: EditOrderModalProps) {
+export default function EditOrderModal({ order, visible, onClose, onOrderUpdated }: EditOrderModalProps) {
   const [selectedTableId, setSelectedTableId] = useState<number | string>("");
   const [items, setItems] = useState<Partial<OrderItem>[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -119,17 +105,13 @@ export default function EditOrderModal({
           <Text variant="headlineMedium" style={styles.title}>
             Edit Order:
           </Text>
-          <ScrollView style={{ maxHeight: '80%' }}>
+          <ScrollView style={{ maxHeight: "80%" }}>
             <Card.Content>
               <Menu
                 visible={tableMenuVisible}
                 onDismiss={() => setTableMenuVisible(false)}
                 anchor={
-                  <Button
-                    icon="chevron-down"
-                    mode="outlined"
-                    onPress={() => setTableMenuVisible(true)}
-                  >
+                  <Button icon="chevron-down" mode="outlined" onPress={() => setTableMenuVisible(true)}>
                     {selectedTableName}
                   </Button>
                 }
@@ -152,24 +134,26 @@ export default function EditOrderModal({
                 <Text variant="bodyLarge" style={styles.label}>
                   Items
                 </Text>
-                <Button
-                  mode="contained-tonal"
-                  icon="plus"
-                  onPress={handleAddItem}
-                >
+                <Button mode="contained-tonal" icon="plus" onPress={handleAddItem}>
                   Add Product
                 </Button>
               </View>
 
               {items.map((item, index) => {
-                const selectedProductName = products.find(p => p.id === item.product_id)?.name ?? 'Select Product';
+                const selectedProductName =
+                  products.find((p) => p.id === item.product_id)?.name ?? "Select Product";
                 return (
                   <View key={index} style={styles.itemRow}>
                     <Menu
                       visible={itemMenuVisible === index}
                       onDismiss={() => setItemMenuVisible(null)}
                       anchor={
-                        <Button style={{ flex: 1 }} mode="outlined" icon="chevron-down" onPress={() => setItemMenuVisible(index)}>
+                        <Button
+                          style={{ flex: 1 }}
+                          mode="outlined"
+                          icon="chevron-down"
+                          onPress={() => setItemMenuVisible(index)}
+                        >
                           {selectedProductName}
                         </Button>
                       }

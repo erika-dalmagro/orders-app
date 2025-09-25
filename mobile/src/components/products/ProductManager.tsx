@@ -1,17 +1,6 @@
 import React, { useState } from "react";
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  SafeAreaView,
-  ActivityIndicator,
-} from "react-native";
-import {
-  Button,
-  Card,
-  Text,
-  TextInput,
-} from "react-native-paper";
+import { View, StyleSheet, ScrollView, SafeAreaView, ActivityIndicator } from "react-native";
+import { Button, Card, Text, TextInput } from "react-native-paper";
 import axios from "axios";
 import Toast from "react-native-toast-message";
 import { Product } from "../../types";
@@ -33,9 +22,7 @@ export default function ProductManager() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const [isDialogVisible, setIsDialogVisible] = useState(false);
-  const [productIdToDelete, setProductIdToDelete] = useState<number | null>(
-    null
-  );
+  const [productIdToDelete, setProductIdToDelete] = useState<number | null>(null);
 
   const handleSubmit = async () => {
     if (!name || !price || !stock) {
@@ -123,12 +110,7 @@ export default function ProductManager() {
           </Text>
           <Card style={styles.container}>
             <Card.Content>
-              <TextInput
-                label="Product Name"
-                value={name}
-                onChangeText={setName}
-                style={styles.input}
-              />
+              <TextInput label="Product Name" value={name} onChangeText={setName} style={styles.input} />
               <TextInput
                 label="Price"
                 value={price}
@@ -158,13 +140,13 @@ export default function ProductManager() {
           </Text>
           {products.map((p) => (
             <Card key={p.id} style={[styles.cardContainer, styles.container]}>
-              <Card.Title title={`Product: ${p.name}`} subtitle={`Stock: ${p.stock}`}/>
+              <Card.Title title={`Product: ${p.name}`} subtitle={`Stock: ${p.stock}`} />
               <Card.Content>
                 <Text>Price: $ {p.price.toFixed(2)}</Text>
               </Card.Content>
               <Card.Actions>
                 <Button style={styles.editButton} onPress={() => handleEdit(p)}>
-                   <Text style={styles.buttonText}>Edit</Text>
+                  <Text style={styles.buttonText}>Edit</Text>
                 </Button>
                 <Button style={styles.deleteButton} onPress={() => handleDelete(p.id)}>
                   <Text style={styles.buttonText}>Delete</Text>
@@ -202,7 +184,7 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.md,
   },
   cardContainer: {
-    marginVertical:theme.spacing.sm,
+    marginVertical: theme.spacing.sm,
   },
   centered: {
     flex: 1,

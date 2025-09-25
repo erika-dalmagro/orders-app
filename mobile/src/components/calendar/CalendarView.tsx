@@ -82,11 +82,7 @@ export default function CalendarView() {
               <Card.Title
                 title={`Table: ${order.table?.name || `#${order.table_id}`}`}
                 subtitle={order.status.toUpperCase()}
-                subtitleStyle={
-                  order.status === "open"
-                    ? styles.statusOpen
-                    : styles.statusClosed
-                }
+                subtitleStyle={order.status === "open" ? styles.statusOpen : styles.statusClosed}
               />
               <Card.Content>
                 {order.items.map((item, i) => (
@@ -109,7 +105,7 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.md,
   },
   cardContainer: {
-    marginVertical:theme.spacing.sm,
+    marginVertical: theme.spacing.sm,
   },
   title: {
     marginTop: 10,
@@ -119,7 +115,7 @@ const styles = StyleSheet.create({
   card: {
     marginHorizontal: theme.spacing.md,
     borderRadius: theme.borderRadius.md,
-    overflow: "hidden", 
+    overflow: "hidden",
   },
   calendar: {
     paddingHorizontal: theme.spacing.md,
