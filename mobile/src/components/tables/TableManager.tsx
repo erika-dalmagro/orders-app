@@ -15,11 +15,11 @@ import {
 } from "react-native-paper";
 import axios from "axios";
 import Toast from "react-native-toast-message";
-import { Table } from "../types";
+import { Table } from "../../types";
 import EditTableModal from "./EditTableModal";
-import { useTables } from "../context/TableContext";
-import ConfirmDialog from "./ConfirmDialog";
-import { theme } from "../styles/theme";
+import { useTables } from "../../contexts/TableContext";
+import ConfirmDialog from "../shared/ConfirmDialog";
+import { theme } from "../../styles/theme";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -141,7 +141,7 @@ export default function TableManager() {
         </View>
 
         <View style={styles.container}>
-          <Text variant="headlineMedium" style={styles.title}>
+          <Text variant="titleLarge" style={styles.title}>
             Tables
           </Text>
           {allTables.map((t) => (

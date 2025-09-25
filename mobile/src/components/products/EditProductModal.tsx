@@ -9,9 +9,9 @@ import {
   TextInput,
 } from "react-native-paper";
 import axios from "axios";
-import { Product } from "../types";
+import { Product } from "../../types";
 import Toast from "react-native-toast-message";
-import { theme } from "../styles/theme";
+import { theme } from "../../styles/theme";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 

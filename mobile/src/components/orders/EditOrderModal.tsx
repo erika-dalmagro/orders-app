@@ -11,9 +11,9 @@ import {
   Menu,
 } from "react-native-paper";
 import axios from "axios";
-import { Order, Product, Table, OrderItem } from "../types";
+import { Order, Product, Table, OrderItem } from "../../types";
 import Toast from "react-native-toast-message";
-import { theme } from "../styles/theme";
+import { theme } from "../../styles/theme";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 

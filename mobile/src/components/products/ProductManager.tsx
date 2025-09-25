@@ -14,11 +14,11 @@ import {
 } from "react-native-paper";
 import axios from "axios";
 import Toast from "react-native-toast-message";
-import { Product } from "../types";
+import { Product } from "../../types";
 import EditProductModal from "./EditProductModal";
-import { useProducts } from "../context/ProductContext";
-import ConfirmDialog from "./ConfirmDialog";
-import { theme } from "../styles/theme";
+import { useProducts } from "../../contexts/ProductContext";
+import ConfirmDialog from "../shared/ConfirmDialog";
+import { theme } from "../../styles/theme";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -153,7 +153,7 @@ export default function ProductManager() {
         </View>
 
         <View style={styles.container}>
-          <Text variant="headlineMedium" style={styles.title}>
+          <Text variant="titleLarge" style={styles.title}>
             Products
           </Text>
           {products.map((p) => (

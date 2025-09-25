@@ -4,8 +4,8 @@ import { ActivityIndicator, Card, Text, MD2Colors } from "react-native-paper";
 import { Calendar, DateData } from "react-native-calendars";
 import axios from "axios";
 import Toast from "react-native-toast-message";
-import { Order } from "../types";
-import { theme } from "../styles/theme";
+import { Order } from "../../types";
+import { theme } from "../../styles/theme";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -78,7 +78,7 @@ export default function CalendarView() {
           <Text style={styles.noOrdersText}>No orders for this date.</Text>
         ) : (
           orders.map((order) => (
-            <Card key={order.id} style={styles.container}>
+            <Card key={order.id} style={[styles.cardContainer, styles.container]}>
               <Card.Title
                 title={`Table: ${order.table?.name || `#${order.table_id}`}`}
                 subtitle={order.status.toUpperCase()}
@@ -107,6 +107,9 @@ const styles = StyleSheet.create({
   container: {
     padding: theme.spacing.md,
     borderRadius: theme.borderRadius.md,
+  },
+  cardContainer: {
+    marginVertical:theme.spacing.sm,
   },
   title: {
     marginTop: 10,

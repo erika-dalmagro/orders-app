@@ -8,7 +8,7 @@ import OrderScreen from "../src/screens/OrderScreen";
 import ProductScreen from "../src/screens/ProductScreen";
 import TableScreen from "../src/screens/TableScreen";
 import CalendarScreen from "../src/screens/CalendarScreen";
-import { useAppTheme } from "../src/context/ThemeContext";
+import { useAppTheme } from "../src/contexts/ThemeContext";
 
 const Tab = createBottomTabNavigator();
 
