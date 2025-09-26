@@ -5,6 +5,7 @@ import axios from "axios";
 import { Order, Product, Table, OrderItem } from "../../types";
 import Toast from "react-native-toast-message";
 import { theme } from "../../styles/theme";
+import { formatDate } from "../../utils/date";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -128,7 +129,7 @@ export default function EditOrderModal({ order, visible, onClose, onOrderUpdated
                 ))}
               </Menu>
 
-              <TextInput label="Date" value={orderDate} editable={false} style={styles.input} />
+              <TextInput label="Date" value={formatDate(orderDate)} editable={false} style={styles.input} />
 
               <View style={styles.itemsHeader}>
                 <Text variant="bodyLarge" style={styles.label}>

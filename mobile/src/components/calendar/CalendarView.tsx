@@ -6,15 +6,16 @@ import axios from "axios";
 import Toast from "react-native-toast-message";
 import { Order } from "../../types";
 import { theme } from "../../styles/theme";
+import { formatDate } from "../../utils/date";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
-const formatDate = (date: Date): string => {
+const formatDateAPI = (date: Date): string => {
   return date.toISOString().split("T")[0];
 };
 
 export default function CalendarView() {
-  const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
+  const [selectedDate, setSelectedDate] = useState(formatDateAPI(new Date()));
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -70,7 +71,7 @@ export default function CalendarView() {
 
       <View style={styles.container}>
         <Text variant="titleLarge" style={styles.title}>
-          Orders for {selectedDate}:
+          Orders for {formatDate(selectedDate)}:
         </Text>
         {loading ? (
           <ActivityIndicator size="large" />
