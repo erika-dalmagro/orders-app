@@ -58,14 +58,50 @@ export default function EditOrderModal({ order, visible, onClose, onOrderUpdated
   const handleUpdateItem = (index: number, field: keyof OrderItem, value: any) => {
     const updatedItems = [...items];
     const itemToUpdate = { ...updatedItems[index] };
+
+    if (field === "product_id") {
+      const isProductAlreadyAdded = items.some((item, i) => i !== index && item.product_id === value);
+      if (isProductAlreadyAdded) {
+        Toast.show({
+          type: "error",
+          text1: "Error",
+          text2: "This product is already in the order.",
+        });
+        return;
+      }
+    }
+
     (itemToUpdate as any)[field] = value;
+
+    const product = products.find((p) => p.id === itemToUpdate.product_id);
+
+    if (product && itemToUpdate.quantity && itemToUpdate.quantity > product.stock) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: `Only ${product.stock} items in stock for ${product.name}.`,
+      });
+      itemToUpdate.quantity = product.stock;
+    }
+
     updatedItems[index] = itemToUpdate;
     setItems(updatedItems);
   };
 
   const handleAddItem = () => {
     if (products.length > 0) {
-      setItems([...items, { product_id: products[0].id, quantity: 1 }]);
+      const availableProducts = products.filter((p) => !items.some((item) => item.product_id === p.id));
+
+      if (availableProducts.length === 0) {
+        Toast.show({
+          type: "error",
+          text1: "Error",
+          text2: "All available products have been added.",
+        });
+        return;
+      }
+
+      setItems([...items, { product_id: availableProducts[0].id, quantity: 1 }]);
     }
   };
 

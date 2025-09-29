@@ -57,13 +57,50 @@ export default function OrderManager() {
       Toast.show({ type: "info", text1: "No products available to add." });
       return;
     }
-    setSelectedItems([...selectedItems, { product_id: products[0].id, quantity: 1 }]);
+
+    const availableProducts = products.filter((p) => !selectedItems.some((item) => item.product_id === p.id));
+
+    if (availableProducts.length === 0) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "All available products have been added.",
+      });
+      return;
+    }
+
+    setSelectedItems([...selectedItems, { product_id: availableProducts[0].id, quantity: 1 }]);
   };
 
   const updateItem = (index: number, field: keyof OrderItem, value: any) => {
     const updated = [...selectedItems];
     const itemToUpdate = { ...updated[index] };
+
+    if (field === "product_id") {
+      const isProductAlreadyAdded = selectedItems.some((item, i) => i !== index && item.product_id === value);
+      if (isProductAlreadyAdded) {
+        Toast.show({
+          type: "error",
+          text1: "Error",
+          text2: "This product is already in the order.",
+        });
+        return;
+      }
+    }
+
     (itemToUpdate as any)[field] = value;
+
+    const product = products.find((p) => p.id === itemToUpdate.product_id);
+
+    if (product && itemToUpdate.quantity && itemToUpdate.quantity > product.stock) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: `Only ${product.stock} items in stock for ${product.name}.`,
+      });
+      itemToUpdate.quantity = product.stock;
+    }
+
     updated[index] = itemToUpdate;
     setSelectedItems(updated);
   };
