@@ -4,8 +4,7 @@ import { Button, Card, IconButton, Menu, Text, TextInput, MD2Colors } from "reac
 import Toast from "react-native-toast-message";
 import axios from "axios";
 import { Order, OrderItem, Product, Table } from "../../types";
-import { useProducts } from "../../contexts/ProductContext";
-import { useTables } from "../../contexts/TableContext";
+import { useData } from "../../contexts/DataContext";
 import EditOrderModal from "./EditOrderModal";
 import ConfirmDialog from "../shared/ConfirmDialog";
 import { theme } from "../../styles/theme";
@@ -13,12 +12,7 @@ import { theme } from "../../styles/theme";
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export default function OrderManager() {
-  const { products, loading: productsLoading } = useProducts();
-  const { availableTables, loading: tablesLoading, loadTables } = useTables();
-
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [shouldRefresh, setShouldRefresh] = useState(false);
+  const { products, availableTables, orders, loading, refreshAll } = useData();
 
   const [selectedItems, setSelectedItems] = useState<Partial<OrderItem>[]>([]);
   const [selectedTableId, setSelectedTableId] = useState<number | null>(null);
@@ -31,26 +25,13 @@ export default function OrderManager() {
   const [isDialogVisible, setIsDialogVisible] = useState(false);
   const [orderIdToDelete, setOrderIdToDelete] = useState<number | null>(null);
 
-  const loadOrders = () => {
-    setLoading(true);
-    axios
-      .get(`${API_URL}/orders`)
-      .then((res) => setOrders(res.data))
-      .catch(() => Toast.show({ type: "error", text1: "Error", text2: "Failed to load orders." }))
-      .finally(() => setLoading(false));
-  };
-
   useEffect(() => {
-    loadOrders();
-  }, [shouldRefresh]);
-
-  useEffect(() => {
-    if (availableTables.length > 0 && !tablesLoading) {
+    if (availableTables.length > 0 && !loading) {
       setSelectedTableId(availableTables[0].id);
     } else {
       setSelectedTableId(null);
     }
-  }, [availableTables, tablesLoading]);
+  }, [availableTables, loading]);
 
   const addItem = () => {
     if (products?.length === 0) {
@@ -132,8 +113,7 @@ export default function OrderManager() {
 
       Toast.show({ type: "success", text1: "Success", text2: "Order created successfully!" });
       setSelectedItems([]);
-      loadTables();
-      setShouldRefresh((prev) => !prev);
+      refreshAll();
     } catch (err: any) {
       const errorMessage = err.response?.data?.error || "Error creating order";
       Toast.show({ type: "error", text1: "Error", text2: errorMessage });
@@ -149,7 +129,7 @@ export default function OrderManager() {
         text1: "Success",
         text2: "Order closed successfully!",
       });
-      loadOrders();
+      refreshAll();
     } catch (error: any) {
       const message = error.response?.data?.error || "Error closing order.";
       Toast.show({ type: "error", text1: "Error", text2: message });
@@ -175,7 +155,7 @@ export default function OrderManager() {
         text1: "Success",
         text2: "Order deleted successfully!",
       });
-      loadOrders();
+      refreshAll();
     } catch (error: any) {
       const message = error.response?.data?.error || "Error deleting order.";
       Toast.show({ type: "error", text1: "Error", text2: message });
@@ -188,10 +168,10 @@ export default function OrderManager() {
   const handleOrderUpdated = () => {
     setIsEditModalVisible(false);
     setEditingOrder(null);
-    setShouldRefresh((prev) => !prev);
+    refreshAll();
   };
 
-  if (productsLoading || tablesLoading) {
+  if (loading) {
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" />

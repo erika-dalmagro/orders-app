@@ -5,14 +5,14 @@ import axios from "axios";
 import Toast from "react-native-toast-message";
 import { Table } from "../../types";
 import EditTableModal from "./EditTableModal";
-import { useTables } from "../../contexts/TableContext";
+import { useData } from "../../contexts/DataContext";
 import ConfirmDialog from "../shared/ConfirmDialog";
 import { theme } from "../../styles/theme";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export default function TableManager() {
-  const { allTables, loading, loadTables } = useTables();
+  const { tables, loading, refreshAll } = useData();
 
   const [name, setName] = useState("");
   const [capacity, setCapacity] = useState("");
@@ -39,7 +39,7 @@ export default function TableManager() {
       setName("");
       setCapacity("");
       setSingleTab(true);
-      loadTables();
+      refreshAll();
     } catch (error) {
       Toast.show({ type: "error", text1: "Error", text2: "An error occurred creating the table." });
       console.error(error);
@@ -67,7 +67,7 @@ export default function TableManager() {
     try {
       await axios.delete(`${API_URL}/tables/${tableIdToDelete}`);
       Toast.show({ type: "success", text1: "Success", text2: "Table deleted successfully!" });
-      loadTables();
+      refreshAll();
     } catch (error: any) {
       const message = error.response?.data?.error || "Error deleting table.";
       Toast.show({ type: "error", text1: "Error", text2: message });
@@ -81,7 +81,7 @@ export default function TableManager() {
   const handleTableUpdated = () => {
     setIsModalVisible(false);
     setSelectedTable(null);
-    loadTables();
+    refreshAll();
   };
 
   if (loading) {
@@ -132,7 +132,7 @@ export default function TableManager() {
           <Text variant="titleLarge" style={styles.title}>
             Tables
           </Text>
-          {allTables.map((t) => (
+          {tables.map((t) => (
             <Card key={t.id} style={[styles.cardContainer, styles.container]}>
               <Card.Title title={`Table: ${t.name}`} subtitle={`Capacity: ${t.capacity}`} />
               <Card.Content>

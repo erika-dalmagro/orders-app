@@ -5,14 +5,14 @@ import axios from "axios";
 import Toast from "react-native-toast-message";
 import { Product } from "../../types";
 import EditProductModal from "./EditProductModal";
-import { useProducts } from "../../contexts/ProductContext";
+import { useData } from "../../contexts/DataContext";
 import ConfirmDialog from "../shared/ConfirmDialog";
 import { theme } from "../../styles/theme";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export default function ProductManager() {
-  const { products, loading, loadProducts } = useProducts();
+  const { products, loading, refreshAll } = useData();
 
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
@@ -43,7 +43,7 @@ export default function ProductManager() {
       setName("");
       setPrice("");
       setStock("");
-      loadProducts();
+      refreshAll();
     } catch (error) {
       Toast.show({ type: "error", text1: "Error", text2: "Could not create product." });
       console.error(error);
@@ -75,7 +75,7 @@ export default function ProductManager() {
         text1: "Success",
         text2: "Product deleted successfully!",
       });
-      loadProducts();
+      refreshAll();
     } catch (error: any) {
       const message = error.response?.data?.error || "Error deleting product.";
       Toast.show({ type: "error", text1: "Error", text2: message });
@@ -89,7 +89,7 @@ export default function ProductManager() {
   const handleProductUpdated = () => {
     setIsModalVisible(false);
     setSelectedProduct(null);
-    loadProducts();
+    refreshAll();
   };
 
   if (loading) {
