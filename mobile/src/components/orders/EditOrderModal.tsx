@@ -74,14 +74,16 @@ export default function EditOrderModal({ order, visible, onClose, onOrderUpdated
     (itemToUpdate as any)[field] = value;
 
     const product = products.find((p) => p.id === itemToUpdate.product_id);
+    const originalItem = order?.items.find((item) => item.product_id === itemToUpdate.product_id);
+    const originalQuantity = originalItem ? originalItem.quantity : 0;
 
-    if (product && itemToUpdate.quantity && itemToUpdate.quantity > product.stock) {
+    if (product && itemToUpdate.quantity && itemToUpdate.quantity > product.stock + originalQuantity) {
       Toast.show({
         type: "error",
         text1: "Error",
-        text2: `Only ${product.stock} items in stock for ${product.name}.`,
+        text2: `Only ${product.stock + originalQuantity} items in stock for ${product.name}.`,
       });
-      itemToUpdate.quantity = product.stock;
+      itemToUpdate.quantity = product.stock + originalQuantity;
     }
 
     updatedItems[index] = itemToUpdate;
@@ -101,7 +103,17 @@ export default function EditOrderModal({ order, visible, onClose, onOrderUpdated
         return;
       }
 
-      setItems([...items, { product_id: availableProducts[0].id, quantity: 1 }]);
+      const productToAdd = availableProducts[0];
+      if (productToAdd.stock < 1) {
+        Toast.show({
+          type: "error",
+          text1: "Error",
+          text2: `Product ${productToAdd.name} is out of stock.`,
+        });
+        return;
+      }
+
+      setItems([...items, { product_id: productToAdd.id, quantity: 1 }]);
     }
   };
 
