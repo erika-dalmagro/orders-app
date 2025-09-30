@@ -3,7 +3,7 @@
 A web application for managing restaurant orders (tabs), built with:
 
 - **Frontend**: React + TypeScript + Vite
-- **Backend**: Go (Gorilla Mux)
+- **Backend**: Go
 - **Styling**: Tailwind CSS
 - **API Communication**: REST + Axios
 - **Database**: PostgreSQL
