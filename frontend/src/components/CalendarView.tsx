@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import type { Order } from "../types";
 import toast from "react-hot-toast";
+import { formatDate } from "../utils/date";
 
 export default function CalendarView() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [orders, setOrders] = useState<Order[]>([]);
 
-  const formatDate = (date: Date) => {
+  const formatDateForAPI = (date: Date) => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
@@ -15,17 +16,17 @@ export default function CalendarView() {
   };
 
   const fetchOrdersForDate = async (date: Date) => {
-    const formattedDate = formatDate(date);
+    const formattedDate = formatDateForAPI(date);
     try {
       const res = await axios.get(
         `http://localhost:8080/orders/by-date?date=${formattedDate}`
       );
       setOrders(res.data);
-      toast.success(`Orders loaded for ${formattedDate}`);
+      toast.success(`Orders loaded for ${formatDate(date)}`);
     } catch (err) {
       console.error("Failed to fetch orders for date:", err);
       setOrders([]);
-      toast.error(`Failed to load orders for ${formattedDate}`);
+      toast.error(`Failed to load orders for ${formatDate(date)}`);
     }
   };
 
@@ -169,8 +170,7 @@ export default function CalendarView() {
               </div>
               <p className="text-sm text-gray-600 mb-2">
                 Order ID: {order.id} | Date:{" "}
-                {new Date(order.date).toLocaleDateString()}{" "}
-                {new Date(order.date).toLocaleTimeString()}
+                {formatDate(order.date)}
               </p>
               <ul className="list-disc list-inside text-gray-700">
                 {order.items.map((item, i) => (
