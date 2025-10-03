@@ -3,6 +3,7 @@ import ProductManager from "./components/ProductManager";
 import CreateOrderForm from "./components/CreateOrderForm";
 import OrderList from "./components/OrderList";
 import EditOrderModal from "./components/EditOrderModal";
+import KitchenView from "./components/KitchenView";
 import type { Order } from "./types";
 import {
   Disclosure,
@@ -19,6 +20,7 @@ const navigation = [
   { name: "Products", href: "products" },
   { name: "Tables", href: "tables" },
   { name: "Calendar", href: "calendar" },
+  { name: "Kitchen", href: "kitchen" },
 ] as const;
 
 function classNames(...classes: string[]) {
@@ -27,7 +29,7 @@ function classNames(...classes: string[]) {
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<
-    "products" | "orders" | "tables" | "calendar"
+    "products" | "orders" | "tables" | "calendar" | "kitchen"
   >("orders");
   const [refreshOrders, setRefreshOrders] = useState(false);
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
@@ -128,6 +130,8 @@ export default function App() {
                 <TableManager />
               ) : activeTab === "calendar" ? (
                 <CalendarView />
+              ) : activeTab === "kitchen" ? (
+                <KitchenView />
               ) : (
                 <>
                   <CreateOrderForm onOrderCreated={reloadOrders} />
