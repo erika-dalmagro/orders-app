@@ -72,9 +72,10 @@ func CreateOrder(c *gin.Context) {
 
 	// Create order
 	order := models.Order{
-		TableID: req.TableID,
-		Status:  "open",
-		Date:    parsedDate,
+		TableID:       req.TableID,
+		Status:        "open",
+		Date:          parsedDate,
+		KitchenStatus: "Waiting",
 	}
 
 	database.DB.Create(&order)
@@ -310,4 +311,42 @@ func DeleteOrder(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Order deleted successfully and stock restored"})
+}
+
+// Status "open"
+func GetKitchenOrders(c *gin.Context) {
+	var orders []models.Order
+	database.DB.Preload("Table").Preload("Items.Product").Where("status = ?", "open").Order("created_at asc").Find(&orders)
+	c.JSON(http.StatusOK, orders)
+}
+
+type UpdateKitchenStatusRequest struct {
+	Status string `json:"status" binding:"required"`
+}
+
+func UpdateKitchenStatus(c *gin.Context) {
+	id := c.Param("id")
+	var order models.Order
+	if err := database.DB.First(&order, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Order not found"})
+		return
+	}
+
+	var req UpdateKitchenStatusRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Status validation
+	newStatus := req.Status
+	if newStatus != "Waiting" && newStatus != "Preparing" && newStatus != "Ready" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid kitchen status"})
+		return
+	}
+
+	order.KitchenStatus = newStatus
+	database.DB.Save(&order)
+
+	c.JSON(http.StatusOK, order)
 }

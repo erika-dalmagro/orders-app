@@ -28,4 +28,8 @@ func RegisterRoutes(r *gin.Engine) {
 	r.GET("/tables/:id", controllers.GetTable)
 	r.PUT("/tables/:id", controllers.UpdateTable)
 	r.DELETE("/tables/:id", controllers.DeleteTable)
+
+	// Kitchen
+	r.GET("/kitchen/orders", controllers.GetKitchenOrders)
+	r.PUT("/orders/:id/kitchen-status", controllers.UpdateKitchenStatus)
 }
