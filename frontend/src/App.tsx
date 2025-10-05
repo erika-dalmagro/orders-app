@@ -129,7 +129,7 @@ export default function App() {
               ) : activeTab === "tables" ? (
                 <TableManager />
               ) : activeTab === "calendar" ? (
-                <CalendarView />
+                <CalendarView onEditOrder={handleEditOrder} />
               ) : activeTab === "kitchen" ? (
                 <KitchenView />
               ) : (

@@ -4,7 +4,11 @@ import type { Order } from "../types";
 import toast from "react-hot-toast";
 import { formatDate } from "../utils/date";
 
-export default function CalendarView() {
+interface CalendarViewProps {
+  onEditOrder: (order: Order) => void;
+}
+
+export default function CalendarView({ onEditOrder }: CalendarViewProps) {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [orders, setOrders] = useState<Order[]>([]);
 
@@ -22,13 +26,35 @@ export default function CalendarView() {
         `http://localhost:8080/orders/by-date?date=${formattedDate}`
       );
       setOrders(res.data);
-      toast.success(`Orders loaded for ${formatDate(date)}`);
     } catch (err) {
       console.error("Failed to fetch orders for date:", err);
       setOrders([]);
       toast.error(`Failed to load orders for ${formatDate(date)}`);
     }
   };
+  
+  const closeOrder = async (id: number) => {
+    try {
+      await axios.put(`http://localhost:8080/orders/${id}/close`);
+      toast.success("Order closed successfully!");
+      fetchOrdersForDate(selectedDate);
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || "Error closing order.");
+    }
+  };
+
+  const handleDeleteOrder = async (id: number) => {
+    if (window.confirm("Are you sure you want to delete this order?")) {
+      try {
+        await axios.delete(`http://localhost:8080/orders/${id}`);
+        toast.success("Order deleted successfully!");
+        fetchOrdersForDate(selectedDate);
+      } catch (error: any) {
+        toast.error(error.response?.data?.error || "Error deleting order.");
+      }
+    }
+  };
+
 
   useEffect(() => {
     fetchOrdersForDate(selectedDate);
@@ -60,8 +86,7 @@ export default function CalendarView() {
     // Fill days of the month
     for (let day = 1; day <= numDays; day++) {
       const currentDayDate = new Date(year, month, day);
-      const isSelected =
-        currentDayDate.toDateString() === selectedDate.toDateString();
+      const isSelected = currentDayDate.toDateString() === selectedDate.toDateString();
       const today = new Date();
       const isToday = currentDayDate.toDateString() === today.toDateString();
 
@@ -81,31 +106,14 @@ export default function CalendarView() {
   };
 
   const goToPreviousMonth = () => {
-    setSelectedDate(
-      (prevDate) => new Date(prevDate.getFullYear(), prevDate.getMonth() - 1, 1)
-    );
+    setSelectedDate((prevDate) => new Date(prevDate.getFullYear(), prevDate.getMonth() - 1, 1));
   };
 
   const goToNextMonth = () => {
-    setSelectedDate(
-      (prevDate) => new Date(prevDate.getFullYear(), prevDate.getMonth() + 1, 1)
-    );
+    setSelectedDate((prevDate) => new Date(prevDate.getFullYear(), prevDate.getMonth() + 1, 1));
   };
 
-  const monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
+  const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   return (
@@ -113,78 +121,51 @@ export default function CalendarView() {
       <h2 className="text-xl font-bold mb-4">Orders Calendar View</h2>
 
       <div className="flex justify-between items-center mb-4">
-        <button
-          onClick={goToPreviousMonth}
-          className="bg-gray-300 text-gray-800 px-3 py-1 rounded"
-        >
-          Previous
-        </button>
-        <h3 className="text-lg font-semibold text-gray-900">
-          {monthNames[selectedDate.getMonth()]} {selectedDate.getFullYear()}
-        </h3>
-        <button
-          onClick={goToNextMonth}
-          className="bg-gray-300 text-gray-800 px-3 py-1 rounded"
-        >
-          Next
-        </button>
+        <button onClick={goToPreviousMonth} className="bg-gray-300 text-gray-800 px-3 py-1 rounded">Previous</button>
+        <h3 className="text-lg font-semibold text-gray-900">{monthNames[selectedDate.getMonth()]} {selectedDate.getFullYear()}</h3>
+        <button onClick={goToNextMonth} className="bg-gray-300 text-gray-800 px-3 py-1 rounded">Next</button>
       </div>
-
       <div className="grid grid-cols-7 gap-1 text-gray-900">
-        {dayNames.map((day) => (
-          <div
-            key={day}
-            className="font-semibold text-center py-2 border-b-2 border-gray-300"
-          >
-            {day}
-          </div>
-        ))}
+        {dayNames.map((day) => (<div key={day} className="font-semibold text-center py-2 border-b-2 border-gray-300">{day}</div>))}
         {renderCalendarDays()}
       </div>
 
-      <h3 className="text-xl font-bold mt-6 mb-3 text-gray-900">
-        Orders for {formatDate(selectedDate)}:
-      </h3>
+      <h3 className="text-xl font-bold mt-6 mb-3 text-gray-900">Orders for {formatDate(selectedDate)}:</h3>
       {orders.length === 0 ? (
         <p className="text-gray-700">No orders for this date.</p>
       ) : (
-        <ul className="space-y-3">
+        <div className="space-y-3">
           {orders.map((order) => (
-            <li
-              key={order.id}
-              className="border p-4 rounded-md shadow-sm bg-white"
-            >
-              <div className="flex justify-between items-center mb-2">
-                <h4 className="font-semibold text-lg text-gray-900">
-                  Table {order.table?.name || `#${order.table_id}`}
-                </h4>
-                <span
-                  className={`px-2 py-1 rounded text-sm font-medium ${
-                    order.status === "open"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-gray-100 text-gray-800"
-                  }`}
-                >
-                  {order.status.toUpperCase()}
-                </span>
+            <div key={order.id} className="border p-4 rounded-md shadow-sm bg-white">
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <h4 className="font-semibold text-lg text-gray-900">
+                    Table {order.table?.name || `#${order.table_id}`}
+                  </h4>
+                  <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                      order.status === "open"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-gray-100 text-gray-800"
+                    }`}>{order.status.toUpperCase()}</span>
+                </div>
+                <div className="flex gap-2">
+                  {order.status === "open" && (
+                    <button onClick={() => closeOrder(order.id)} className="bg-red-500 text-white px-3 py-1 rounded text-sm">Close</button>
+                  )}
+                  <button onClick={() => onEditOrder(order)} className="bg-yellow-500 text-white px-3 py-1 rounded text-sm">Edit</button>
+                  <button onClick={() => handleDeleteOrder(order.id)} className="bg-red-700 text-white px-3 py-1 rounded text-sm">Delete</button>
+                </div>
               </div>
-              <p className="text-sm text-gray-600 mb-2">
-                Order ID: {order.id} | Date:{" "}
-                {formatDate(order.date)}
-              </p>
-              <ul className="list-disc list-inside text-gray-700">
+              <ul className="list-disc list-inside text-gray-700 text-sm">
                 {order.items.map((item, i) => (
                   <li key={i}>
-                    {item.product?.name} x {item.quantity} — $
-                    {item.product
-                      ? (item.product.price * item.quantity).toFixed(2)
-                      : "N/A"}
+                    {item.product?.name} x {item.quantity}
                   </li>
                 ))}
               </ul>
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );
