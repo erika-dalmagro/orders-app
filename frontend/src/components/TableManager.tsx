@@ -10,7 +10,7 @@ export default function TableManager() {
   const [capacity, setCapacity] = useState("");
   const [singleTab, setSingleTab] = useState(true);
   const [editingTableInModal, setEditingTableInModal] = useState<Table | null>(
-    null
+    null,
   );
 
   const loadTables = () => {
@@ -66,7 +66,7 @@ export default function TableManager() {
       } catch (error: any) {
         toast.error(
           error.response?.data?.error ||
-            "Error deleting table. Check console for details."
+            "Error deleting table. Check console for details.",
         );
         console.error(error);
       }

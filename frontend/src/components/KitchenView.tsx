@@ -36,9 +36,12 @@ export default function KitchenView() {
 
   const handleUpdateStatus = async (orderId: number, newStatus: string) => {
     try {
-      await axios.put(`http://localhost:8080/orders/${orderId}/kitchen-status`, {
-        status: newStatus,
-      });
+      await axios.put(
+        `http://localhost:8080/orders/${orderId}/kitchen-status`,
+        {
+          status: newStatus,
+        },
+      );
       toast.success(`Order moved to "${newStatus}"`);
       fetchKitchenOrders();
     } catch (error) {
@@ -85,7 +88,9 @@ export default function KitchenView() {
                   ))}
                 </ul>
                 <button
-                  onClick={() => handleUpdateStatus(order.id, KITCHEN_STATUS.PREPARING)}
+                  onClick={() =>
+                    handleUpdateStatus(order.id, KITCHEN_STATUS.PREPARING)
+                  }
                   className="mt-3 w-full bg-orange-500 text-white py-1 rounded hover:bg-orange-600"
                 >
                   Start Preparation
@@ -105,7 +110,7 @@ export default function KitchenView() {
           {preparingOrders.length === 0 ? (
             <p className="text-gray-500">No orders in preparation</p>
           ) : (
-             preparingOrders.map((order) => (
+            preparingOrders.map((order) => (
               <div key={order.id} className="bg-white p-3 rounded shadow mb-3">
                 <p className="font-semibold">Table: {order.table?.name}</p>
                 <ul className="list-disc list-inside text-sm mt-1">
@@ -115,8 +120,10 @@ export default function KitchenView() {
                     </li>
                   ))}
                 </ul>
-                 <button
-                  onClick={() => handleUpdateStatus(order.id, KITCHEN_STATUS.READY)}
+                <button
+                  onClick={() =>
+                    handleUpdateStatus(order.id, KITCHEN_STATUS.READY)
+                  }
                   className="mt-3 w-full bg-red-500 text-white py-1 rounded hover:bg-red-600"
                 >
                   Finish
@@ -133,13 +140,13 @@ export default function KitchenView() {
           <p className="text-sm text-gray-500 mb-4">
             {readyOrders.length} orders ready
           </p>
-           {readyOrders.length === 0 ? (
+          {readyOrders.length === 0 ? (
             <p className="text-gray-500">No orders ready</p>
           ) : (
-             readyOrders.map((order) => (
+            readyOrders.map((order) => (
               <div key={order.id} className="bg-white p-3 rounded shadow mb-3">
                 <p className="font-semibold">Table: {order.table?.name}</p>
-                 <ul className="list-disc list-inside text-sm mt-1">
+                <ul className="list-disc list-inside text-sm mt-1">
                   {order.items.map((item) => (
                     <li key={item.id}>
                       {item.quantity}x {item.product?.name}

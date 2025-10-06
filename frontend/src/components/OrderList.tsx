@@ -38,7 +38,7 @@ export default function OrderList({ onEditOrder }: OrderListProps) {
   const handleDeleteOrder = async (id: number) => {
     if (
       window.confirm(
-        "Are you sure you want to delete this order? This will also delete its items."
+        "Are you sure you want to delete this order? This will also delete its items.",
       )
     ) {
       try {

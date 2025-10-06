@@ -14,7 +14,7 @@ export default function CreateOrderForm({
   const [selectedItems, setSelectedItems] = useState<OrderItem[]>([]);
   const [selectedTableId, setSelectedTableId] = useState<number | null>(null);
   const [orderDate, setOrderDate] = useState<string>(
-    new Date().toISOString().split("T")[0]
+    new Date().toISOString().split("T")[0],
   );
   const [error, setError] = useState("");
 

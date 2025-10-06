@@ -23,7 +23,7 @@ export default function CalendarView({ onEditOrder }: CalendarViewProps) {
     const formattedDate = formatDateForAPI(date);
     try {
       const res = await axios.get(
-        `http://localhost:8080/orders/by-date?date=${formattedDate}`
+        `http://localhost:8080/orders/by-date?date=${formattedDate}`,
       );
       setOrders(res.data);
     } catch (err) {
@@ -32,7 +32,7 @@ export default function CalendarView({ onEditOrder }: CalendarViewProps) {
       toast.error(`Failed to load orders for ${formatDate(date)}`);
     }
   };
-  
+
   const closeOrder = async (id: number) => {
     try {
       await axios.put(`http://localhost:8080/orders/${id}/close`);
@@ -54,7 +54,6 @@ export default function CalendarView({ onEditOrder }: CalendarViewProps) {
       }
     }
   };
-
 
   useEffect(() => {
     fetchOrdersForDate(selectedDate);
@@ -79,14 +78,18 @@ export default function CalendarView({ onEditOrder }: CalendarViewProps) {
     // Fill leading empty days
     for (let i = 0; i < firstDay; i++) {
       days.push(
-        <div key={`empty-${i}`} className="p-2 text-center text-gray-500"></div>
+        <div
+          key={`empty-${i}`}
+          className="p-2 text-center text-gray-500"
+        ></div>,
       );
     }
 
     // Fill days of the month
     for (let day = 1; day <= numDays; day++) {
       const currentDayDate = new Date(year, month, day);
-      const isSelected = currentDayDate.toDateString() === selectedDate.toDateString();
+      const isSelected =
+        currentDayDate.toDateString() === selectedDate.toDateString();
       const today = new Date();
       const isToday = currentDayDate.toDateString() === today.toDateString();
 
@@ -99,21 +102,40 @@ export default function CalendarView({ onEditOrder }: CalendarViewProps) {
           onClick={() => setSelectedDate(currentDayDate)}
         >
           {day}
-        </div>
+        </div>,
       );
     }
     return days;
   };
 
   const goToPreviousMonth = () => {
-    setSelectedDate((prevDate) => new Date(prevDate.getFullYear(), prevDate.getMonth() - 1, 1));
+    setSelectedDate(
+      (prevDate) =>
+        new Date(prevDate.getFullYear(), prevDate.getMonth() - 1, 1),
+    );
   };
 
   const goToNextMonth = () => {
-    setSelectedDate((prevDate) => new Date(prevDate.getFullYear(), prevDate.getMonth() + 1, 1));
+    setSelectedDate(
+      (prevDate) =>
+        new Date(prevDate.getFullYear(), prevDate.getMonth() + 1, 1),
+    );
   };
 
-  const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
   const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   return (
@@ -121,39 +143,82 @@ export default function CalendarView({ onEditOrder }: CalendarViewProps) {
       <h2 className="text-xl font-bold mb-4">Orders Calendar View</h2>
 
       <div className="flex justify-between items-center mb-4">
-        <button onClick={goToPreviousMonth} className="bg-gray-300 text-gray-800 px-3 py-1 rounded">Previous</button>
-        <h3 className="text-lg font-semibold text-gray-900">{monthNames[selectedDate.getMonth()]} {selectedDate.getFullYear()}</h3>
-        <button onClick={goToNextMonth} className="bg-gray-300 text-gray-800 px-3 py-1 rounded">Next</button>
+        <button
+          onClick={goToPreviousMonth}
+          className="bg-gray-300 text-gray-800 px-3 py-1 rounded"
+        >
+          Previous
+        </button>
+        <h3 className="text-lg font-semibold text-gray-900">
+          {monthNames[selectedDate.getMonth()]} {selectedDate.getFullYear()}
+        </h3>
+        <button
+          onClick={goToNextMonth}
+          className="bg-gray-300 text-gray-800 px-3 py-1 rounded"
+        >
+          Next
+        </button>
       </div>
       <div className="grid grid-cols-7 gap-1 text-gray-900">
-        {dayNames.map((day) => (<div key={day} className="font-semibold text-center py-2 border-b-2 border-gray-300">{day}</div>))}
+        {dayNames.map((day) => (
+          <div
+            key={day}
+            className="font-semibold text-center py-2 border-b-2 border-gray-300"
+          >
+            {day}
+          </div>
+        ))}
         {renderCalendarDays()}
       </div>
 
-      <h3 className="text-xl font-bold mt-6 mb-3 text-gray-900">Orders for {formatDate(selectedDate)}:</h3>
+      <h3 className="text-xl font-bold mt-6 mb-3 text-gray-900">
+        Orders for {formatDate(selectedDate)}:
+      </h3>
       {orders.length === 0 ? (
         <p className="text-gray-700">No orders for this date.</p>
       ) : (
         <div className="space-y-3">
           {orders.map((order) => (
-            <div key={order.id} className="border p-4 rounded-md shadow-sm bg-white">
+            <div
+              key={order.id}
+              className="border p-4 rounded-md shadow-sm bg-white"
+            >
               <div className="flex justify-between items-start mb-2">
                 <div>
                   <h4 className="font-semibold text-lg text-gray-900">
                     Table {order.table?.name || `#${order.table_id}`}
                   </h4>
-                  <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                  <span
+                    className={`px-2 py-0.5 rounded text-xs font-medium ${
                       order.status === "open"
                         ? "bg-green-100 text-green-800"
                         : "bg-gray-100 text-gray-800"
-                    }`}>{order.status.toUpperCase()}</span>
+                    }`}
+                  >
+                    {order.status.toUpperCase()}
+                  </span>
                 </div>
                 <div className="flex gap-2">
                   {order.status === "open" && (
-                    <button onClick={() => closeOrder(order.id)} className="bg-red-500 text-white px-3 py-1 rounded text-sm">Close</button>
+                    <button
+                      onClick={() => closeOrder(order.id)}
+                      className="bg-red-500 text-white px-3 py-1 rounded text-sm"
+                    >
+                      Close
+                    </button>
                   )}
-                  <button onClick={() => onEditOrder(order)} className="bg-yellow-500 text-white px-3 py-1 rounded text-sm">Edit</button>
-                  <button onClick={() => handleDeleteOrder(order.id)} className="bg-red-700 text-white px-3 py-1 rounded text-sm">Delete</button>
+                  <button
+                    onClick={() => onEditOrder(order)}
+                    className="bg-yellow-500 text-white px-3 py-1 rounded text-sm"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteOrder(order.id)}
+                    className="bg-red-700 text-white px-3 py-1 rounded text-sm"
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
               <ul className="list-disc list-inside text-gray-700 text-sm">

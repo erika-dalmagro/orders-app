@@ -55,7 +55,7 @@ export default function EditOrderModal({
                 ...allTables
                   .filter((t) => t.id === currentTableId)
                   .map((t) => JSON.stringify(t)),
-              ])
+              ]),
             ).map((t) => JSON.parse(t));
 
             setAvailableTables(combinedTables);
@@ -65,7 +65,7 @@ export default function EditOrderModal({
             }
           })
           .catch(() =>
-            toast.error("Failed to load available tables for order editing.")
+            toast.error("Failed to load available tables for order editing."),
           );
       })
       .catch(() => toast.error("Failed to load all tables for order editing."));
@@ -78,7 +78,7 @@ export default function EditOrderModal({
   const handleUpdateItem = (
     index: number,
     field: keyof OrderItem,
-    value: any
+    value: any,
   ) => {
     const updatedItems = [...items];
     updatedItems[index] = { ...updatedItems[index], [field]: value };
