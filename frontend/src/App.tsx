@@ -55,9 +55,15 @@ export default function App() {
     <div className="min-h-dvh text-gray-900 bg-gray-100">
       <div className="min-h-full">
         <Disclosure as="nav" className="bg-gray-800">
-          <div className="mx-auto max-w-7xl">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex h-16 items-center justify-between">
               <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <h1 className="text-white font-bold text-xl">
+                    Restaurant System
+                  </h1>
+                </div>
+
                 <div className="hidden md:block">
                   <div className="ml-10 flex items-baseline space-x-4">
                     {navigation.map((item) => (
@@ -115,49 +121,38 @@ export default function App() {
             </div>
           </DisclosurePanel>
         </Disclosure>
-
-        <header className="bg-white shadow-sm">
-          <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-              Restaurant System
-            </h1>
-          </div>
-        </header>
         <main>
           <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto p-6">
-              {activeTab === "dashboard" ? (
-                <Dashboard />
-              ) : activeTab === "products" ? (
-                <ProductManager />
-              ) : activeTab === "tables" ? (
-                <TableManager />
-              ) : activeTab === "calendar" ? (
-                <CalendarView onEditOrder={handleEditOrder} />
-              ) : activeTab === "kitchen" ? (
-                <KitchenView />
-              ) : (
-                <>
-                  <CreateOrderForm onOrderCreated={reloadOrders} />
-                  <OrderList
-                    key={refreshOrders.toString()}
-                    onEditOrder={handleEditOrder}
-                  />
-                </>
-              )}
-
-              {editingOrder && (
-                <EditOrderModal
-                  order={editingOrder}
-                  onClose={handleCloseModal}
-                  onOrderUpdated={handleOrderUpdated}
+            {activeTab === "dashboard" ? (
+              <Dashboard />
+            ) : activeTab === "products" ? (
+              <ProductManager />
+            ) : activeTab === "tables" ? (
+              <TableManager />
+            ) : activeTab === "calendar" ? (
+              <CalendarView onEditOrder={handleEditOrder} />
+            ) : activeTab === "kitchen" ? (
+              <KitchenView />
+            ) : (
+              <>
+                <CreateOrderForm onOrderCreated={reloadOrders} />
+                <OrderList
+                  key={refreshOrders.toString()}
+                  onEditOrder={handleEditOrder}
                 />
-              )}
-            </div>
+              </>
+            )}
           </div>
         </main>
       </div>
       <Toaster />
+      {editingOrder && (
+        <EditOrderModal
+          order={editingOrder}
+          onClose={handleCloseModal}
+          onOrderUpdated={handleOrderUpdated}
+        />
+      )}
     </div>
   );
 }
