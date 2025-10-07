@@ -4,6 +4,7 @@ import CreateOrderForm from "./components/CreateOrderForm";
 import OrderList from "./components/OrderList";
 import EditOrderModal from "./components/EditOrderModal";
 import KitchenView from "./components/KitchenView";
+import Dashboard from "./components/Dashboard";
 import type { Order } from "./types";
 import {
   Disclosure,
@@ -16,6 +17,7 @@ import TableManager from "./components/TableManager";
 import CalendarView from "./components/CalendarView";
 
 const navigation = [
+  { name: "Dashboard", href: "dashboard" },
   { name: "Orders", href: "orders" },
   { name: "Products", href: "products" },
   { name: "Tables", href: "tables" },
@@ -29,8 +31,8 @@ function classNames(...classes: string[]) {
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<
-    "products" | "orders" | "tables" | "calendar" | "kitchen"
-  >("orders");
+    "dashboard" | "products" | "orders" | "tables" | "calendar" | "kitchen"
+  >("dashboard");
   const [refreshOrders, setRefreshOrders] = useState(false);
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
 
@@ -124,7 +126,9 @@ export default function App() {
         <main>
           <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto p-6">
-              {activeTab === "products" ? (
+              {activeTab === "dashboard" ? (
+                <Dashboard />
+              ) : activeTab === "products" ? (
                 <ProductManager />
               ) : activeTab === "tables" ? (
                 <TableManager />
