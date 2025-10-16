@@ -7,22 +7,26 @@ import KitchenView from "./components/KitchenView";
 import Dashboard from "./components/Dashboard";
 import type { Order } from "./types";
 import {
-  Disclosure,
-  DisclosureButton,
-  DisclosurePanel,
-} from "@headlessui/react";
-import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+  Bars3Icon,
+  XMarkIcon,
+  HomeIcon,
+  ShoppingBagIcon,
+  CubeIcon,
+  ViewColumnsIcon,
+  CalendarIcon,
+  FireIcon,
+} from "@heroicons/react/24/outline";
 import { Toaster } from "react-hot-toast";
 import TableManager from "./components/TableManager";
 import CalendarView from "./components/CalendarView";
 
 const navigation = [
-  { name: "Dashboard", href: "dashboard" },
-  { name: "Orders", href: "orders" },
-  { name: "Products", href: "products" },
-  { name: "Tables", href: "tables" },
-  { name: "Calendar", href: "calendar" },
-  { name: "Kitchen", href: "kitchen" },
+  { name: "Dashboard", href: "dashboard", icon: HomeIcon },
+  { name: "Orders", href: "orders", icon: ShoppingBagIcon },
+  { name: "Products", href: "products", icon: CubeIcon },
+  { name: "Tables", href: "tables", icon: ViewColumnsIcon },
+  { name: "Calendar", href: "calendar", icon: CalendarIcon },
+  { name: "Kitchen", href: "kitchen", icon: FireIcon },
 ] as const;
 
 function classNames(...classes: string[]) {
@@ -35,6 +39,7 @@ export default function App() {
   >("dashboard");
   const [refreshOrders, setRefreshOrders] = useState(false);
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const reloadOrders = () => setRefreshOrders(!refreshOrders);
 
@@ -52,77 +57,73 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-dvh text-gray-900 bg-gray-100">
-      <div className="min-h-full">
-        <Disclosure as="nav" className="bg-gray-800">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex h-16 items-center justify-between">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <h1 className="text-white font-bold text-xl">
-                    Restaurant System
-                  </h1>
-                </div>
-
-                <div className="hidden md:block">
-                  <div className="ml-10 flex items-baseline space-x-4">
-                    {navigation.map((item) => (
-                      <button
-                        key={item.name}
-                        onClick={() => setActiveTab(item.href)}
-                        className={classNames(
-                          activeTab === item.href
-                            ? "bg-gray-900 text-white"
-                            : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                          "rounded-md px-3 py-2 text-sm font-medium",
-                        )}
-                      >
-                        {item.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <div className="-mr-2 flex md:hidden">
-                {/* Mobile menu */}
-                <DisclosureButton className="group relative inline-flex items-center justify-center rounded-md bg-gray-800 p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 focus:outline-hidden">
-                  <span className="absolute -inset-0.5" />
-                  <span className="sr-only">Open main menu</span>
-                  <Bars3Icon
-                    aria-hidden="true"
-                    className="block size-6 group-data-open:hidden"
-                  />
-                  <XMarkIcon
-                    aria-hidden="true"
-                    className="hidden size-6 group-data-open:block"
-                  />
-                </DisclosureButton>
-              </div>
-            </div>
+    <div className="flex h-screen bg-gray-100 text-gray-900">
+      {/* Sidebar */}
+      <aside
+        className={classNames(
+          "fixed inset-y-0 left-0 z-50 w-64 bg-gray-800 border-r border-gray-700 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0",
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        <div className="flex flex-col h-full">
+          <div className="flex items-center justify-between p-4 border-b border-gray-700">
+            <h2 className="text-xl font-bold text-white">
+              Restaurant System
+            </h2>
+            <button
+              type="button"
+              className="lg:hidden text-gray-400 hover:text-white"
+              onClick={() => setIsSidebarOpen(false)}
+            >
+              <XMarkIcon className="h-6 w-6" />
+            </button>
           </div>
 
-          <DisclosurePanel className="md:hidden">
-            <div className="space-y-1 px-2 pt-2 pb-3 sm:px-3">
-              {navigation.map((item) => (
-                <DisclosureButton
+          <nav className="flex-1 p-4 space-y-2">
+            {navigation.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.href;
+
+              return (
+                <button
                   key={item.name}
-                  as="a"
-                  onClick={() => setActiveTab(item.href)}
+                  onClick={() => {
+                    setActiveTab(item.href);
+                    setIsSidebarOpen(false);
+                  }}
                   className={classNames(
-                    activeTab === item.href
+                    "w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all text-sm font-medium",
+                    isActive
                       ? "bg-gray-900 text-white"
-                      : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                    "block rounded-md px-3 py-2 text-base font-medium",
+                      : "text-gray-300 hover:bg-gray-700 hover:text-white"
                   )}
                 >
-                  {item.name}
-                </DisclosureButton>
-              ))}
-            </div>
-          </DisclosurePanel>
-        </Disclosure>
-        <main>
-          <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+                  <Icon className="h-5 w-5" />
+                  <span>{item.name}</span>
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+      </aside>
+
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header */}
+        <header className="bg-white border-b border-gray-200 px-4 py-3 lg:px-6">
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              className="lg:hidden text-gray-500 hover:text-gray-700"
+              onClick={() => setIsSidebarOpen(true)}
+            >
+              <Bars3Icon className="h-6 w-6" />
+            </button>
+            <h1 className="text-lg font-semibold">
+              {navigation.find((item) => item.href === activeTab)?.name || "Dashboard"}
+            </h1>
+          </div>
+        </header>
+        <main className="flex-1 overflow-y-auto bg-gray-100 p-4 lg:p-6">
             {activeTab === "dashboard" ? (
               <Dashboard />
             ) : activeTab === "products" ? (
@@ -142,9 +143,9 @@ export default function App() {
                 />
               </>
             )}
-          </div>
         </main>
       </div>
+
       <Toaster />
       {editingOrder && (
         <EditOrderModal
