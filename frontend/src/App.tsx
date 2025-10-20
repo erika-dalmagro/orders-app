@@ -6,6 +6,8 @@ import EditOrderModal from "./components/EditOrderModal";
 import KitchenView from "./components/KitchenView";
 import Dashboard from "./components/Dashboard";
 import type { Order } from "./types";
+import { useTranslation } from "react-i18next";
+
 import {
   Bars3Icon,
   XMarkIcon,
@@ -34,6 +36,7 @@ function classNames(...classes: string[]) {
 }
 
 export default function App() {
+  const { t, i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState<
     "dashboard" | "products" | "orders" | "tables" | "calendar" | "kitchen"
   >("dashboard");
@@ -56,6 +59,15 @@ export default function App() {
     handleCloseModal();
   };
 
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+  };
+
+  const translatedNavigation = navigation.map(item => ({
+    ...item,
+    name: t(item.href)
+  }));
+
   return (
     <div className="flex h-screen bg-gray-100 text-gray-900">
       {/* Sidebar */}
@@ -68,7 +80,7 @@ export default function App() {
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between p-4 border-b border-gray-700">
             <h2 className="text-xl font-bold text-white">
-              Restaurant System
+              {t("restaurantSystem")}
             </h2>
             <button
               type="button"
@@ -80,7 +92,7 @@ export default function App() {
           </div>
 
           <nav className="flex-1 p-4 space-y-2">
-            {navigation.map((item) => {
+            {translatedNavigation.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.href;
 
@@ -104,6 +116,22 @@ export default function App() {
               );
             })}
           </nav>
+
+          {/* Language buttons */}
+          <div className="p-4 border-t border-gray-700 flex justify-center gap-2">
+            <button
+              onClick={() => changeLanguage("pt")}
+              className={`px-3 py-1 rounded ${i18n.language.startsWith('pt') ? 'bg-blue-600 text-white' : 'bg-gray-600 text-gray-300 hover:bg-gray-500'}`}
+            >
+              PT
+            </button>
+            <button
+              onClick={() => changeLanguage("en")}
+              className={`px-3 py-1 rounded ${i18n.language.startsWith('en') ? 'bg-blue-600 text-white' : 'bg-gray-600 text-gray-300 hover:bg-gray-500'}`}
+            >
+              EN
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -119,7 +147,7 @@ export default function App() {
               <Bars3Icon className="h-6 w-6" />
             </button>
             <h1 className="text-lg font-semibold">
-              {navigation.find((item) => item.href === activeTab)?.name || "Dashboard"}
+              {translatedNavigation.find((item) => item.href === activeTab)?.name || t("dashboard")}
             </h1>
           </div>
         </header>
