@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import type { Order, Product, OrderItem, Table } from "../types";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 interface EditOrderModalProps {
   order: Order | null;
@@ -14,6 +15,7 @@ export default function EditOrderModal({
   onClose,
   onOrderUpdated,
 }: EditOrderModalProps) {
+  const { t } = useTranslation();
   const [selectedTableId, setSelectedTableId] = useState<number | null>(null);
   const [items, setItems] = useState<OrderItem[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -104,11 +106,11 @@ export default function EditOrderModal({
     setError("");
 
     if (!selectedTableId) {
-      toast.error("Please select a table.");
+      toast.error(t("selectTablePrompt"));
       return;
     }
     if (items.length === 0) {
-      toast.error("Please add at least one item to the order.");
+      toast.error(t("addOneItemPrompt"));
       return;
     }
 
@@ -121,12 +123,13 @@ export default function EditOrderModal({
         })),
         date: orderDate,
       });
-      toast.success("Order updated successfully!");
+      toast.success(t("orderUpdatedSuccess"));
       onOrderUpdated();
       onClose();
     } catch (err: any) {
-      setError(err.response?.data?.error || "Error updating order");
-      toast.error(err.response?.data?.error || "Error updating order");
+      const errorMessage = err.response?.data?.error || t("errorUpdatingOrder");
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
@@ -134,7 +137,7 @@ export default function EditOrderModal({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
       <div className="bg-white text-black p-6 rounded-lg shadow-lg w-full max-w-lg">
         <h2 className="text-2xl font-bold mb-4">
-          Edit Order — Table {order.table?.name || `#${order.table_id}`}
+          {t("editOrderTitle", { tableName: order.table?.name || `#${order.table_id}` })}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -142,7 +145,7 @@ export default function EditOrderModal({
               htmlFor="tableSelect"
               className="block text-sm font-medium text-gray-700"
             >
-              Table:
+              {t('tableLabel')}
             </label>
             <select
               id="tableSelect"
@@ -155,17 +158,17 @@ export default function EditOrderModal({
               }
             >
               {availableTables.length === 0 && selectedTableId === null && (
-                <option value="">No tables available</option>
+                <option value="">{t('noTablesAvailable')}</option>
               )}
               {order.table &&
                 !availableTables.some((t) => t.id === order.table?.id) && (
                   <option key={order.table.id} value={order.table.id}>
-                    {order.table.name} (Current Order's Table)
+                    {order.table.name} {t('currentOrderTable')}
                   </option>
                 )}
               {availableTables.map((table) => (
                 <option key={table.id} value={table.id}>
-                  {table.name} (Capacity: {table.capacity})
+                  {table.name} {t('capacityLabel', { capacity: table.capacity })}
                 </option>
               ))}
             </select>
@@ -176,7 +179,7 @@ export default function EditOrderModal({
               htmlFor="orderDate"
               className="block text-sm font-medium text-gray-700"
             >
-              Date:
+              {t('dateLabel')}
             </label>
             <input
               type="date"
@@ -188,7 +191,7 @@ export default function EditOrderModal({
             />
           </div>
 
-          <h3 className="text-xl font-semibold">Itens</h3>
+          <h3 className="text-xl font-semibold">{t('items')}</h3>
           {items.map((item, index) => (
             <div key={index} className="flex gap-2 items-center">
               <select
@@ -200,7 +203,7 @@ export default function EditOrderModal({
               >
                 {products.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.name} (Stock: {p.stock})
+                    {p.name} {t('stockLabel', { stock: p.stock })}
                   </option>
                 ))}
               </select>
@@ -218,7 +221,7 @@ export default function EditOrderModal({
                 onClick={() => handleRemoveItem(index)}
                 className="bg-red-700 text-white px-3 py-1 rounded"
               >
-                Remove
+                {t('remove')}
               </button>
             </div>
           ))}
@@ -229,7 +232,7 @@ export default function EditOrderModal({
             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
             disabled={products.length === 0}
           >
-            + Add Product
+            + {t('addProduct')}
           </button>
 
           {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
@@ -240,13 +243,13 @@ export default function EditOrderModal({
               onClick={onClose}
               className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button
               type="submit"
               className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
             >
-              Save Changes
+              {t('saveChanges')}
             </button>
           </div>
         </form>

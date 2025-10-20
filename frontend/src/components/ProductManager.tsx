@@ -3,14 +3,15 @@ import axios from "axios";
 import type { Product } from "../types";
 import EditProductModal from "./EditProductModal";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 export default function ProductManager() {
+  const { t } = useTranslation();
   const [products, setProducts] = useState<Product[]>([]);
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
-  const [editingProductInModal, setEditingProductInModal] =
-    useState<Product | null>(null);
+  const [editingProductInModal, setEditingProductInModal] = useState<Product | null>(null);
 
   const loadProducts = () => {
     axios
@@ -30,14 +31,14 @@ export default function ProductManager() {
         price: parseFloat(price),
         stock: parseInt(stock),
       });
-      toast.success("Product created successfully!");
+      toast.success(t("productCreatedSuccess"));
 
       setName("");
       setPrice("");
       setStock("");
       loadProducts();
     } catch (error) {
-      toast.error("An error occurred creating product. Check the console.");
+      toast.error(t("errorCreatingProduct"));
       console.error(error);
     }
   };
@@ -56,13 +57,13 @@ export default function ProductManager() {
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm("Are you sure you want to delete this product?")) {
+    if (window.confirm(t("confirmDeleteProduct"))) {
       try {
         await axios.delete(`http://localhost:8080/products/${id}`);
-        toast.success("Product deleted successfully!");
+        toast.success(t("productDeletedSuccess"));
         loadProducts();
       } catch (error) {
-        toast.error("Error deleting product.");
+        toast.error(t("errorDeletingProduct"));
         console.error(error);
       }
     }
@@ -70,18 +71,18 @@ export default function ProductManager() {
 
   return (
     <div className="border p-6 rounded mb-6 shadow">
-      <h2 className="text-xl font-bold mb-4">Product Manager</h2>
+      <h2 className="text-xl font-bold mb-4">{t('productManager')}</h2>
       <form onSubmit={handleSubmit} className="mb-6 flex gap-2">
         <input
           className="border p-2"
-          placeholder="Name"
+          placeholder={t('name')}
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
         />
         <input
           className="border p-2"
-          placeholder="Price"
+          placeholder={t('price')}
           type="number"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
@@ -90,7 +91,7 @@ export default function ProductManager() {
         />
         <input
           className="border p-2"
-          placeholder="Stock"
+          placeholder={t('stock')}
           type="number"
           value={stock}
           onChange={(e) => setStock(e.target.value)}
@@ -101,7 +102,7 @@ export default function ProductManager() {
           className="bg-blue-600 text-white px-4 py-2 rounded"
           type="submit"
         >
-          Add Product
+          {t('add')} {t('products')}
         </button>
       </form>
 
@@ -110,16 +111,16 @@ export default function ProductManager() {
           <thead>
             <tr>
               <th className="py-2 px-4 border-b text-left text-gray-700">
-                Name
+                {t('name')}
               </th>
               <th className="py-2 px-4 border-b text-left text-gray-700">
-                Price
+                {t('price')}
               </th>
               <th className="py-2 px-4 border-b text-left text-gray-700">
-                Stock
+                {t('stock')}
               </th>
               <th className="py-2 px-4 border-b text-left text-gray-700">
-                Actions
+                {t('actions')}
               </th>
             </tr>
           </thead>
@@ -137,13 +138,13 @@ export default function ProductManager() {
                       onClick={() => handleEdit(p)}
                       className="bg-yellow-500 text-white px-3 py-1 rounded"
                     >
-                      Edit
+                      {t('edit')}
                     </button>
                     <button
                       onClick={() => handleDelete(p.id)}
                       className="bg-red-500 text-white px-3 py-1 rounded"
                     >
-                      Delete
+                      {t('delete')}
                     </button>
                   </div>
                 </td>

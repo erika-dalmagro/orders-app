@@ -3,12 +3,14 @@ import axios from "axios";
 import type { Order } from "../types";
 import toast from "react-hot-toast";
 import { formatDate } from "../utils/date";
+import { useTranslation } from "react-i18next";
 
 interface CalendarViewProps {
   onEditOrder: (order: Order) => void;
 }
 
 export default function CalendarView({ onEditOrder }: CalendarViewProps) {
+  const { t } = useTranslation();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [orders, setOrders] = useState<Order[]>([]);
 
@@ -36,21 +38,21 @@ export default function CalendarView({ onEditOrder }: CalendarViewProps) {
   const closeOrder = async (id: number) => {
     try {
       await axios.put(`http://localhost:8080/orders/${id}/close`);
-      toast.success("Order closed successfully!");
+      toast.success(t("orderClosedSuccess"));
       fetchOrdersForDate(selectedDate);
     } catch (error: any) {
-      toast.error(error.response?.data?.error || "Error closing order.");
+      toast.error(error.response?.data?.error || t("errorClosingOrder"));
     }
   };
 
   const handleDeleteOrder = async (id: number) => {
-    if (window.confirm("Are you sure you want to delete this order?")) {
+    if (window.confirm(t("confirmDeleteOrder"))) {
       try {
         await axios.delete(`http://localhost:8080/orders/${id}`);
-        toast.success("Order deleted successfully!");
+        toast.success(t("orderDeletedSuccess"));
         fetchOrdersForDate(selectedDate);
       } catch (error: any) {
-        toast.error(error.response?.data?.error || "Error deleting order.");
+        toast.error(error.response?.data?.error || t("errorDeletingOrder"));
       }
     }
   };
@@ -140,23 +142,23 @@ export default function CalendarView({ onEditOrder }: CalendarViewProps) {
 
   return (
     <div className="border p-6 rounded mb-6 shadow">
-      <h2 className="text-xl font-bold mb-4">Orders Calendar View</h2>
+      <h2 className="text-xl font-bold mb-4">{t('calendarViewTitle')}</h2>
 
       <div className="flex justify-between items-center mb-4">
         <button
           onClick={goToPreviousMonth}
           className="bg-gray-300 text-gray-800 px-3 py-1 rounded"
         >
-          Previous
+          {t('previous')}
         </button>
         <h3 className="text-lg font-semibold text-gray-900">
-          {monthNames[selectedDate.getMonth()]} {selectedDate.getFullYear()}
+           {monthNames[selectedDate.getMonth()]} {selectedDate.getFullYear()}
         </h3>
         <button
           onClick={goToNextMonth}
           className="bg-gray-300 text-gray-800 px-3 py-1 rounded"
         >
-          Next
+          {t('next')}
         </button>
       </div>
       <div className="grid grid-cols-7 gap-1 text-gray-900">
@@ -172,10 +174,10 @@ export default function CalendarView({ onEditOrder }: CalendarViewProps) {
       </div>
 
       <h3 className="text-xl font-bold mt-6 mb-3 text-gray-900">
-        Orders for {formatDate(selectedDate)}:
+        {t('ordersForDate', { date: formatDate(selectedDate) })}:
       </h3>
       {orders.length === 0 ? (
-        <p className="text-gray-700">No orders for this date.</p>
+        <p className="text-gray-700">{t('noOrdersForDate')}</p>
       ) : (
         <div className="space-y-3">
           {orders.map((order) => (
@@ -186,7 +188,7 @@ export default function CalendarView({ onEditOrder }: CalendarViewProps) {
               <div className="flex justify-between items-start mb-2">
                 <div>
                   <h4 className="font-semibold text-lg text-gray-900">
-                    Table {order.table?.name || `#${order.table_id}`}
+                    {t('tableLabel')} {order.table?.name || `#${order.table_id}`}
                   </h4>
                   <span
                     className={`px-2 py-0.5 rounded text-xs font-medium ${
@@ -195,7 +197,7 @@ export default function CalendarView({ onEditOrder }: CalendarViewProps) {
                         : "bg-gray-100 text-gray-800"
                     }`}
                   >
-                    {order.status.toUpperCase()}
+                    {t(order.status === "open" ? "openStatus" : "closedStatus", order.status.toUpperCase())}
                   </span>
                 </div>
                 <div className="flex gap-2">
@@ -204,20 +206,20 @@ export default function CalendarView({ onEditOrder }: CalendarViewProps) {
                       onClick={() => closeOrder(order.id)}
                       className="bg-red-500 text-white px-3 py-1 rounded text-sm"
                     >
-                      Close
+                      {t('closeOrder')}
                     </button>
                   )}
                   <button
                     onClick={() => onEditOrder(order)}
                     className="bg-yellow-500 text-white px-3 py-1 rounded text-sm"
                   >
-                    Edit
+                    {t('edit')}
                   </button>
                   <button
                     onClick={() => handleDeleteOrder(order.id)}
                     className="bg-red-700 text-white px-3 py-1 rounded text-sm"
                   >
-                    Delete
+                    {t('delete')}
                   </button>
                 </div>
               </div>

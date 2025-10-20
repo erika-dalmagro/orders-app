@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import type { Order } from "../types";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 interface OrderListProps {
   onEditOrder: (order: Order) => void;
 }
 
 export default function OrderList({ onEditOrder }: OrderListProps) {
+  const { t } = useTranslation();
   const [orders, setOrders] = useState<Order[]>([]);
 
   const loadOrders = () => {
@@ -24,10 +26,10 @@ export default function OrderList({ onEditOrder }: OrderListProps) {
   const closeOrder = async (id: number) => {
     try {
       await axios.put(`http://localhost:8080/orders/${id}/close`);
-      toast.success("Order closed successfully!");
+      toast.success(t("orderClosedSuccess"));
       loadOrders();
     } catch (error: any) {
-      toast.error(error.response?.data?.error || "Error closing order.");
+      toast.error(error.response?.data?.error || t("errorClosingOrder"));
     }
   };
 
@@ -36,36 +38,32 @@ export default function OrderList({ onEditOrder }: OrderListProps) {
   };
 
   const handleDeleteOrder = async (id: number) => {
-    if (
-      window.confirm(
-        "Are you sure you want to delete this order? This will also delete its items.",
-      )
-    ) {
+    if (window.confirm(t("confirmDeleteOrder"))) {
       try {
         await axios.delete(`http://localhost:8080/orders/${id}`);
-        toast.success("Order deleted successfully!");
+        toast.success(t("orderDeletedSuccess"));
         loadOrders();
       } catch (error: any) {
         console.error("Error deleting order:", error);
-        toast.error(error.response?.data?.error || "Error deleting order.");
+        toast.error(error.response?.data?.error || t("errorDeletingOrder"));
       }
     }
   };
 
   return (
     <div>
-      <h2 className="text-xl font-bold mb-2">Orders</h2>
+      <h2 className="text-xl font-bold mb-2">{t('orderListTitle')}</h2>
       {orders.map((order) => (
         <div key={order.id} className="border p-6 mb-3 rounded shadow">
           <div className="flex justify-between items-center">
             <h3 className="font-semibold">
-              Table {order.table?.name || `#${order.table_id}`} —{" "}
+              {t('tableLabel')} {order.table?.name || `#${order.table_id}`} —{" "}
               <span
                 className={
                   order.status === "open" ? "text-green-600" : "text-gray-600"
                 }
               >
-                {order.status.toUpperCase()}
+                {t(order.status)}
               </span>
             </h3>
             <div className="flex gap-2">
@@ -74,20 +72,20 @@ export default function OrderList({ onEditOrder }: OrderListProps) {
                   onClick={() => closeOrder(order.id)}
                   className="bg-red-500 text-white px-3 py-1 rounded"
                 >
-                  Close Order
+                  {t('closeOrder')}
                 </button>
               )}
               <button
                 onClick={() => handleEditOrder(order)}
                 className="bg-yellow-500 text-white px-3 py-1 rounded"
               >
-                Edit
+                {t('edit')}
               </button>
               <button
                 onClick={() => handleDeleteOrder(order.id)}
                 className="bg-red-700 text-white px-3 py-1 rounded"
               >
-                Delete
+                {t('delete')}
               </button>
             </div>
           </div>

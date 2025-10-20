@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import type { Order } from "../types";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 const KITCHEN_STATUS = {
   WAITING: "Waiting",
@@ -10,6 +11,7 @@ const KITCHEN_STATUS = {
 };
 
 export default function KitchenView() {
+  const { t } = useTranslation();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -20,7 +22,7 @@ export default function KitchenView() {
         setOrders(res.data);
       })
       .catch(() => {
-        toast.error("Failed to load kitchen orders.");
+        toast.error(t("failedToLoadKitchen"));
       })
       .finally(() => {
         setLoading(false);
@@ -42,10 +44,11 @@ export default function KitchenView() {
           status: newStatus,
         },
       );
-      toast.success(`Order moved to "${newStatus}"`);
+      const translatedStatus = t(newStatus.toLowerCase());
+      toast.success(t("orderMovedTo", { status: translatedStatus }));
       fetchKitchenOrders();
     } catch (error) {
-      toast.error("Failed to update order status.");
+      toast.error(t("failedToUpdateStatus"));
     }
   };
 
@@ -54,7 +57,7 @@ export default function KitchenView() {
   };
 
   if (loading) {
-    return <div>Loading kitchen orders...</div>;
+    return <div>{t('loading')}...</div>;
   }
 
   const waitingOrders = filterOrdersByStatus(KITCHEN_STATUS.WAITING);
@@ -63,23 +66,23 @@ export default function KitchenView() {
 
   return (
     <div className="border p-6 rounded shadow bg-white">
-      <h2 className="text-2xl font-bold mb-4 text-gray-800">Kitchen</h2>
-      <p className="text-gray-600 mb-6">View of orders for preparation</p>
+      <h2 className="text-2xl font-bold mb-4 text-gray-800">{t('kitchenViewTitle')}</h2>
+      <p className="text-gray-600 mb-6">{t('kitchenViewSubtitle')}</p>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-gray-50 p-4 rounded-lg border-l-4 border-orange-400">
           <h3 className="font-bold text-lg text-gray-800 mb-2">
-            🕒 Waiting for Preparation
+            🕒 {t('waitingForPreparation')}
           </h3>
           <p className="text-sm text-gray-500 mb-4">
-            {waitingOrders.length} orders in queue
+            {t('ordersInQueue', { count: waitingOrders.length })}
           </p>
           {waitingOrders.length === 0 ? (
-            <p className="text-gray-500">No orders waiting</p>
+            <p className="text-gray-500">{t('noOrdersWaiting')}</p>
           ) : (
             waitingOrders.map((order) => (
               <div key={order.id} className="bg-white p-3 rounded shadow mb-3">
-                <p className="font-semibold">Table: {order.table?.name}</p>
+                <p className="font-semibold">{t('tableLabel')} {order.table?.name}</p>
                 <ul className="list-disc list-inside text-sm mt-1">
                   {order.items.map((item) => (
                     <li key={item.id}>
@@ -93,7 +96,7 @@ export default function KitchenView() {
                   }
                   className="mt-3 w-full bg-orange-500 text-white py-1 rounded hover:bg-orange-600"
                 >
-                  Start Preparation
+                  {t('startPreparation')}
                 </button>
               </div>
             ))
@@ -102,17 +105,17 @@ export default function KitchenView() {
 
         <div className="bg-gray-50 p-4 rounded-lg border-l-4 border-red-400">
           <h3 className="font-bold text-lg text-gray-800 mb-2">
-            🍳 In Preparation
+            🍳 {t('inPreparation')}
           </h3>
           <p className="text-sm text-gray-500 mb-4">
-            {preparingOrders.length} orders being prepared
+            {t('ordersBeingPrepared', { count: preparingOrders.length })}
           </p>
           {preparingOrders.length === 0 ? (
-            <p className="text-gray-500">No orders in preparation</p>
+            <p className="text-gray-500">{t('noOrdersInPreparation')}</p>
           ) : (
             preparingOrders.map((order) => (
               <div key={order.id} className="bg-white p-3 rounded shadow mb-3">
-                <p className="font-semibold">Table: {order.table?.name}</p>
+                <p className="font-semibold">{t('tableLabel')} {order.table?.name}</p>
                 <ul className="list-disc list-inside text-sm mt-1">
                   {order.items.map((item) => (
                     <li key={item.id}>
@@ -126,7 +129,7 @@ export default function KitchenView() {
                   }
                   className="mt-3 w-full bg-red-500 text-white py-1 rounded hover:bg-red-600"
                 >
-                  Finish
+                  {t('finish')}
                 </button>
               </div>
             ))
@@ -135,17 +138,17 @@ export default function KitchenView() {
 
         <div className="bg-gray-50 p-4 rounded-lg border-l-4 border-green-400">
           <h3 className="font-bold text-lg text-gray-800 mb-2">
-            ✅ Ready to Serve
+            ✅ {t('readyToServe')}
           </h3>
           <p className="text-sm text-gray-500 mb-4">
-            {readyOrders.length} orders ready
+            {t('ordersReady', { count: readyOrders.length })}
           </p>
           {readyOrders.length === 0 ? (
-            <p className="text-gray-500">No orders ready</p>
+            <p className="text-gray-500">{t('noOrdersReady')}</p>
           ) : (
             readyOrders.map((order) => (
               <div key={order.id} className="bg-white p-3 rounded shadow mb-3">
-                <p className="font-semibold">Table: {order.table?.name}</p>
+                <p className="font-semibold">{t('tableLabel')} {order.table?.name}</p>
                 <ul className="list-disc list-inside text-sm mt-1">
                   {order.items.map((item) => (
                     <li key={item.id}>

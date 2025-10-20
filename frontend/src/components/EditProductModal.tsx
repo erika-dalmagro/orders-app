@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import type { Product } from "../types";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 interface EditProductModalProps {
   product: Product | null;
@@ -14,6 +15,7 @@ export default function EditProductModal({
   onClose,
   onProductUpdated,
 }: EditProductModalProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
@@ -42,12 +44,13 @@ export default function EditProductModal({
         price: parseFloat(price),
         stock: parseInt(stock),
       });
-      toast.success("Product updated successfully!");
+      toast.success(t("productUpdatedSuccess"));
       onProductUpdated();
       onClose();
     } catch (err: any) {
-      setError(err.response?.data?.error || "Error updating product.");
-      toast.error(err.response?.data?.error || "Error updating product.");
+      const errorMessage = err.response?.data?.error || t("errorUpdatingProduct");
+      setError(errorMessage);
+      toast.error(errorMessage);
       console.error(err);
     }
   };
@@ -56,7 +59,7 @@ export default function EditProductModal({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white text-gray-900 p-6 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-2xl font-bold mb-4">
-          Edit Product: {product.name}
+          {t("editProductTitle", { productName: product.name })}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -64,12 +67,12 @@ export default function EditProductModal({
               htmlFor="productName"
               className="block text-sm font-medium text-gray-700"
             >
-              Name:
+              {t('name')}:
             </label>
             <input
               id="productName"
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-              placeholder="Product Name"
+              placeholder={t('name')}
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -80,12 +83,12 @@ export default function EditProductModal({
               htmlFor="productPrice"
               className="block text-sm font-medium text-gray-700"
             >
-              Price:
+              {t('price')}:
             </label>
             <input
               id="productPrice"
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-              placeholder="Price"
+              placeholder={t('price')}
               type="number"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
@@ -99,12 +102,12 @@ export default function EditProductModal({
               htmlFor="productStock"
               className="block text-sm font-medium text-gray-700"
             >
-              Stock:
+              {t('stock')}:
             </label>
             <input
               id="productStock"
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-              placeholder="Stock"
+              placeholder={t('stock')}
               type="number"
               value={stock}
               onChange={(e) => setStock(e.target.value)}
@@ -119,13 +122,13 @@ export default function EditProductModal({
               onClick={onClose}
               className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 transition duration-150 ease-in-out"
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button
               type="submit"
               className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-150 ease-in-out"
             >
-              Save Changes
+              {t('saveChanges')}
             </button>
           </div>
         </form>

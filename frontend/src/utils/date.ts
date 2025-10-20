@@ -1,3 +1,5 @@
+import i18n from "../i18n";
+
 export const formatDate = (dateString: string | Date): string => {
   if (!dateString) {
     return "";
@@ -5,10 +7,16 @@ export const formatDate = (dateString: string | Date): string => {
 
   const date = new Date(dateString);
   if (isNaN(date.getTime())) {
-    return "Invalid Date";
+    return i18n.t("invalidDate");
   }
 
-  return new Intl.DateTimeFormat("pt-BR", {
+  const currentLanguage = i18n.language || 'en';
+  const locale = currentLanguage.startsWith('pt') ? 'pt-BR' : 'en-US';
+
+  return new Intl.DateTimeFormat(locale, {
     timeZone: "UTC",
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
   }).format(date);
 };

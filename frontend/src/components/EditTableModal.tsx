@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import type { Table } from "../types";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 interface EditTableModalProps {
   table: Table | null;
@@ -14,6 +15,7 @@ export default function EditTableModal({
   onClose,
   onTableUpdated,
 }: EditTableModalProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [capacity, setCapacity] = useState("");
   const [singleTab, setSingleTab] = useState(true);
@@ -43,12 +45,13 @@ export default function EditTableModal({
         single_tab: singleTab,
       });
 
-      toast.success("Table updated successfully!");
+      toast.success(t("tableUpdatedSuccess"));
       onTableUpdated();
       onClose();
     } catch (err: any) {
-      setError(err.response?.data?.error || "Error updating table.");
-      toast.error(err.response?.data?.error || "Error updating table.");
+      const errorMessage = err.response?.data?.error || t("errorUpdatingTable");
+      setError(errorMessage);
+      toast.error(errorMessage);
       console.error(err);
     }
   };
@@ -56,19 +59,19 @@ export default function EditTableModal({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white text-gray-900 p-6 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-4">Edit Table: {table.name}</h2>
+        <h2 className="text-2xl font-bold mb-4"> {t("editTableTitle", { tableName: table.name })} </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label
               htmlFor="tableName"
               className="block text-sm font-medium text-gray-700"
             >
-              Name:
+              {t('name')}:
             </label>
             <input
               id="tableName"
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-              placeholder="Table Name"
+              placeholder={t('name')}
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -79,12 +82,12 @@ export default function EditTableModal({
               htmlFor="tableCapacity"
               className="block text-sm font-medium text-gray-700"
             >
-              Capacity:
+              {t('capacity')}:
             </label>
             <input
               id="tableCapacity"
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-              placeholder="Capacity"
+              placeholder={t('capacity')}
               type="number"
               value={capacity}
               onChange={(e) => setCapacity(e.target.value)}
@@ -104,7 +107,7 @@ export default function EditTableModal({
               htmlFor="editSingleTab"
               className="text-sm font-medium text-gray-700"
             >
-              Single Tab
+              {t('singleTab')}
             </label>
           </div>
 
@@ -116,13 +119,13 @@ export default function EditTableModal({
               onClick={onClose}
               className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 transition duration-150 ease-in-out"
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button
               type="submit"
               className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-150 ease-in-out"
             >
-              Save Changes
+              {t('saveChanges')}
             </button>
           </div>
         </form>

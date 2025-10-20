@@ -3,12 +3,14 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import type { Product, OrderItem, Table } from "../types";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 export default function CreateOrderForm({
   onOrderCreated,
 }: {
   onOrderCreated: () => void;
 }) {
+  const { t } = useTranslation();
   const [products, setProducts] = useState<Product[]>([]);
   const [tables, setTables] = useState<Table[]>([]);
   const [selectedItems, setSelectedItems] = useState<OrderItem[]>([]);
@@ -43,7 +45,7 @@ export default function CreateOrderForm({
 
   const addItem = () => {
     if (products?.length === 0) {
-      toast.error("Products not loaded yet.");
+      toast.error(t("productsNotLoaded"));
       return;
     }
 
@@ -70,12 +72,12 @@ export default function CreateOrderForm({
     setError("");
 
     if (!selectedTableId) {
-      toast.error("Please select a table.");
+      toast.error(t("selectTablePrompt"));
       return;
     }
 
     if (selectedItems?.length === 0) {
-      toast.error("Please add at least one item to the order.");
+      toast.error(t("addOneItemPrompt"));
       return;
     }
 
@@ -86,23 +88,24 @@ export default function CreateOrderForm({
         date: orderDate,
       });
 
-      toast.success("Order created successfully!");
+      toast.success(t("orderCreatedSuccess"));
       setSelectedItems([]);
       loadAvailableTables();
       onOrderCreated();
     } catch (err: any) {
-      setError(err.response?.data?.error || "Error creating order");
-      toast.error(err.response?.data?.error || "Error creating order");
+      const errorMessage = err.response?.data?.error || t("errorCreatingOrder");
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
   return (
     <div className="border p-6 rounded mb-6 shadow">
-      <h2 className="text-xl font-bold mb-2">Create New Order</h2>
+      <h2 className="text-xl font-bold mb-2">{t('createOrderFormTitle')}</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="flex gap-4 items-center">
           <label htmlFor="tableSelect" className="mr-2 font-medium">
-            Table:
+            {t('tableLabel')}
           </label>
           <select
             id="tableSelect"
@@ -113,17 +116,17 @@ export default function CreateOrderForm({
             disabled={tables?.length === 0}
           >
             {tables?.length === 0 && (
-              <option value="">No tables available</option>
+              <option value="">{t('noTablesAvailable')}</option>
             )}
             {tables?.map((table) => (
               <option key={table.id} value={table.id}>
-                {table.name} (Capacity: {table.capacity})
+                {table.name} {t('capacityLabel', { capacity: table.capacity })}
               </option>
             ))}
           </select>
 
           <label htmlFor="orderDate" className="mr-2 font-medium">
-            Date:
+            {t('dateLabel')}
           </label>
           <input
             type="date"
@@ -141,7 +144,7 @@ export default function CreateOrderForm({
               className="bg-blue-400 px-3 py-1 rounded"
               disabled={products?.length === 0}
             >
-              + Add Product
+              + {t('addProduct')}
             </button>
           </div>
         </div>
@@ -157,7 +160,7 @@ export default function CreateOrderForm({
             >
               {products?.map((p) => (
                 <option key={p.id} value={p.id}>
-                  {p.name} (Stock: {p.stock})
+                  {p.name} {t('stockLabel', { stock: p.stock })}
                 </option>
               ))}
             </select>
@@ -175,7 +178,7 @@ export default function CreateOrderForm({
               onClick={() => removeItem(index)}
               className="bg-red-700 text-white px-3 py-1 rounded"
             >
-              Remove
+              {t('remove')}
             </button>
           </div>
         ))}
@@ -187,7 +190,7 @@ export default function CreateOrderForm({
           className="bg-green-600 text-white px-4 py-2 rounded"
           disabled={!selectedTableId || selectedItems?.length === 0}
         >
-          Create Order
+          {t('createOrder')}
         </button>
       </form>
     </div>

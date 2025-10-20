@@ -3,8 +3,10 @@ import axios from "axios";
 import type { Table } from "../types";
 import toast from "react-hot-toast";
 import EditTableModal from "./EditTableModal";
+import { useTranslation } from "react-i18next";
 
 export default function TableManager() {
+  const { t } = useTranslation();
   const [tables, setTables] = useState<Table[]>([]);
   const [name, setName] = useState("");
   const [capacity, setCapacity] = useState("");
@@ -32,14 +34,14 @@ export default function TableManager() {
         capacity: parseInt(capacity),
         single_tab: singleTab,
       });
-      toast.success("Table created successfully!");
+      toast.success(t("tableCreatedSuccess"));
 
       setName("");
       setCapacity("");
       setSingleTab(true);
       loadTables();
     } catch (error) {
-      toast.error("An error occurred creating table. Check the console.");
+      toast.error(t("errorCreatingTable"));
       console.error(error);
     }
   };
@@ -58,15 +60,14 @@ export default function TableManager() {
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm("Are you sure you want to delete this table?")) {
+    if (window.confirm(t("confirmDeleteTable"))) {
       try {
         await axios.delete(`http://localhost:8080/tables/${id}`);
-        toast.success("Table deleted successfully!");
+        toast.success(t("tableDeletedSuccess"));
         loadTables();
       } catch (error: any) {
         toast.error(
-          error.response?.data?.error ||
-            "Error deleting table. Check console for details.",
+          t(error.response?.data?.error === "Cannot delete table with open orders" ? "errorDeleteTableWithOpenOrders" : "errorDeletingTable")
         );
         console.error(error);
       }
@@ -75,18 +76,18 @@ export default function TableManager() {
 
   return (
     <div className="border p-6 rounded mb-6 shadow">
-      <h2 className="text-xl font-bold mb-4">Table Manager</h2>
+      <h2 className="text-xl font-bold mb-4">{t('tableManager')}</h2>
       <form onSubmit={handleSubmit} className="mb-6 flex gap-2 items-center">
         <input
           className="border p-2"
-          placeholder="Table Name (e.g., Table 1, Bar)"
+          placeholder={t('tableNamePlaceholder')}
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
         />
         <input
           className="border p-2"
-          placeholder="Capacity"
+          placeholder={t('capacity')}
           type="number"
           value={capacity}
           onChange={(e) => setCapacity(e.target.value)}
@@ -105,14 +106,14 @@ export default function TableManager() {
             htmlFor="singleTab"
             className="text-sm font-medium text-gray-700 mr-4"
           >
-            Single Tab
+            {t('singleTab')}
           </label>
         </div>
         <button
           className="bg-blue-600 text-white px-4 py-2 rounded"
           type="submit"
         >
-          Add Table
+          {t('add')} {t('tables')}
         </button>
       </form>
 
@@ -121,40 +122,40 @@ export default function TableManager() {
           <thead>
             <tr>
               <th className="py-2 px-4 border-b text-left text-gray-700">
-                Name
+                {t('name')}
               </th>
               <th className="py-2 px-4 border-b text-left text-gray-700">
-                Capacity
+                {t('capacity')}
               </th>
               <th className="py-2 px-4 border-b text-left text-gray-700">
-                Tab
+                {t('tab')}
               </th>
               <th className="py-2 px-4 border-b text-left text-gray-700">
-                Actions
+                {t('actions')}
               </th>
             </tr>
           </thead>
           <tbody>
-            {tables.map((t) => (
-              <tr key={t.id} className="border-b">
-                <td className="py-2 px-4 text-gray-900">{t.name}</td>
-                <td className="py-2 px-4 text-gray-900">{t.capacity}</td>
+            {tables.map((table) => (
+              <tr key={table.id} className="border-b">
+                <td className="py-2 px-4 text-gray-900">{table.name}</td>
+                <td className="py-2 px-4 text-gray-900">{table.capacity}</td>
                 <td className="py-2 px-4 text-gray-900">
-                  {t.single_tab ? "Single" : "Multiple"}
+                  {table.single_tab ? t('singleTab') : t('multiple')}
                 </td>
                 <td className="py-2 px-4">
                   <div className="flex gap-1">
                     <button
-                      onClick={() => handleEdit(t)}
+                      onClick={() => handleEdit(table)}
                       className="bg-yellow-500 text-white px-3 py-1 rounded"
                     >
-                      Edit
+                      {t('edit')}
                     </button>
                     <button
-                      onClick={() => handleDelete(t.id)}
+                      onClick={() => handleDelete(table.id)}
                       className="bg-red-500 text-white px-3 py-1 rounded"
                     >
-                      Delete
+                      {t('delete')}
                     </button>
                   </div>
                 </td>

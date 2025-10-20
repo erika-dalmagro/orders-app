@@ -4,6 +4,7 @@ import type { Order, Product, Table } from "../types";
 import toast from "react-hot-toast";
 import { formatDate } from "../utils/date";
 import { Package, ShoppingCart, DollarSign, Users } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface ReportData {
   todayRevenue: number;
@@ -36,6 +37,7 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, subValue }) => 
 );
 
 export default function Dashboard() {
+  const { t } = useTranslation();
   const [report, setReport] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -129,7 +131,7 @@ export default function Dashboard() {
         topSellingProducts,
       });
     } catch (error) {
-      toast.error("Failed to load dashboard data.");
+      toast.error(t("failedLoadDashboard"));
     } finally {
       setLoading(false);
     }
@@ -141,14 +143,14 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="text-center p-10 text-gray-500">Loading dashboard...</div>
+      <div className="text-center p-10 text-gray-500">{t('loadingDashboard')}</div>
     );
   }
 
   if (!report) {
     return (
       <div className="text-center p-10 text-red-500">
-        Could not load dashboard data.
+        {t('errorLoadingDashboard')}
       </div>
     );
   }
@@ -158,41 +160,46 @@ export default function Dashboard() {
       ? (report.occupiedTables / report.totalTables) * 100
       : 0;
 
+  const revenueChangeString = t('revenueChangeSinceYesterday', {
+     changePrefix: report.revenueChange >= 0 ? "↑" : "↓",
+     changeValue: report.revenueChange.toFixed(1)
+  });
+
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
-        <p className="text-gray-500">General overview of your restaurant</p>
+        <h1 className="text-3xl font-bold text-gray-800">{t('dashboardTitle')}</h1>
+        <p className="text-gray-500">{t('dashboardSubtitle')}</p>
       </div>
 
       {/* Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
-          title="Today's Sales"
+          title={t('todaySales')}
           value={`$${report.todayRevenue.toFixed(2)}`}
           icon={<DollarSign className="h-6 w-6 text-lime-400" />}
-          subValue={`${report.revenueChange >= 0 ? "↑" : "↓"} ${report.revenueChange.toFixed(1)}% since yesterday`}
+          subValue={revenueChangeString}
         />
 
         <StatCard
-          title="Active Orders"
+          title={t('activeOrders')}
           value={report.activeOrders.toString()}
           icon={<ShoppingCart className="h-6 w-6 text-red-500" />}
-          subValue={`${report.preparingOrders} in preparation`}
+          subValue={t('inPreparationCount', { count: report.preparingOrders })}
         />
 
         <StatCard
-          title="Occupied Tables"
+          title={t('occupiedTables')}
           value={`${report.occupiedTables}/${report.totalTables}`}
           icon={<Users className="h-6 w-6 text-yellow-400" />}
-          subValue={`${occupancy.toFixed(0)}% occupancy`}
+          subValue={t('occupancyPercentage', { percentage: occupancy.toFixed(0) })}
         />
 
         <StatCard
-          title="Low Stock"
+          title={t('lowStock')}
           value={report.lowStockItems.toString()}
           icon={<Package className="h-6 w-6 text-red-500" />}
-          subValue={`products below minimum`}
+          subValue={t('lowStockSubtitle')}
         />
       </div>
 
@@ -200,7 +207,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h3 className="text-lg font-semibold text-gray-600 mb-4">
-            Recent Orders
+            {t('recentOrders')}
           </h3>
           {report.recentOrders.length > 0 ? (
             <ul className="space-y-3">
@@ -209,27 +216,27 @@ export default function Dashboard() {
                   key={order.id}
                   className="flex justify-between items-center text-sm"
                 >
-                  <span>Table {order.table?.name || `#${order.table_id}`}</span>
+                  <span>{t('tableLabel')} {order.table?.name || `#${order.table_id}`}</span>
                   <span className="text-gray-500">
                     {formatDate(order.date)}
                   </span>
                   <span
                     className={`px-2 py-0.5 rounded-full text-xs font-medium ${order.status === "open" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}`}
                   >
-                    {order.status}
+                    {t(order.status === "open" ? "openStatus" : "closedStatus", order.status.toUpperCase())}
                   </span>
                 </li>
               ))}
             </ul>
           ) : (
             <p className="text-gray-400 text-center mt-4">
-              No recent orders found
+              {t('noRecentOrders')}
             </p>
           )}
         </div>
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h3 className="text-lg font-semibold text-gray-600 mb-4">
-            Top Selling Products
+            {t('topSellingProducts')}
           </h3>
           {report.topSellingProducts.length > 0 ? (
             <ul className="space-y-3">
@@ -240,14 +247,14 @@ export default function Dashboard() {
                 >
                   <span>{name}</span>
                   <span className="font-semibold text-gray-500">
-                    {count} sold
+                    {t('soldCount', { count })}
                   </span>
                 </li>
               ))}
             </ul>
           ) : (
             <p className="text-gray-400 text-center mt-4">
-              No sales registered today
+              {t('noSalesToday')}
             </p>
           )}
         </div>
