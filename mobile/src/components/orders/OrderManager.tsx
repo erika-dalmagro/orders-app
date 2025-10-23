@@ -8,10 +8,12 @@ import { useData } from "../../contexts/DataContext";
 import EditOrderModal from "./EditOrderModal";
 import ConfirmDialog from "../shared/ConfirmDialog";
 import { theme } from "../../styles/theme";
+import { useTranslation } from "react-i18next";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export default function OrderManager() {
+  const { t } = useTranslation();
   const { products, availableTables, orders, loading, refreshAll } = useData();
 
   const [selectedItems, setSelectedItems] = useState<Partial<OrderItem>[]>([]);
@@ -35,7 +37,7 @@ export default function OrderManager() {
 
   const addItem = () => {
     if (products?.length === 0) {
-      Toast.show({ type: "info", text1: "No products available to add." });
+      Toast.show({ type: "info", text1: t("noProductsAvailable") });
       return;
     }
 
@@ -44,8 +46,8 @@ export default function OrderManager() {
     if (availableProducts.length === 0) {
       Toast.show({
         type: "error",
-        text1: "Error",
-        text2: "All available products have been added.",
+        text1: t("error"),
+        text2: t("allProductsAddedError")
       });
       return;
     }
@@ -62,8 +64,8 @@ export default function OrderManager() {
       if (isProductAlreadyAdded) {
         Toast.show({
           type: "error",
-          text1: "Error",
-          text2: "This product is already in the order.",
+          text1: t("error"),
+          text2: t("productAlreadyAddedError") 
         });
         return;
       }
@@ -76,8 +78,8 @@ export default function OrderManager() {
     if (product && itemToUpdate.quantity && itemToUpdate.quantity > product.stock) {
       Toast.show({
         type: "error",
-        text1: "Error",
-        text2: `Only ${product.stock} items in stock for ${product.name}.`,
+        text1: t("error"),
+        text2: t("insufficientStockError", { stock: product.stock, productName: product.name }),
       });
       itemToUpdate.quantity = product.stock;
     }
@@ -94,11 +96,11 @@ export default function OrderManager() {
 
   const handleSubmit = async () => {
     if (!selectedTableId) {
-      Toast.show({ type: "error", text1: "Error", text2: "Please select a table." });
+      Toast.show({ type: "error", text1: t("error"), text2: t("selectTablePrompt") });
       return;
     }
     if (selectedItems.length === 0) {
-      Toast.show({ type: "error", text1: "Error", text2: "Please add at least one item." });
+      Toast.show({ type: "error", text1: t("error"), text2: t("addOneItemPrompt") });
       return;
     }
 
@@ -111,12 +113,12 @@ export default function OrderManager() {
         date: orderDate,
       });
 
-      Toast.show({ type: "success", text1: "Success", text2: "Order created successfully!" });
+      Toast.show({ type: "success", text1: t("success"), text2: t("orderCreatedSuccess") });
       setSelectedItems([]);
       refreshAll();
     } catch (err: any) {
-      const errorMessage = err.response?.data?.error || "Error creating order";
-      Toast.show({ type: "error", text1: "Error", text2: errorMessage });
+      const errorMessage = err.response?.data?.error || t("errorCreatingOrder");
+      Toast.show({ type: "error", text1: t("error"), text2: errorMessage });
       console.error(err);
     }
   };
@@ -124,15 +126,11 @@ export default function OrderManager() {
   const closeOrder = async (id: number) => {
     try {
       await axios.put(`${API_URL}/orders/${id}/close`);
-      Toast.show({
-        type: "success",
-        text1: "Success",
-        text2: "Order closed successfully!",
-      });
+      Toast.show({ type: "success", text1: t("success"), text2: t("orderClosedSuccess") });
       refreshAll();
     } catch (error: any) {
-      const message = error.response?.data?.error || "Error closing order.";
-      Toast.show({ type: "error", text1: "Error", text2: message });
+      const message = error.response?.data?.error || t("errorClosingOrder");
+      Toast.show({ type: "error", text1: t("error"), text2: message });
     }
   };
 
@@ -150,15 +148,11 @@ export default function OrderManager() {
     if (orderIdToDelete === null) return;
     try {
       await axios.delete(`${API_URL}/orders/${orderIdToDelete}`);
-      Toast.show({
-        type: "success",
-        text1: "Success",
-        text2: "Order deleted successfully!",
-      });
+      Toast.show({ type: "success", text1: t("success"), text2: t("orderDeletedSuccess") });
       refreshAll();
     } catch (error: any) {
-      const message = error.response?.data?.error || "Error deleting order.";
-      Toast.show({ type: "error", text1: "Error", text2: message });
+      const message = error.response?.data?.error || t("errorDeletingOrder");
+      Toast.show({ type: "error", text1: t("error"), text2: message });
     } finally {
       setIsDialogVisible(false);
       setOrderIdToDelete(null);
@@ -175,24 +169,24 @@ export default function OrderManager() {
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" />
-        <Text>Loading form data...</Text>
+        <Text>{t("loadingFormData")}</Text>
       </View>
     );
   }
 
-  const selectedTableName = availableTables.find((t) => t.id === selectedTableId)?.name || "Select a table";
+  const selectedTableName = availableTables.find((t) => t.id === selectedTableId)?.name || t("selectTable");
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
         <View style={styles.container}>
           <Text variant="headlineMedium" style={styles.title}>
-            Order Manager
+            {t("orderManager")}
           </Text>
           <Card style={styles.container}>
             <Card.Content>
               <Text variant="bodyLarge" style={styles.label}>
-                Table:
+                {t("tableLabel")}
               </Text>
               <Menu
                 visible={tableMenuVisible}
@@ -204,7 +198,7 @@ export default function OrderManager() {
                     onPress={() => setTableMenuVisible(true)}
                     disabled={availableTables.length === 0}
                   >
-                    {availableTables.length === 0 ? "No tables available" : selectedTableName}
+                    {availableTables.length === 0 ? t("noTablesAvailable") : selectedTableName}
                   </Button>
                 }
               >
@@ -215,24 +209,24 @@ export default function OrderManager() {
                       setSelectedTableId(table.id);
                       setTableMenuVisible(false);
                     }}
-                    title={`${table.name} (Capacity: ${table.capacity})`}
+                    title={`${table.name} ${t("capacityLabel", { capacity: table.capacity })}`}
                   />
                 ))}
               </Menu>
 
               <View style={styles.itemsHeader}>
                 <Text variant="bodyLarge" style={styles.label}>
-                  Products
+                  {t("products")}
                 </Text>
                 <Button mode="contained-tonal" icon="plus" onPress={addItem} disabled={products.length === 0}>
-                  Add Product
+                  {t("addProduct")}
                 </Button>
               </View>
 
               <ScrollView style={styles.scrollView}>
                 {selectedItems.map((item, index) => {
                   const selectedProductName =
-                    products.find((p) => p.id === item.product_id)?.name || "Select Product";
+                    products.find((p) => p.id === item.product_id)?.name || t("selectProduct");
                   return (
                     <View key={index} style={styles.itemRow}>
                       {/* Product Selector */}
@@ -257,7 +251,7 @@ export default function OrderManager() {
                               updateItem(index, "product_id", p.id);
                               setItemMenuVisible(null);
                             }}
-                            title={`${p.name} (Stock: ${p.stock})`}
+                            title={`${p.name} ${t("stockLabel", { stock: p.stock })}`}
                           />
                         ))}
                       </Menu>
@@ -289,7 +283,7 @@ export default function OrderManager() {
                 disabled={!selectedTableId || selectedItems.length === 0}
                 style={styles.createButton}
               >
-                Create Order
+                {t("createOrder")}
               </Button>
             </Card.Actions>
           </Card>
@@ -297,7 +291,7 @@ export default function OrderManager() {
 
         <View style={styles.container}>
           <Text variant="titleLarge" style={styles.title}>
-            Orders
+            {t("ordersTitle")}
           </Text>
           {loading ? (
             <ActivityIndicator animating={true} size="large" />
@@ -305,8 +299,8 @@ export default function OrderManager() {
             orders.map((order) => (
               <Card key={order.id} style={[styles.cardContainer, styles.container]}>
                 <Card.Title
-                  title={`Table: ${order.table?.name || `#${order.table_id}`}`}
-                  subtitle={order.status.toUpperCase()}
+                  title={`${t("tableLabel")} ${order.table?.name || `#${order.table_id}`}`}
+                  subtitle={t(order.status === "open" ? "openStatus" : "closedStatus")}
                   subtitleStyle={order.status === "open" ? styles.statusOpen : styles.statusClosed}
                 />
                 <Card.Content>
@@ -319,16 +313,16 @@ export default function OrderManager() {
                 <Card.Actions>
                   {order.status === "open" && (
                     <Button style={styles.editButton} onPress={() => handleEditOrder(order)}>
-                      <Text style={styles.buttonText}>Edit</Text>
+                      <Text style={styles.buttonText}>{t("edit")}</Text>
                     </Button>
                   )}
                   {order.status === "open" && (
                     <Button style={styles.closeButton} onPress={() => closeOrder(order.id)}>
-                      <Text style={styles.buttonText}>Close Order</Text>
+                      <Text style={styles.buttonText}>{t("closeOrder")}</Text>
                     </Button>
                   )}
                   <Button style={styles.deleteButton} onPress={() => handleDeleteOrder(order.id)}>
-                    <Text style={styles.buttonText}>Delete</Text>
+                    <Text style={styles.buttonText}>{t("delete")}</Text>
                   </Button>
                 </Card.Actions>
               </Card>
@@ -336,10 +330,11 @@ export default function OrderManager() {
           )}
           <ConfirmDialog
             visible={isDialogVisible}
-            title="Delete Order"
-            message="Are you sure you want to delete this order? This will also delete its items."
+            title={t("confirmDeleteOrderTitle")}
+            message={t("confirmDeleteOrderMessage")}
             onCancel={() => setIsDialogVisible(false)}
             onConfirm={handleConfirmDelete}
+            confirmText={t("delete")}
           />
         </View>
 

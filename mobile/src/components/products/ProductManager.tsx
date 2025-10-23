@@ -8,10 +8,12 @@ import EditProductModal from "./EditProductModal";
 import { useData } from "../../contexts/DataContext";
 import ConfirmDialog from "../shared/ConfirmDialog";
 import { theme } from "../../styles/theme";
+import { useTranslation } from "react-i18next";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export default function ProductManager() {
+  const { t } = useTranslation();
   const { products, loading, refreshAll } = useData();
 
   const [name, setName] = useState("");
@@ -26,7 +28,7 @@ export default function ProductManager() {
 
   const handleSubmit = async () => {
     if (!name || !price || !stock) {
-      Toast.show({ type: "error", text1: "Validation Error", text2: "All fields are required." });
+      Toast.show({ type: "error", text1: t("validationError"), text2: t("allFieldsRequired") });
       return;
     }
     try {
@@ -35,17 +37,13 @@ export default function ProductManager() {
         price: parseFloat(price),
         stock: parseInt(stock),
       });
-      Toast.show({
-        type: "success",
-        text1: "Success",
-        text2: "Product created successfully!",
-      });
+      Toast.show({ type: "success", text1: t("success"), text2: t("productCreatedSuccess") });
       setName("");
       setPrice("");
       setStock("");
       refreshAll();
     } catch (error) {
-      Toast.show({ type: "error", text1: "Error", text2: "Could not create product." });
+      Toast.show({ type: "error", text1: t("error"), text2: t("errorCreatingProduct") });
       console.error(error);
     }
   };
@@ -70,15 +68,11 @@ export default function ProductManager() {
 
     try {
       await axios.delete(`${API_URL}/products/${productIdToDelete}`);
-      Toast.show({
-        type: "success",
-        text1: "Success",
-        text2: "Product deleted successfully!",
-      });
+      Toast.show({ type: "success", text1: t("success"), text2: t("productDeletedSuccess") });
       refreshAll();
     } catch (error: any) {
-      const message = error.response?.data?.error || "Error deleting product.";
-      Toast.show({ type: "error", text1: "Error", text2: message });
+      const message = error.response?.data?.error || t("errorDeletingProduct");
+      Toast.show({ type: "error", text1: t("error"), text2: message });
       console.error(error);
     } finally {
       setIsDialogVisible(false);
@@ -96,7 +90,7 @@ export default function ProductManager() {
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" />
-        <Text>Loading products...</Text>
+        <Text>{t("loadingProducts")}</Text>
       </View>
     );
   }
@@ -106,20 +100,20 @@ export default function ProductManager() {
       <ScrollView style={styles.container}>
         <View style={styles.container}>
           <Text variant="headlineMedium" style={styles.title}>
-            Product Manager
+            {t("productManager")}
           </Text>
           <Card style={styles.container}>
             <Card.Content>
-              <TextInput label="Product Name" value={name} onChangeText={setName} style={styles.input} />
+              <TextInput label={t("name")} value={name} onChangeText={setName} style={styles.input} />
               <TextInput
-                label="Price"
+                label={t("price")}
                 value={price}
                 onChangeText={setPrice}
                 keyboardType="numeric"
                 style={styles.input}
               />
               <TextInput
-                label="Stock"
+                label={t("stock")}
                 value={stock}
                 onChangeText={setStock}
                 keyboardType="numeric"
@@ -128,7 +122,7 @@ export default function ProductManager() {
             </Card.Content>
             <Card.Actions>
               <Button mode="contained" onPress={handleSubmit}>
-                Create Product
+                {t("add")} {t("products")}
               </Button>
             </Card.Actions>
           </Card>
@@ -136,20 +130,20 @@ export default function ProductManager() {
 
         <View style={styles.container}>
           <Text variant="titleLarge" style={styles.title}>
-            Products
+            {t("products")}
           </Text>
           {products.map((p) => (
             <Card key={p.id} style={[styles.cardContainer, styles.container]}>
-              <Card.Title title={`Product: ${p.name}`} subtitle={`Stock: ${p.stock}`} />
+              <Card.Title title={`${t("name")}: ${p.name}`} subtitle={`${t("stock")}: ${p.stock}`} />  
               <Card.Content>
-                <Text>Price: $ {p.price.toFixed(2)}</Text>
+                <Text>{t("price")}: $ {p.price.toFixed(2)} </Text>
               </Card.Content>
               <Card.Actions>
                 <Button style={styles.editButton} onPress={() => handleEdit(p)}>
-                  <Text style={styles.buttonText}>Edit</Text>
+                  <Text style={styles.buttonText}>{t("edit")}</Text>
                 </Button>
                 <Button style={styles.deleteButton} onPress={() => handleDelete(p.id)}>
-                  <Text style={styles.buttonText}>Delete</Text>
+                  <Text style={styles.buttonText}>{t("delete")}</Text>
                 </Button>
               </Card.Actions>
             </Card>
@@ -166,10 +160,11 @@ export default function ProductManager() {
 
       <ConfirmDialog
         visible={isDialogVisible}
-        title="Delete Product"
-        message="Are you sure you want to delete this product?"
+        title={t("confirmDeleteTitle")}
+        message={t("confirmDeleteProduct")}
         onCancel={handleCancelDelete}
         onConfirm={handleConfirmDelete}
+        confirmText={t("delete")}
       />
     </SafeAreaView>
   );

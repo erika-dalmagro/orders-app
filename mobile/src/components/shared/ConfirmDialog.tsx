@@ -2,6 +2,7 @@ import React from "react";
 import { Button, Dialog, Portal, Text } from "react-native-paper";
 import { theme } from "../../styles/theme";
 import { StyleSheet } from "react-native";
+import { useTranslation } from "react-i18next";
 
 interface ConfirmDialogProps {
   visible: boolean;
@@ -18,8 +19,10 @@ const ConfirmDialog = ({
   message,
   onCancel,
   onConfirm,
-  confirmText = "Delete",
+  confirmText,
 }: ConfirmDialogProps) => {
+  const { t } = useTranslation();
+
   return (
     <Portal>
       <Dialog style={styles.dialogContainer} visible={visible} onDismiss={onCancel}>
@@ -29,11 +32,11 @@ const ConfirmDialog = ({
         </Dialog.Content>
         <Dialog.Actions style={styles.dialogActions}>
           <Button style={[styles.buttons, styles.dialogCancelButton]} onPress={onCancel}>
-            <Text style={styles.dialogCancelButtonText}>Cancel</Text>
+            <Text style={styles.dialogCancelButtonText}>{t("cancel")}</Text>
           </Button>
 
           <Button style={[styles.buttons, styles.dialogConfirmButton]} onPress={onConfirm}>
-            <Text style={styles.dialogConfirmButtonText}>{confirmText}</Text>
+            <Text style={styles.dialogConfirmButtonText}>{confirmText || t("delete")}</Text>
           </Button>
         </Dialog.Actions>
       </Dialog>

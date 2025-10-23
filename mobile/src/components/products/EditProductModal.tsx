@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 import { Button, Card, Modal, Portal, Text, TextInput } from "react-native-paper";
 import axios from "axios";
 import { Product } from "../../types";
 import Toast from "react-native-toast-message";
 import { theme } from "../../styles/theme";
+import { useTranslation } from "react-i18next";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -21,6 +22,7 @@ export default function EditProductModal({
   onClose,
   onProductUpdated,
 }: EditProductModalProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
@@ -44,13 +46,13 @@ export default function EditProductModal({
       });
       Toast.show({
         type: "success",
-        text1: "Success",
-        text2: "Product updated successfully!",
+        text1: t("success"),
+        text2: t("productUpdatedSuccess"),
       });
       onProductUpdated();
     } catch (err: any) {
-      const message = err.response?.data?.error || "Error updating product.";
-      Toast.show({ type: "error", text1: "Error", text2: message });
+      const message = err.response?.data?.error || t("errorUpdatingProduct");
+      Toast.show({ type: "error", text1: t("error"), text2: message });
     }
   };
 
@@ -59,19 +61,19 @@ export default function EditProductModal({
       <Modal visible={visible} onDismiss={onClose} contentContainerStyle={styles.modalContainer}>
         <Card style={styles.container}>
           <Text variant="headlineMedium" style={styles.title}>
-            Edit Product: {product?.name}
+            {t("editProductTitle", { productName: product?.name })}
           </Text>
           <Card.Content>
-            <TextInput label="Product Name" value={name} onChangeText={setName} style={styles.input} />
+            <TextInput label={t("name")} value={name} onChangeText={setName} style={styles.input} />
             <TextInput
-              label="Price"
+              label={t("price")}
               value={price}
               onChangeText={setPrice}
               keyboardType="numeric"
               style={styles.input}
             />
             <TextInput
-              label="Stock"
+              label={t("stock")}
               value={stock}
               onChangeText={setStock}
               keyboardType="numeric"
@@ -79,8 +81,8 @@ export default function EditProductModal({
             />
           </Card.Content>
           <Card.Actions>
-            <Button onPress={onClose}>Cancel</Button>
-            <Button onPress={handleSubmit}>Save Changes</Button>
+            <Button onPress={onClose}>{t("cancel")}</Button>
+            <Button onPress={handleSubmit}>{t("saveChanges")}</Button>
           </Card.Actions>
         </Card>
       </Modal>

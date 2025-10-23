@@ -7,6 +7,7 @@ import Toast from "react-native-toast-message";
 import { Order } from "../../types";
 import { theme } from "../../styles/theme";
 import { formatDate } from "../../utils/date";
+import { useTranslation } from "react-i18next";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -15,6 +16,7 @@ const formatDateAPI = (date: Date): string => {
 };
 
 export default function CalendarView() {
+  const { t } = useTranslation();
   const [selectedDate, setSelectedDate] = useState(formatDateAPI(new Date()));
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,8 +31,8 @@ export default function CalendarView() {
       setOrders([]);
       Toast.show({
         type: "error",
-        text1: "Error",
-        text2: `Failed to load orders for ${date}`,
+        text1: t("error"),
+        text2: t("failedToLoadOrdersForDate", { date }),
       });
     } finally {
       setLoading(false);
@@ -48,7 +50,7 @@ export default function CalendarView() {
   return (
     <ScrollView style={styles.container}>
       <Text variant="headlineMedium" style={styles.title}>
-        Orders Calendar
+        {t("calendarTitle")}
       </Text>
 
       <Card style={styles.card}>
@@ -57,10 +59,7 @@ export default function CalendarView() {
           current={selectedDate}
           onDayPress={onDayPress}
           markedDates={{
-            [selectedDate]: {
-              selected: true,
-              selectedColor: theme.colors.primary,
-            },
+            [selectedDate]: { selected: true, selectedColor: theme.colors.primary },
           }}
           theme={{
             todayTextColor: theme.colors.primary,
@@ -71,18 +70,18 @@ export default function CalendarView() {
 
       <View style={styles.container}>
         <Text variant="titleLarge" style={styles.title}>
-          Orders for {formatDate(selectedDate)}:
+          {t("ordersForDate", { date: formatDate(selectedDate) })}:
         </Text>
         {loading ? (
           <ActivityIndicator size="large" />
         ) : orders.length === 0 ? (
-          <Text style={styles.noOrdersText}>No orders for this date.</Text>
+          <Text style={styles.noOrdersText}>{t("noOrdersForDate")}</Text>
         ) : (
           orders.map((order) => (
             <Card key={order.id} style={[styles.cardContainer, styles.container]}>
               <Card.Title
-                title={`Table: ${order.table?.name || `#${order.table_id}`}`}
-                subtitle={order.status.toUpperCase()}
+                title={`${t("tableLabel")} ${order.table?.name || `#${order.table_id}`}`}
+                subtitle={t(order.status === "open" ? "openStatus" : "closedStatus")}
                 subtitleStyle={order.status === "open" ? styles.statusOpen : styles.statusClosed}
               />
               <Card.Content>

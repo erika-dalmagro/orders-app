@@ -5,6 +5,7 @@ import axios from "axios";
 import { Table } from "../../types";
 import Toast from "react-native-toast-message";
 import { theme } from "../../styles/theme";
+import { useTranslation } from "react-i18next";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -16,6 +17,7 @@ interface EditTableModalProps {
 }
 
 export default function EditTableModal({ table, visible, onClose, onTableUpdated }: EditTableModalProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [capacity, setCapacity] = useState("");
   const [singleTab, setSingleTab] = useState(true);
@@ -39,13 +41,13 @@ export default function EditTableModal({ table, visible, onClose, onTableUpdated
       });
       Toast.show({
         type: "success",
-        text1: "Success",
-        text2: "Table updated successfully!",
+        text1: t("success"),
+        text2: t("tableUpdatedSuccess"),
       });
       onTableUpdated();
     } catch (err: any) {
-      const message = err.response?.data?.error || "Error updating table.";
-      Toast.show({ type: "error", text1: "Error", text2: message });
+      const message = err.response?.data?.error || t("errorUpdatingTable");
+      Toast.show({ type: "error", text1: t("error"), text2: message });
     }
   };
 
@@ -54,25 +56,25 @@ export default function EditTableModal({ table, visible, onClose, onTableUpdated
       <Modal visible={visible} onDismiss={onClose} contentContainerStyle={styles.modalContainer}>
         <Card style={styles.container}>
           <Text variant="headlineMedium" style={styles.title}>
-            Edit Table: {table?.name}
+            {t("editTableTitle", { tableName: table?.name })}
           </Text>
           <Card.Content>
-            <TextInput label="Table Name" value={name} onChangeText={setName} style={styles.input} />
+            <TextInput label={t("name")} value={name} onChangeText={setName} style={styles.input} />
             <TextInput
-              label="Capacity"
+              label={t("capacity")}
               value={capacity}
               onChangeText={setCapacity}
               keyboardType="numeric"
               style={styles.input}
             />
             <View style={styles.switchContainer}>
-              <Text>Single Tab</Text>
+              <Text>{t("singleTab")}</Text>
               <Switch onValueChange={setSingleTab} value={singleTab} />
             </View>
           </Card.Content>
           <Card.Actions>
-            <Button onPress={onClose}>Cancel</Button>
-            <Button onPress={handleSubmit}>Save Changes</Button>
+            <Button onPress={onClose}>{t("cancel")}</Button>
+            <Button onPress={handleSubmit}>{t("saveChanges")}</Button>
           </Card.Actions>
         </Card>
       </Modal>

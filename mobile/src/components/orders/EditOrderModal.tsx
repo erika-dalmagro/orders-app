@@ -6,6 +6,7 @@ import { Order, Product, Table, OrderItem } from "../../types";
 import Toast from "react-native-toast-message";
 import { theme } from "../../styles/theme";
 import { formatDate } from "../../utils/date";
+import { useTranslation } from "react-i18next";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -17,6 +18,7 @@ interface EditOrderModalProps {
 }
 
 export default function EditOrderModal({ order, visible, onClose, onOrderUpdated }: EditOrderModalProps) {
+  const { t } = useTranslation();
   const [selectedTableId, setSelectedTableId] = useState<number | string>("");
   const [items, setItems] = useState<Partial<OrderItem>[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -64,8 +66,8 @@ export default function EditOrderModal({ order, visible, onClose, onOrderUpdated
       if (isProductAlreadyAdded) {
         Toast.show({
           type: "error",
-          text1: "Error",
-          text2: "This product is already in the order.",
+          text1: t("error"),
+          text2: t("productAlreadyAddedError") 
         });
         return;
       }
@@ -80,8 +82,11 @@ export default function EditOrderModal({ order, visible, onClose, onOrderUpdated
     if (product && itemToUpdate.quantity && itemToUpdate.quantity > product.stock + originalQuantity) {
       Toast.show({
         type: "error",
-        text1: "Error",
-        text2: `Only ${product.stock + originalQuantity} items in stock for ${product.name}.`,
+        text1: t("error"),
+        text2: t("insufficientStockError", {
+          stock: product.stock + originalQuantity,
+          productName: product.name,
+        }),
       });
       itemToUpdate.quantity = product.stock + originalQuantity;
     }
@@ -97,8 +102,8 @@ export default function EditOrderModal({ order, visible, onClose, onOrderUpdated
       if (availableProducts.length === 0) {
         Toast.show({
           type: "error",
-          text1: "Error",
-          text2: "All available products have been added.",
+          text1: t("error"),
+          text2: t("allProductsAddedError"),
         });
         return;
       }
@@ -107,8 +112,8 @@ export default function EditOrderModal({ order, visible, onClose, onOrderUpdated
       if (productToAdd.stock < 1) {
         Toast.show({
           type: "error",
-          text1: "Error",
-          text2: `Product ${productToAdd.name} is out of stock.`,
+          text1: t("error"),
+          text2: t("outOfStockError", { productName: productToAdd.name }),
         });
         return;
       }
@@ -127,32 +132,25 @@ export default function EditOrderModal({ order, visible, onClose, onOrderUpdated
     try {
       await axios.put(`${API_URL}/orders/${order.id}`, {
         table_id: selectedTableId,
-        items: items.map((item) => ({
-          product_id: item.product_id,
-          quantity: item.quantity,
-        })),
+        items: items.map((item) => ({ product_id: item.product_id, quantity: item.quantity })),
         date: orderDate,
       });
-      Toast.show({
-        type: "success",
-        text1: "Success",
-        text2: "Order updated successfully!",
-      });
+      Toast.show({ type: "success", text1: t("success"), text2: t("orderUpdatedSuccess") });
       onOrderUpdated();
     } catch (err: any) {
-      const message = err.response?.data?.error || "Error updating order";
-      Toast.show({ type: "error", text1: "Error", text2: message });
+      const message = err.response?.data?.error || t("errorUpdatingOrder");
+      Toast.show({ type: "error", text1: t("error"), text2: message });
     }
   };
 
-  const selectedTableName = availableTables.find((t) => t.id === selectedTableId)?.name || "Select a table";
+  const selectedTableName = availableTables.find((table) => table.id === selectedTableId)?.name || t("selectTable");
 
   return (
     <Portal>
       <Modal visible={visible} onDismiss={onClose} contentContainerStyle={styles.modalContainer}>
         <Card style={styles.container}>
           <Text variant="headlineMedium" style={styles.title}>
-            Edit Order:
+            {t("editOrderTitle")}
           </Text>
           <ScrollView style={{ maxHeight: "80%" }}>
             <Card.Content>
@@ -177,20 +175,25 @@ export default function EditOrderModal({ order, visible, onClose, onOrderUpdated
                 ))}
               </Menu>
 
-              <TextInput label="Date" value={formatDate(orderDate)} editable={false} style={styles.input} />
+              <TextInput
+                label={t("dateLabel")}
+                value={formatDate(orderDate)}
+                editable={false}
+                style={styles.input}
+              />
 
               <View style={styles.itemsHeader}>
                 <Text variant="bodyLarge" style={styles.label}>
-                  Items
+                  {t("items")}
                 </Text>
                 <Button mode="contained-tonal" icon="plus" onPress={handleAddItem}>
-                  Add Product
+                  {t("addProduct")}
                 </Button>
               </View>
 
               {items.map((item, index) => {
                 const selectedProductName =
-                  products.find((p) => p.id === item.product_id)?.name ?? "Select Product";
+                  products.find((p) => p.id === item.product_id)?.name ?? t("selectProduct");
                 return (
                   <View key={index} style={styles.itemRow}>
                     <Menu
@@ -240,8 +243,8 @@ export default function EditOrderModal({ order, visible, onClose, onOrderUpdated
             </Card.Content>
           </ScrollView>
           <Card.Actions>
-            <Button onPress={onClose}>Cancel</Button>
-            <Button onPress={handleSubmit}>Save Changes</Button>
+            <Button onPress={onClose}>{t("cancel")}</Button>
+            <Button onPress={handleSubmit}>{t("saveChanges")}</Button>
           </Card.Actions>
         </Card>
       </Modal>

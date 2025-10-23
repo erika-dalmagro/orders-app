@@ -8,10 +8,12 @@ import EditTableModal from "./EditTableModal";
 import { useData } from "../../contexts/DataContext";
 import ConfirmDialog from "../shared/ConfirmDialog";
 import { theme } from "../../styles/theme";
+import { useTranslation } from "react-i18next";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export default function TableManager() {
+  const { t } = useTranslation();
   const { tables, loading, refreshAll } = useData();
 
   const [name, setName] = useState("");
@@ -26,7 +28,7 @@ export default function TableManager() {
 
   const handleSubmit = async () => {
     if (!name || !capacity) {
-      Toast.show({ type: "error", text1: "Validation Error", text2: "Name and Capacity are required." });
+      Toast.show({ type: "error", text1: t("validationError"), text2: t("nameCapacityRequired") });
       return;
     }
     try {
@@ -35,13 +37,13 @@ export default function TableManager() {
         capacity: parseInt(capacity),
         single_tab: singleTab,
       });
-      Toast.show({ type: "success", text1: "Success", text2: "Table created successfully!" });
+      Toast.show({ type: "success", text1: t("success"), text2: t("tableCreatedSuccess") });
       setName("");
       setCapacity("");
       setSingleTab(true);
       refreshAll();
     } catch (error) {
-      Toast.show({ type: "error", text1: "Error", text2: "An error occurred creating the table." });
+      Toast.show({ type: "error", text1: t("error"), text2: t("errorCreatingTable") });
       console.error(error);
     }
   };
@@ -66,11 +68,15 @@ export default function TableManager() {
 
     try {
       await axios.delete(`${API_URL}/tables/${tableIdToDelete}`);
-      Toast.show({ type: "success", text1: "Success", text2: "Table deleted successfully!" });
+      Toast.show({ type: "success", text1: t("success"), text2: t("tableDeletedSuccess") });
       refreshAll();
     } catch (error: any) {
-      const message = error.response?.data?.error || "Error deleting table.";
-      Toast.show({ type: "error", text1: "Error", text2: message });
+      const apiErrorKey =
+        error.response?.data?.error === "Cannot delete table with open orders"
+          ? "errorDeleteTableWithOpenOrders"
+          : "errorDeletingTable";
+      const message = t(apiErrorKey);
+      Toast.show({ type: "error", text1: t("error"), text2: message });
       console.error(error);
     } finally {
       setIsDialogVisible(false);
@@ -88,7 +94,7 @@ export default function TableManager() {
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" />
-        <Text>Loading tables...</Text>
+        <Text>{t("loadingTables")}</Text>
       </View>
     );
   }
@@ -98,31 +104,31 @@ export default function TableManager() {
       <ScrollView style={styles.container}>
         <View style={styles.container}>
           <Text variant="headlineMedium" style={styles.title}>
-            Table Manager
+            {t("tableManager")}
           </Text>
           <Card style={styles.container}>
             <Card.Content>
               <TextInput
-                label="Table Name (e.g., Table 1, Bar)"
+                label={t("tableNamePlaceholder")}
                 value={name}
                 onChangeText={setName}
                 style={styles.input}
               />
               <TextInput
-                label="Capacity"
+                label={t("capacity")}
                 value={capacity}
                 onChangeText={setCapacity}
                 keyboardType="numeric"
                 style={styles.input}
               />
               <View style={styles.switchContainer}>
-                <Text>Single Tab</Text>
+                <Text>{t("singleTab")}</Text>
                 <Switch onValueChange={setSingleTab} value={singleTab} />
               </View>
             </Card.Content>
             <Card.Actions>
               <Button mode="contained" onPress={handleSubmit}>
-                Create Table
+                {t("createTable")}
               </Button>
             </Card.Actions>
           </Card>
@@ -130,24 +136,31 @@ export default function TableManager() {
 
         <View style={styles.container}>
           <Text variant="titleLarge" style={styles.title}>
-            Tables
+            {t("tables")}
           </Text>
-          {tables.map((t) => (
-            <Card key={t.id} style={[styles.cardContainer, styles.container]}>
-              <Card.Title title={`Table: ${t.name}`} subtitle={`Capacity: ${t.capacity}`} />
-              <Card.Content>
-                <Text>Tab Mode: {t.single_tab ? "Single" : "Multiple"}</Text>
-              </Card.Content>
-              <Card.Actions>
-                <Button style={styles.editButton} onPress={() => handleEdit(t)}>
-                  <Text style={styles.buttonText}>Edit</Text>
-                </Button>
-                <Button style={styles.deleteButton} onPress={() => handleDelete(t.id)}>
-                  <Text style={styles.buttonText}>Delete</Text>
-                </Button>
-              </Card.Actions>
-            </Card>
-          ))}
+          {tables.map(tableItem => (
+              <Card key={tableItem.id} style={[styles.cardContainer, styles.container]}>
+                <Card.Title
+                  title={`${t("tableLabel")} ${tableItem.name}`}
+                  subtitle={`${t("capacity")}: ${tableItem.capacity}`}
+                />
+               
+                <Card.Content>
+                  <Text>
+                    {t("tabMode")} {tableItem.single_tab ? t("singleTab") : t("multiple")}
+                  </Text>{" "}
+                 
+                </Card.Content>
+                <Card.Actions>
+                  <Button style={styles.editButton} onPress={() => handleEdit(tableItem)}>
+                    <Text style={styles.buttonText}>{t("edit")}</Text>
+                  </Button>
+                  <Button style={styles.deleteButton} onPress={() => handleDelete(tableItem.id)}>
+                    <Text style={styles.buttonText}>{t("delete")}</Text>
+                  </Button>
+                </Card.Actions>
+              </Card>
+            ))}
         </View>
       </ScrollView>
 
@@ -160,10 +173,11 @@ export default function TableManager() {
 
       <ConfirmDialog
         visible={isDialogVisible}
-        title="Delete Table"
-        message="Are you sure you want to delete this table?"
+        title={t("confirmDeleteTitle")}
+        message={t("confirmDeleteTable")}
         onCancel={handleCancelDelete}
         onConfirm={handleConfirmDelete}
+        confirmText={t("delete")}
       />
     </SafeAreaView>
   );
