@@ -83,5 +83,8 @@
   "failedToLoadOrdersForDate": "Failed to load orders for {{date}}",
   "invalidDate": "Invalid Date",
   "success": "Success",
-  "error": "Error"
+  "error": "Error",
+  "markAsServed": "Mark as Served",
+  "orderServedSuccess": "Order marked as served!",
+  "errorServingOrder": "Error marking order as served."
 }

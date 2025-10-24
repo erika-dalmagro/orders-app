@@ -340,7 +340,7 @@ func UpdateKitchenStatus(c *gin.Context) {
 
 	// Status validation
 	newStatus := req.Status
-	if newStatus != "Waiting" && newStatus != "Preparing" && newStatus != "Ready" {
+	if newStatus != "Waiting" && newStatus != "Preparing" && newStatus != "Ready" && newStatus != "Served" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid kitchen status"})
 		return
 	}
@@ -348,5 +348,6 @@ func UpdateKitchenStatus(c *gin.Context) {
 	order.KitchenStatus = newStatus
 	database.DB.Save(&order)
 
+	database.DB.Preload("Table").Preload("Items.Product").First(&order, id)
 	c.JSON(http.StatusOK, order)
 }

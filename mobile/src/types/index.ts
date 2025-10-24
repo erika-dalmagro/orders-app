@@ -3,6 +3,8 @@ export type Product = {
   name: string;
   price: number;
   stock: number;
+  created_at?: string;
+  updated_at?: string;
 };
 
 export type OrderItem = {
@@ -10,6 +12,8 @@ export type OrderItem = {
   product_id: number;
   quantity: number;
   product?: Product;
+  created_at?: string;
+  updated_at?: string;
 };
 
 export type Table = {
@@ -17,6 +21,8 @@ export type Table = {
   name: string;
   capacity: number;
   single_tab: boolean;
+  created_at?: string;
+  updated_at?: string;
 };
 
 export type Order = {
@@ -26,4 +32,7 @@ export type Order = {
   status: string;
   items: OrderItem[];
   date: string;
+  kitchen_status?: string;
+  created_at?: string;
+  updated_at?: string;
 };

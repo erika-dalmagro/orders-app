@@ -83,5 +83,8 @@
   "failedToLoadOrdersForDate": "Falha ao carregar pedidos para {{date}}",
   "invalidDate": "Data Inválida",
   "success": "Sucesso",
-  "error": "Erro"
+  "error": "Erro",
+  "markAsServed": "Marcar como Servido",
+  "orderServedSuccess": "Pedido marcado como servido!",
+  "errorServingOrder": "Erro ao marcar pedido como servido."
 }
