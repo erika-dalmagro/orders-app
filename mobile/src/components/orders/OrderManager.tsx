@@ -346,23 +346,23 @@ export default function OrderManager() {
                     </Text>
                   ))}
                 </Card.Content>
-                <Card.Actions>
+                <Card.Actions style={styles.cardActions}>
                   {order.status === "open" && (
-                    <Button style={styles.editButton} onPress={() => handleEditOrder(order)}>
+                    <Button style={[styles.actionButton, styles.editButton]} onPress={() => handleEditOrder(order)}>
                       <Text style={styles.buttonText}>{t("edit")}</Text>
                     </Button>
                   )}
                   {order.status === "open" && order.kitchen_status === KITCHEN_STATUS.READY && (
-                    <Button style={styles.serveButton} onPress={() => handleServeOrder(order.id)}>
+                    <Button style={[styles.actionButton, styles.serveButton]} onPress={() => handleServeOrder(order.id)}>
                       <Text style={styles.buttonText}>{t("markAsServed")}</Text>
                     </Button>
                   )}
                   {order.status === "open" && (
-                    <Button style={styles.closeButton} onPress={() => closeOrder(order.id)}>
+                    <Button style={[styles.actionButton, styles.closeButton]} onPress={() => closeOrder(order.id)}>
                       <Text style={styles.buttonText}>{t("closeOrder")}</Text>
                     </Button>
                   )}
-                  <Button style={styles.deleteButton} onPress={() => handleDeleteOrder(order.id)}>
+                  <Button style={[styles.actionButton, styles.deleteButton]} onPress={() => handleDeleteOrder(order.id)}>
                     <Text style={styles.buttonText}>{t("delete")}</Text>
                   </Button>
                 </Card.Actions>
@@ -462,5 +462,15 @@ const styles = StyleSheet.create({
   },
   itemText: {
     marginBottom: theme.spacing.xs,
+  },
+  cardActions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+    paddingVertical: theme.spacing.sm,
+    paddingHorizontal: theme.spacing.xs,
+  },
+  actionButton: {
+    margin: theme.spacing.xs,
   },
 });
