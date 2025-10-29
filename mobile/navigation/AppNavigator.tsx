@@ -11,6 +11,7 @@ import ProductScreen from "../src/screens/ProductScreen";
 import TableScreen from "../src/screens/TableScreen";
 import CalendarScreen from "../src/screens/CalendarScreen";
 import { useAppTheme } from "../src/contexts/ThemeContext";
+import KitchenScreen from "../src/screens/KitchenScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -65,6 +66,7 @@ export default function AppNavigator() {
                 [t('orders')]: focused ? 'receipt' : 'receipt-outline',
                 [t('products')]: focused ? 'fast-food' : 'fast-food-outline',
                 [t('tables')]: focused ? 'tablet-landscape' : 'tablet-landscape-outline',
+                [t('kitchen')]: focused ? 'flame' : 'flame-outline',
                 [t('calendar')]: focused ? 'calendar' : 'calendar-outline',
             };
 
@@ -81,6 +83,7 @@ export default function AppNavigator() {
         <Tab.Screen name={t('orders')} component={OrderScreen} />
         <Tab.Screen name={t('products')} component={ProductScreen} />
         <Tab.Screen name={t('tables')} component={TableScreen} />
+        <Tab.Screen name={t('kitchen')} component={KitchenScreen} />
         <Tab.Screen name={t('calendar')} component={CalendarScreen} />
       </Tab.Navigator>
     </NavigationContainer>
