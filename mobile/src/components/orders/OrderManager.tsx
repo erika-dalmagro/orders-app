@@ -54,20 +54,20 @@ export default function OrderManager() {
       Toast.show({
         type: "error",
         text1: t("error"),
-        text2: t("allProductsAddedError")
+        text2: t("allProductsAddedError"),
       });
       return;
     }
 
     const productToAdd = availableProducts[0];
-     if (productToAdd.stock < 1) {
-       Toast.show({
-         type: "error",
-         text1: t("error"),
-         text2: t("outOfStockError", { productName: productToAdd.name }),
-       });
-       return;
-     }
+    if (productToAdd.stock < 1) {
+      Toast.show({
+        type: "error",
+        text1: t("error"),
+        text2: t("outOfStockError", { productName: productToAdd.name }),
+      });
+      return;
+    }
 
     setSelectedItems([...selectedItems, { product_id: productToAdd.id, quantity: 1 }]);
   };
@@ -82,7 +82,7 @@ export default function OrderManager() {
         Toast.show({
           type: "error",
           text1: t("error"),
-          text2: t("productAlreadyAddedError")
+          text2: t("productAlreadyAddedError"),
         });
         return;
       }
@@ -132,11 +132,11 @@ export default function OrderManager() {
 
       Toast.show({ type: "success", text1: t("success"), text2: t("orderCreatedSuccess") });
       setSelectedItems([]);
-      
+
       if (availableTables.length > 0) {
-          setSelectedTableId(availableTables[0].id);
+        setSelectedTableId(availableTables[0].id);
       } else {
-          setSelectedTableId(null);
+        setSelectedTableId(null);
       }
       refreshAll();
     } catch (err: any) {
@@ -168,16 +168,16 @@ export default function OrderManager() {
   };
 
   const handleServeOrder = async (id: number) => {
-      try {
-        await axios.put(`${API_URL}/orders/${id}/kitchen-status`, {
-          status: KITCHEN_STATUS.SERVED, 
-        });
-        Toast.show({ type: "success", text1: t("success"), text2: t("orderServedSuccess") });
-        refreshAll();
-      } catch (error: any) {
-        const message = error.response?.data?.error || t("errorServingOrder");
-        Toast.show({ type: "error", text1: t("error"), text2: message });
-      }
+    try {
+      await axios.put(`${API_URL}/orders/${id}/kitchen-status`, {
+        status: KITCHEN_STATUS.SERVED,
+      });
+      Toast.show({ type: "success", text1: t("success"), text2: t("orderServedSuccess") });
+      refreshAll();
+    } catch (error: any) {
+      const message = error.response?.data?.error || t("errorServingOrder");
+      Toast.show({ type: "error", text1: t("error"), text2: message });
+    }
   };
 
   const handleConfirmDelete = async () => {
@@ -336,7 +336,7 @@ export default function OrderManager() {
               <Card key={order.id} style={[styles.cardContainer, styles.container]}>
                 <Card.Title
                   title={`${t("tableLabel")} ${order.table?.name || `#${order.table_id}`}`}
-                  subtitle={`${t(order.status === "open" ? "openStatus" : "closedStatus")} - ${order.kitchen_status || 'N/A'}`}
+                  subtitle={`${t(order.status === "open" ? "openStatus" : "closedStatus")} - ${order.kitchen_status || "N/A"}`}
                   subtitleStyle={order.status === "open" ? styles.statusOpen : styles.statusClosed}
                 />
                 <Card.Content>
@@ -353,10 +353,10 @@ export default function OrderManager() {
                     </Button>
                   )}
                   {order.status === "open" && order.kitchen_status === KITCHEN_STATUS.READY && (
-                     <Button style={styles.serveButton} onPress={() => handleServeOrder(order.id)}>
-                        <Text style={styles.buttonText}>{t("markAsServed")}</Text>
-                     </Button>
-                   )}
+                    <Button style={styles.serveButton} onPress={() => handleServeOrder(order.id)}>
+                      <Text style={styles.buttonText}>{t("markAsServed")}</Text>
+                    </Button>
+                  )}
                   {order.status === "open" && (
                     <Button style={styles.closeButton} onPress={() => closeOrder(order.id)}>
                       <Text style={styles.buttonText}>{t("closeOrder")}</Text>
@@ -458,8 +458,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#dc3545",
   },
   serveButton: {
-     backgroundColor: "#28a745",
-   },
+    backgroundColor: "#28a745",
+  },
   itemText: {
     marginBottom: theme.spacing.xs,
   },

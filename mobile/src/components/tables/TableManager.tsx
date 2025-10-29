@@ -138,29 +138,28 @@ export default function TableManager() {
           <Text variant="titleLarge" style={styles.title}>
             {t("tables")}
           </Text>
-          {tables.map(tableItem => (
-              <Card key={tableItem.id} style={[styles.cardContainer, styles.container]}>
-                <Card.Title
-                  title={`${t("tableLabel")} ${tableItem.name}`}
-                  subtitle={`${t("capacity")}: ${tableItem.capacity}`}
-                />
-               
-                <Card.Content>
-                  <Text>
-                    {t("tabMode")} {tableItem.single_tab ? t("singleTab") : t("multiple")}
-                  </Text>{" "}
-                 
-                </Card.Content>
-                <Card.Actions>
-                  <Button style={styles.editButton} onPress={() => handleEdit(tableItem)}>
-                    <Text style={styles.buttonText}>{t("edit")}</Text>
-                  </Button>
-                  <Button style={styles.deleteButton} onPress={() => handleDelete(tableItem.id)}>
-                    <Text style={styles.buttonText}>{t("delete")}</Text>
-                  </Button>
-                </Card.Actions>
-              </Card>
-            ))}
+          {tables.map((tableItem) => (
+            <Card key={tableItem.id} style={[styles.cardContainer, styles.container]}>
+              <Card.Title
+                title={`${t("tableLabel")} ${tableItem.name}`}
+                subtitle={`${t("capacity")}: ${tableItem.capacity}`}
+              />
+
+              <Card.Content>
+                <Text>
+                  {t("tabMode")} {tableItem.single_tab ? t("singleTab") : t("multiple")}
+                </Text>{" "}
+              </Card.Content>
+              <Card.Actions>
+                <Button style={styles.editButton} onPress={() => handleEdit(tableItem)}>
+                  <Text style={styles.buttonText}>{t("edit")}</Text>
+                </Button>
+                <Button style={styles.deleteButton} onPress={() => handleDelete(tableItem.id)}>
+                  <Text style={styles.buttonText}>{t("delete")}</Text>
+                </Button>
+              </Card.Actions>
+            </Card>
+          ))}
         </View>
       </ScrollView>
 

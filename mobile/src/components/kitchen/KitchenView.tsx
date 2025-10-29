@@ -6,7 +6,7 @@ import Toast from "react-native-toast-message";
 import { Order } from "../../types";
 import { theme } from "../../styles/theme";
 import { useTranslation } from "react-i18next";
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect } from "@react-navigation/native";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -45,22 +45,21 @@ export default function KitchenView() {
 
       const intervalId = setInterval(fetchKitchenOrders, 15000);
 
-      return () => clearInterval(intervalId); 
-    }, [fetchKitchenOrders])
+      return () => clearInterval(intervalId);
+    }, [fetchKitchenOrders]),
   );
-
 
   const handleUpdateStatus = async (orderId: number, newStatus: string) => {
     try {
       await axios.put(`${API_URL}/orders/${orderId}/kitchen-status`, {
         status: newStatus,
       });
-      
-      let translatedStatusKey = '';
+
+      let translatedStatusKey = "";
       if (newStatus === KITCHEN_STATUS.PREPARING) {
-        translatedStatusKey = 'inPreparation';
+        translatedStatusKey = "inPreparation";
       } else if (newStatus === KITCHEN_STATUS.READY) {
-        translatedStatusKey = 'readyToServe';
+        translatedStatusKey = "readyToServe";
       } else {
         translatedStatusKey = newStatus.toLowerCase(); // Fallback
       }
@@ -69,7 +68,7 @@ export default function KitchenView() {
       Toast.show({
         type: "success",
         text1: t("success"),
-        text2: t("orderMovedTo", { status: translatedStatus })
+        text2: t("orderMovedTo", { status: translatedStatus }),
       });
 
       fetchKitchenOrders();
@@ -101,7 +100,7 @@ export default function KitchenView() {
     <Card key={order.id} style={[styles.cardContainer, styles.container]}>
       <Card.Content>
         <Text variant="titleMedium" style={styles.cardTitle}>
-            {t('tableLabel')} {order.table?.name || `#${order.table_id}`}
+          {t("tableLabel")} {order.table?.name || `#${order.table_id}`}
         </Text>
         {order.items.map((item, i) => (
           <Text key={`${order.id}-${item.id || i}`} style={styles.itemText}>
@@ -115,67 +114,69 @@ export default function KitchenView() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-        <ScrollView style={styles.container}>
-            <Text variant="headlineMedium" style={styles.title}>
-                 {t("kitchenViewTitle")}
-            </Text>
-             <Text style={styles.subtitle}>{t("kitchenViewSubtitle")}</Text>
+      <ScrollView style={styles.container}>
+        <Text variant="headlineMedium" style={styles.title}>
+          {t("kitchenViewTitle")}
+        </Text>
+        <Text style={styles.subtitle}>{t("kitchenViewSubtitle")}</Text>
 
-            {/* Waiting */}
-            <View style={[styles.column, { borderColor: MD2Colors.orange400 }]}>
-                <Text style={styles.columnTitle}>🕒 {t('waitingForPreparation')}</Text>
-                 <Text style={styles.columnSubtitle}>
-                    {t('ordersInQueue', { count: waitingOrders.length })}
-                 </Text>
-                {waitingOrders.length === 0 ? (
-                    <Text style={styles.noOrdersText}>{t('noOrdersWaiting')}</Text>
-                ) : (
-                    waitingOrders.map(order => renderOrderCard(order, (
-                        <Button
-                            mode="contained"
-                            style={{ backgroundColor: MD2Colors.orange500 }}
-                            onPress={() => handleUpdateStatus(order.id, KITCHEN_STATUS.PREPARING)}
-                        >
-                             {t('startPreparation')}
-                        </Button>
-                    )))
-                )}
-            </View>
+        {/* Waiting */}
+        <View style={[styles.column, { borderColor: MD2Colors.orange400 }]}>
+          <Text style={styles.columnTitle}>🕒 {t("waitingForPreparation")}</Text>
+          <Text style={styles.columnSubtitle}>{t("ordersInQueue", { count: waitingOrders.length })}</Text>
+          {waitingOrders.length === 0 ? (
+            <Text style={styles.noOrdersText}>{t("noOrdersWaiting")}</Text>
+          ) : (
+            waitingOrders.map((order) =>
+              renderOrderCard(
+                order,
+                <Button
+                  mode="contained"
+                  style={{ backgroundColor: MD2Colors.orange500 }}
+                  onPress={() => handleUpdateStatus(order.id, KITCHEN_STATUS.PREPARING)}
+                >
+                  {t("startPreparation")}
+                </Button>,
+              ),
+            )
+          )}
+        </View>
 
-            {/* Preparing */}
-            <View style={[styles.column, { borderColor: MD2Colors.red400 }]}>
-                <Text style={styles.columnTitle}>🍳 {t('inPreparation')}</Text>
-                <Text style={styles.columnSubtitle}>
-                    {t('ordersBeingPrepared', { count: preparingOrders.length })}
-                </Text>
-                {preparingOrders.length === 0 ? (
-                     <Text style={styles.noOrdersText}>{t('noOrdersInPreparation')}</Text>
-                ) : (
-                    preparingOrders.map(order => renderOrderCard(order, (
-                        <Button
-                            mode="contained"
-                            style={{ backgroundColor: MD2Colors.red500 }}
-                            onPress={() => handleUpdateStatus(order.id, KITCHEN_STATUS.READY)}
-                         >
-                            {t('finish')}
-                        </Button>
-                    )))
-                )}
-            </View>
+        {/* Preparing */}
+        <View style={[styles.column, { borderColor: MD2Colors.red400 }]}>
+          <Text style={styles.columnTitle}>🍳 {t("inPreparation")}</Text>
+          <Text style={styles.columnSubtitle}>
+            {t("ordersBeingPrepared", { count: preparingOrders.length })}
+          </Text>
+          {preparingOrders.length === 0 ? (
+            <Text style={styles.noOrdersText}>{t("noOrdersInPreparation")}</Text>
+          ) : (
+            preparingOrders.map((order) =>
+              renderOrderCard(
+                order,
+                <Button
+                  mode="contained"
+                  style={{ backgroundColor: MD2Colors.red500 }}
+                  onPress={() => handleUpdateStatus(order.id, KITCHEN_STATUS.READY)}
+                >
+                  {t("finish")}
+                </Button>,
+              ),
+            )
+          )}
+        </View>
 
-            {/* Ready */}
-            <View style={[styles.column, { borderColor: MD2Colors.green400 }]}>
-                 <Text style={styles.columnTitle}>✅ {t('readyToServe')}</Text>
-                 <Text style={styles.columnSubtitle}>
-                    {t('ordersReady', { count: readyOrders.length })}
-                 </Text>
-                {readyOrders.length === 0 ? (
-                     <Text style={styles.noOrdersText}>{t('noOrdersReady')}</Text>
-                ) : (
-                    readyOrders.map(order => renderOrderCard(order))
-                )}
-            </View>
-        </ScrollView>
+        {/* Ready */}
+        <View style={[styles.column, { borderColor: MD2Colors.green400 }]}>
+          <Text style={styles.columnTitle}>✅ {t("readyToServe")}</Text>
+          <Text style={styles.columnSubtitle}>{t("ordersReady", { count: readyOrders.length })}</Text>
+          {readyOrders.length === 0 ? (
+            <Text style={styles.noOrdersText}>{t("noOrdersReady")}</Text>
+          ) : (
+            readyOrders.map((order) => renderOrderCard(order))
+          )}
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -223,7 +224,7 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.md,
   },
   cardTitle: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: theme.spacing.xs,
   },
   itemText: {
@@ -232,7 +233,7 @@ const styles = StyleSheet.create({
     marginLeft: theme.spacing.sm,
   },
   noOrdersText: {
-    textAlign: 'center',
+    textAlign: "center",
     color: theme.colors.muted,
     marginVertical: theme.spacing.md,
   },

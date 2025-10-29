@@ -134,9 +134,11 @@ export default function ProductManager() {
           </Text>
           {products.map((p) => (
             <Card key={p.id} style={[styles.cardContainer, styles.container]}>
-              <Card.Title title={`${t("name")}: ${p.name}`} subtitle={`${t("stock")}: ${p.stock}`} />  
+              <Card.Title title={`${t("name")}: ${p.name}`} subtitle={`${t("stock")}: ${p.stock}`} />
               <Card.Content>
-                <Text>{t("price")}: $ {p.price.toFixed(2)} </Text>
+                <Text>
+                  {t("price")}: $ {p.price.toFixed(2)}{" "}
+                </Text>
               </Card.Content>
               <Card.Actions>
                 <Button style={styles.editButton} onPress={() => handleEdit(p)}>

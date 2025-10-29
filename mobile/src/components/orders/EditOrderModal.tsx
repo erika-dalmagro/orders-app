@@ -67,7 +67,7 @@ export default function EditOrderModal({ order, visible, onClose, onOrderUpdated
         Toast.show({
           type: "error",
           text1: t("error"),
-          text2: t("productAlreadyAddedError") 
+          text2: t("productAlreadyAddedError"),
         });
         return;
       }
@@ -143,7 +143,8 @@ export default function EditOrderModal({ order, visible, onClose, onOrderUpdated
     }
   };
 
-  const selectedTableName = availableTables.find((table) => table.id === selectedTableId)?.name || t("selectTable");
+  const selectedTableName =
+    availableTables.find((table) => table.id === selectedTableId)?.name || t("selectTable");
 
   return (
     <Portal>

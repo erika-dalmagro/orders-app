@@ -13,14 +13,7 @@ interface ConfirmDialogProps {
   confirmText?: string;
 }
 
-const ConfirmDialog = ({
-  visible,
-  title,
-  message,
-  onCancel,
-  onConfirm,
-  confirmText,
-}: ConfirmDialogProps) => {
+const ConfirmDialog = ({ visible, title, message, onCancel, onConfirm, confirmText }: ConfirmDialogProps) => {
   const { t } = useTranslation();
 
   return (

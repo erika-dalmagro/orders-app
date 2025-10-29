@@ -4,7 +4,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import { Appbar, Button, Text } from "react-native-paper";
 import { useTranslation } from "react-i18next";
-import { View } from 'react-native'; 
+import { View } from "react-native";
 
 import OrderScreen from "../src/screens/OrderScreen";
 import ProductScreen from "../src/screens/ProductScreen";
@@ -33,25 +33,25 @@ export default function AppNavigator() {
           tabBarInactiveTintColor: "gray",
           tabBarStyle: { backgroundColor: theme.colors.surface },
           headerRight: () => (
-            <View style={{ flexDirection: 'row', alignItems: 'center', paddingRight: 5 }}>
-               <Button
-                 mode={i18n.language.startsWith('pt') ? "contained" : "text"}
-                 onPress={() => changeLanguage('pt')}
-                 compact
-                 style={{ marginRight: 5 }}
-                 labelStyle={{ marginVertical: 4, marginHorizontal: 6 }}
-               >
-                 PT
-               </Button>
-               <Button
-                 mode={i18n.language.startsWith('en') ? "contained" : "text"}
-                 onPress={() => changeLanguage('en')}
-                 compact
-                 style={{ marginRight: 5 }}
-                 labelStyle={{ marginVertical: 4, marginHorizontal: 6 }}
-               >
-                 EN
-               </Button>
+            <View style={{ flexDirection: "row", alignItems: "center", paddingRight: 5 }}>
+              <Button
+                mode={i18n.language.startsWith("pt") ? "contained" : "text"}
+                onPress={() => changeLanguage("pt")}
+                compact
+                style={{ marginRight: 5 }}
+                labelStyle={{ marginVertical: 4, marginHorizontal: 6 }}
+              >
+                PT
+              </Button>
+              <Button
+                mode={i18n.language.startsWith("en") ? "contained" : "text"}
+                onPress={() => changeLanguage("en")}
+                compact
+                style={{ marginRight: 5 }}
+                labelStyle={{ marginVertical: 4, marginHorizontal: 6 }}
+              >
+                EN
+              </Button>
               <Appbar.Action
                 icon={isDarkTheme ? "weather-sunny" : "weather-night"}
                 onPress={toggleTheme}
@@ -63,28 +63,28 @@ export default function AppNavigator() {
             let iconName: keyof typeof Ionicons.glyphMap;
 
             const routeNameToIconMap: { [key: string]: keyof typeof Ionicons.glyphMap } = {
-                [t('orders')]: focused ? 'receipt' : 'receipt-outline',
-                [t('products')]: focused ? 'fast-food' : 'fast-food-outline',
-                [t('tables')]: focused ? 'tablet-landscape' : 'tablet-landscape-outline',
-                [t('kitchen')]: focused ? 'flame' : 'flame-outline',
-                [t('calendar')]: focused ? 'calendar' : 'calendar-outline',
+              [t("orders")]: focused ? "receipt" : "receipt-outline",
+              [t("products")]: focused ? "fast-food" : "fast-food-outline",
+              [t("tables")]: focused ? "tablet-landscape" : "tablet-landscape-outline",
+              [t("kitchen")]: focused ? "flame" : "flame-outline",
+              [t("calendar")]: focused ? "calendar" : "calendar-outline",
             };
 
-            iconName = routeNameToIconMap[route.name] || 'alert-circle';
+            iconName = routeNameToIconMap[route.name] || "alert-circle";
 
             return <Ionicons name={iconName} size={size} color={color} />;
           },
           tabBarLabel: ({ focused, color }) => {
-             return <Text style={{ color, fontSize: focused ? 11 : 10 }}>{route.name}</Text>;
-           },
-          headerTitle: route.name
+            return <Text style={{ color, fontSize: focused ? 11 : 10 }}>{route.name}</Text>;
+          },
+          headerTitle: route.name,
         })}
       >
-        <Tab.Screen name={t('orders')} component={OrderScreen} />
-        <Tab.Screen name={t('products')} component={ProductScreen} />
-        <Tab.Screen name={t('tables')} component={TableScreen} />
-        <Tab.Screen name={t('kitchen')} component={KitchenScreen} />
-        <Tab.Screen name={t('calendar')} component={CalendarScreen} />
+        <Tab.Screen name={t("orders")} component={OrderScreen} />
+        <Tab.Screen name={t("products")} component={ProductScreen} />
+        <Tab.Screen name={t("tables")} component={TableScreen} />
+        <Tab.Screen name={t("kitchen")} component={KitchenScreen} />
+        <Tab.Screen name={t("calendar")} component={CalendarScreen} />
       </Tab.Navigator>
     </NavigationContainer>
   );
